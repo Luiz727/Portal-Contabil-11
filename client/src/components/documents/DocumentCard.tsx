@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { getFileIcon, getFileIconClass, formatDate } from "@/lib/utils";
+import ShareDocument from "./ShareDocument";
 
 type DocumentCardProps = {
   document: any;
@@ -109,10 +110,10 @@ export default function DocumentCard({ document, onDownload }: DocumentCardProps
             )}
           </div>
           
-          <div className={`mt-4 flex justify-between items-center transition-opacity duration-200 ${showOptions ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`mt-4 grid grid-cols-3 gap-2 transition-opacity duration-200 ${showOptions ? 'opacity-100' : 'opacity-0'}`}>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="text-xs">
                   <span className="material-icons text-sm mr-1">info</span>
                   Detalhes
                 </Button>
@@ -181,7 +182,10 @@ export default function DocumentCard({ document, onDownload }: DocumentCardProps
               </DialogContent>
             </Dialog>
             
-            <Button variant="default" size="sm" onClick={() => onDownload(document.id)}>
+            {/* Botão para compartilhar documento com link seguro */}
+            <ShareDocument documentId={document.id} documentName={document.name} />
+            
+            <Button variant="default" size="sm" className="text-xs" onClick={() => onDownload(document.id)}>
               <span className="material-icons text-sm mr-1">download</span>
               Download
             </Button>

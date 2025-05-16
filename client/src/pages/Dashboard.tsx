@@ -116,7 +116,7 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-neutral-800">Dashboard</h2>
           <p className="mt-1 text-sm text-neutral-500">Visão geral das atividades do escritório</p>
         </div>
-        <div className="mt-4 md:mt-0 flex space-x-3">
+        <div className="mt-4 md:mt-0 flex items-center space-x-3">
           <Select
             value={selectedCompany}
             onValueChange={setSelectedCompany}
@@ -134,6 +134,66 @@ export default function Dashboard() {
           <Button onClick={handleCreateTask}>
             <span className="material-icons text-sm mr-1">add</span>
             Nova Tarefa
+          </Button>
+        </div>
+      </div>
+      
+      {/* Principais Módulos - Botões de Acesso Rápido */}
+      <div className="bg-white shadow-sm rounded-lg p-4 my-6">
+        <h3 className="text-sm font-medium text-neutral-600 mb-3">Acesso Rápido</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/clients'}
+          >
+            <span className="material-icons mb-2 text-2xl">people</span>
+            <span className="text-xs">Clientes</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/documents'}
+          >
+            <span className="material-icons mb-2 text-2xl">description</span>
+            <span className="text-xs">Documentos</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/tasks'}
+          >
+            <span className="material-icons mb-2 text-2xl">check_circle</span>
+            <span className="text-xs">Tarefas</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/financial'}
+          >
+            <span className="material-icons mb-2 text-2xl">account_balance</span>
+            <span className="text-xs">Financeiro</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/invoices'}
+          >
+            <span className="material-icons mb-2 text-2xl">receipt</span>
+            <span className="text-xs">Notas Fiscais</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/integrations'}
+          >
+            <span className="material-icons mb-2 text-2xl">sync</span>
+            <span className="text-xs">Integrações</span>
           </Button>
         </div>
       </div>
