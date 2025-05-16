@@ -114,6 +114,14 @@ function Router() {
         </Route>
       )}
       
+      {isAuthenticated && (
+        <Route path="/integrations">
+          <MainLayout>
+            <Integrations />
+          </MainLayout>
+        </Route>
+      )}
+      
       <Route component={NotFound} />
     </Switch>
   );
