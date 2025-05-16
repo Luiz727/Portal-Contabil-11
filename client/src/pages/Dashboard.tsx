@@ -190,6 +190,15 @@ export default function Dashboard() {
           <Button 
             variant="outline" 
             className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+            onClick={() => window.location.href = '/whatsapp'}
+          >
+            <span className="material-icons mb-2 text-2xl">chat</span>
+            <span className="text-xs">WhatsApp</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
             onClick={() => window.location.href = '/integrations'}
           >
             <span className="material-icons mb-2 text-2xl">sync</span>

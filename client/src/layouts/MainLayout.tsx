@@ -56,12 +56,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={toggleSidebar}
           ></div>
-          <Sidebar />
+          <div className="relative z-50">
+            <Sidebar />
+          </div>
         </div>
       )}
       
       {/* Desktop sidebar */}
-      <Sidebar />
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">

@@ -64,8 +64,8 @@ export default function Sidebar() {
   }, [location]);
 
   return (
-    <aside className="hidden md:flex md:flex-shrink-0">
-      <div className="flex flex-col w-64 bg-primary-800 text-white h-screen">
+    <aside className="flex flex-shrink-0">
+      <div className="flex flex-col w-64 bg-primary-800 text-white h-screen overflow-y-auto">
         {/* Logo */}
         <div className="px-4 py-6 flex items-center border-b border-primary-700">
           <span className="material-icons mr-2">account_balance</span>
