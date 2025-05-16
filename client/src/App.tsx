@@ -16,6 +16,7 @@ import Reconciliation from "@/pages/Reconciliation";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 import Integrations from "@/pages/Integrations";
+import WhatsApp from "@/pages/WhatsApp";
 import MainLayout from "@/layouts/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -118,6 +119,14 @@ function Router() {
         <Route path="/integrations">
           <MainLayout>
             <Integrations />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/whatsapp">
+          <MainLayout>
+            <WhatsApp />
           </MainLayout>
         </Route>
       )}

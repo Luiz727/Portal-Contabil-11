@@ -115,6 +115,15 @@ export default function Sidebar() {
             />
           </NavSection>
 
+          <NavSection title="Comunicação">
+            <NavItem 
+              href="/whatsapp" 
+              icon="chat" 
+              label="WhatsApp" 
+              active={location === "/whatsapp"} 
+            />
+          </NavSection>
+
           <NavSection title="Financeiro">
             <NavItem 
               href="/financial" 

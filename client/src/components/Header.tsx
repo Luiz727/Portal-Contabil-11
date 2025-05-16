@@ -67,6 +67,7 @@ export default function Header({ toggleSidebar }: HeaderProps) {
             variant="ghost" 
             size="icon"
             className="relative p-1 text-neutral-500 hover:text-neutral-600 focus:outline-none"
+            onClick={() => window.location.href = "/whatsapp"}
           >
             <span className="material-icons">chat</span>
             <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-blue-500 text-white text-xs font-bold leading-4 text-center">5</span>
