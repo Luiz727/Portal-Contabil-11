@@ -1,0 +1,113 @@
+Crie um sistema web completo e personalizável, voltado para um escritório de contabilidade, com as seguintes funcionalidades:
+
+Gestão de Tarefas e Atividades
+
+Painel de tarefas para a equipe interna.
+
+Visualização por responsável, prioridade e prazo.
+
+Tarefas recorrentes e alertas.
+
+Portal de Acesso para Clientes
+
+Login individual com controle de permissões.
+
+Visualização de documentos, relatórios, NFes, NFSes, vencimentos, obrigações mensais, etc.
+
+Integração com API do WhatsApp
+
+Envio automático de lembretes, mensagens personalizadas e documentos.
+
+Registro de mensagens enviadas e recebidas.
+
+Gerenciador de Documentos
+
+Upload/download por cliente e por colaborador.
+
+Organização por categorias e data.
+
+Armazenamento em nuvem com segurança.
+
+Calendário Integrado
+
+Compromissos do escritório e dos clientes.
+
+Alertas automáticos e sincronização com Google Calendar/Outlook.
+
+Organizador de XMLs de Notas Fiscais
+
+Importação automática ou manual de XML.
+
+Classificação por empresa, mês, tipo (entrada/saída).
+
+Leitura automática dos dados do XML.
+
+Emissor de NFS-e e NF-e
+
+Integração com a prefeitura e com a SEFAZ.
+
+Certificado A1 e A3, com emissão e envio por e-mail/WhatsApp.
+
+Histórico completo e duplicação de notas.
+
+Controle de Estoque
+
+Entradas, saídas, inventário e alertas de baixa.
+
+Vinculação com NF-e emitida.
+
+Controle Financeiro Completo
+
+Contas a pagar e receber.
+
+Fluxo de caixa e dashboard financeiro.
+
+Emissão de boletos e integração com bancos.
+
+Conciliador Bancário
+
+Importação de extratos OFX/CSV.
+
+Conciliação automática com lançamentos do sistema.
+
+Relatórios de divergências.
+
+Importação/Exportação de Dados
+
+Importar XML, CSV e Excel.
+
+Exportar cadastros e relatórios.
+
+Administração Centralizada
+
+Um painel principal com visão geral de todas as empresas clientes.
+
+Agrupamento de empresas por subgrupo (holding ou grupo econômico).
+
+Relatórios consolidados ou individuais.
+
+Controle de Acesso por Perfil
+
+Permissões diferenciadas por tipo de usuário: administrador, colaborador, cliente, etc.
+
+Acesso limitado por empresa ou grupo de empresas.
+
+Painel de Indicadores (KPIs) para gestão contábil e financeira (ex: obrigações pendentes, fluxo de caixa consolidado).
+
+Envio automático de obrigações via e-mail/WhatsApp, com base no calendário contábil.
+
+Assinatura eletrônica de documentos.
+
+Chat interno e/ou canal de atendimento ao cliente integrado ao sistema.
+
+Logs de auditoria para rastrear ações dos usuários.
+
+Sistema de notificações internas com alerta de vencimentos, mensagens novas ou documentos pendentes.
+
+Integração com Microsoft 365 ou Google Workspace para armazenamento e colaboração.
+
+Central de ajuda ou FAQ personalizada para clientes.
+
+Controle de ponto e produtividade da equipe interna.
+
+Exportação de relatórios em PDF com identidade visual personalizada.
