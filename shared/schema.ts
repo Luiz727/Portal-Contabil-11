@@ -601,3 +601,60 @@ export type InsertApiIntegration = typeof apiIntegrations.$inferInsert;
 export type ApiIntegration = typeof apiIntegrations.$inferSelect;
 export type InsertImportExportLog = typeof importExportLogs.$inferInsert;
 export type ImportExportLog = typeof importExportLogs.$inferSelect;
+
+// Tabela de honorários para controle financeiro do escritório
+export const honorarios = pgTable("honorarios", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id),
+  descricao: varchar("descricao", { length: 255 }).notNull(),
+  valor: varchar("valor").notNull(),
+  vencimento: varchar("vencimento").notNull(), 
+  tipoServico: varchar("tipo_servico", { length: 100 }).notNull(),
+  status: varchar("status", { length: 20 }).default("pendente").notNull(),
+  observacoes: text("observacoes"),
+  nfseId: integer("nfse_id").references(() => nfses.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Tabela para padrões de documentos reconhecidos pela IA
+export const documentPatterns = pgTable("document_patterns", {
+  id: serial("id").primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  descricao: text("descricao"),
+  pattern: text("pattern").notNull(),
+  regexPattern: text("regex_pattern"),
+  categoriaId: integer("categoria_id").references(() => documentCategories.id),
+  palavrasChave: text("palavras_chave").array(),
+  confiancaValor: integer("confianca_valor"),
+  ativo: boolean("ativo"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertHonorarioSchema = createInsertSchema(honorarios).pick({
+  clientId: true,
+  descricao: true,
+  valor: true,
+  vencimento: true,
+  tipoServico: true,
+  status: true,
+  observacoes: true,
+  nfseId: true
+});
+
+export const insertDocumentPatternSchema = createInsertSchema(documentPatterns).pick({
+  nome: true,
+  descricao: true,
+  pattern: true,
+  regexPattern: true,
+  categoriaId: true,
+  palavrasChave: true,
+  confidence: true,
+  ativo: true
+});
+
+export type InsertHonorario = typeof honorarios.$inferInsert;
+export type Honorario = typeof honorarios.$inferSelect;
+export type InsertDocumentPattern = typeof documentPatterns.$inferInsert;
+export type DocumentPattern = typeof documentPatterns.$inferSelect;

@@ -18,6 +18,8 @@ import {
   importExportLogs,
   whatsappMessages,
   notifications,
+  honorarios,
+  documentPatterns,
   type User,
   type Client,
   type Task,
@@ -34,6 +36,10 @@ import {
   type ProductCategory,
   type ApiIntegration,
   type ImportExportLog,
+  type Honorario,
+  type InsertHonorario,
+  type DocumentPattern,
+  type InsertDocumentPattern,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, desc, sql, lt, or, like, not, isNull } from "drizzle-orm";
@@ -139,6 +145,21 @@ export interface IStorage {
   // Dashboard operations
   getDashboardStats(): Promise<any>;
   getClientDashboardStats(clientId: number): Promise<any>;
+  
+  // Operações para honorários
+  getHonorarios(): Promise<any[]>;
+  getHonorario(id: number): Promise<any | undefined>;
+  getHonorariosByClient(clientId: number): Promise<any[]>;
+  getHonorariosByStatus(status: string): Promise<any[]>;
+  createHonorario(data: any): Promise<any>;
+  updateHonorario(id: number, data: Partial<any>): Promise<any | undefined>;
+  
+  // Operações para padrões de documentos
+  getDocumentPatterns(): Promise<any[]>;
+  getDocumentPattern(id: number): Promise<any | undefined>;
+  getDocumentPatternsByCategory(categoryId: number): Promise<any[]>;
+  createDocumentPattern(data: any): Promise<any>;
+  updateDocumentPattern(id: number, data: Partial<any>): Promise<any | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
