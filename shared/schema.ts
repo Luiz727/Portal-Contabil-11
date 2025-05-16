@@ -658,3 +658,224 @@ export type InsertHonorario = typeof honorarios.$inferInsert;
 export type Honorario = typeof honorarios.$inferSelect;
 export type InsertDocumentPattern = typeof documentPatterns.$inferInsert;
 export type DocumentPattern = typeof documentPatterns.$inferSelect;
+
+// Produtos universais - compartilhados entre empresas
+export const universalProducts = pgTable("universal_products", {
+  id: serial("id").primaryKey(),
+  code: text("code").unique().notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  ncm: text("ncm").notNull(), // Nomenclatura Comum do Mercosul
+  cest: text("cest"), // Código Especificador da Substituição Tributária
+  cfop: text("cfop"), // Código Fiscal de Operações e Prestações padrão
+  defaultUnit: text("default_unit").notNull(), // UN, KG, etc.
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }), // Preço base de referência
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }), // Preço de custo padrão
+  productType: text("product_type").default("product").notNull(), // product, service
+  active: boolean("active").default(true),
+  taxGroup: text("tax_group"), // Grupo tributário padrão
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Preços personalizados por cliente para produtos universais
+export const clientProductPrices = pgTable("client_product_prices", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  universalProductId: integer("universal_product_id").references(() => universalProducts.id, { onDelete: 'cascade' }),
+  customPrice: decimal("custom_price", { precision: 10, scale: 2 }).notNull(),
+  validFrom: date("valid_from").defaultNow(),
+  validUntil: date("valid_until"),
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    clientProductIdx: uniqueIndex("client_product_idx").on(table.clientId, table.universalProductId),
+  };
+});
+
+// Simulações de cálculo de impostos
+export const taxSimulations = pgTable("tax_simulations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  operationType: text("operation_type").notNull(), // entrada, saída
+  destinationState: text("destination_state").notNull(),
+  originState: text("origin_state").notNull(),
+  taxRegime: text("tax_regime").notNull(), // simples_nacional, lucro_presumido, lucro_real
+  simplesRate: decimal("simples_rate", { precision: 5, scale: 2 }),
+  icmsRate: decimal("icms_rate", { precision: 5, scale: 2 }),
+  icmsStRate: decimal("icms_st_rate", { precision: 5, scale: 2 }),
+  ipiRate: decimal("ipi_rate", { precision: 5, scale: 2 }),
+  pisRate: decimal("pis_rate", { precision: 5, scale: 2 }),
+  cofinsRate: decimal("cofins_rate", { precision: 5, scale: 2 }),
+  issRate: decimal("iss_rate", { precision: 5, scale: 2 }),
+  freightValue: decimal("freight_value", { precision: 10, scale: 2 }).default("0"),
+  insuranceValue: decimal("insurance_value", { precision: 10, scale: 2 }).default("0"),
+  otherCosts: decimal("other_costs", { precision: 10, scale: 2 }).default("0"),
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  totalTaxes: decimal("total_taxes", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("draft").notNull(), // draft, completed
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Itens da simulação de impostos
+export const taxSimulationItems = pgTable("tax_simulation_items", {
+  id: serial("id").primaryKey(),
+  simulationId: integer("simulation_id").references(() => taxSimulations.id, { onDelete: 'cascade' }),
+  universalProductId: integer("universal_product_id").references(() => universalProducts.id, { onDelete: 'cascade' }),
+  description: text("description").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 3 }).notNull(),
+  unitValue: decimal("unit_value", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  ncm: text("ncm").notNull(),
+  cfop: text("cfop").notNull(),
+  unitOfMeasure: text("unit_of_measure").notNull(),
+  icmsValue: decimal("icms_value", { precision: 10, scale: 2 }),
+  icmsStValue: decimal("icms_st_value", { precision: 10, scale: 2 }),
+  ipiValue: decimal("ipi_value", { precision: 10, scale: 2 }),
+  pisValue: decimal("pis_value", { precision: 10, scale: 2 }),
+  cofinsValue: decimal("cofins_value", { precision: 10, scale: 2 }),
+  issValue: decimal("iss_value", { precision: 10, scale: 2 }),
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).default("0"),
+  netValue: decimal("net_value", { precision: 10, scale: 2 }).notNull(), // Valor líquido após impostos
+  profitMargin: decimal("profit_margin", { precision: 10, scale: 2 }), // Margem de lucro calculada
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }), // Preço de custo para cálculo
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Price tiers para produtos (por faixa de cliente)
+export const productPriceTiers = pgTable("product_price_tiers", {
+  id: serial("id").primaryKey(),
+  universalProductId: integer("universal_product_id").references(() => universalProducts.id, { onDelete: 'cascade' }),
+  tierName: text("tier_name").notNull(), // básico, premium, revenda, atacado, varejo, etc.
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  minimumQuantity: integer("minimum_quantity").default(1),
+  active: boolean("active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    productTierIdx: uniqueIndex("product_tier_idx").on(table.universalProductId, table.tierName),
+  };
+});
+
+// Kits de produtos (produtos compostos por outros produtos)
+export const productKits = pgTable("product_kits", {
+  id: serial("id").primaryKey(),
+  code: text("code").unique().notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }),
+  active: boolean("active").default(true),
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Itens do kit de produtos
+export const productKitItems = pgTable("product_kit_items", {
+  id: serial("id").primaryKey(),
+  kitId: integer("kit_id").references(() => productKits.id, { onDelete: 'cascade' }),
+  universalProductId: integer("universal_product_id").references(() => universalProducts.id, { onDelete: 'cascade' }),
+  quantity: decimal("quantity", { precision: 10, scale: 3 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema de inserção para produtos universais
+export const insertUniversalProductSchema = createInsertSchema(universalProducts).pick({
+  code: true,
+  name: true,
+  description: true,
+  ncm: true,
+  cest: true,
+  cfop: true,
+  defaultUnit: true,
+  basePrice: true,
+  costPrice: true,
+  productType: true,
+  active: true,
+  taxGroup: true,
+  notes: true,
+  createdBy: true,
+});
+
+// Schema de inserção para simulações de impostos
+export const insertTaxSimulationSchema = createInsertSchema(taxSimulations).pick({
+  name: true,
+  clientId: true,
+  operationType: true,
+  destinationState: true,
+  originState: true,
+  taxRegime: true,
+  simplesRate: true,
+  icmsRate: true,
+  icmsStRate: true,
+  ipiRate: true,
+  pisRate: true,
+  cofinsRate: true,
+  issRate: true,
+  freightValue: true,
+  insuranceValue: true,
+  otherCosts: true,
+  totalValue: true,
+  totalTaxes: true,
+  status: true,
+  notes: true,
+  createdBy: true,
+});
+
+// Schema de inserção para itens de simulação
+export const insertTaxSimulationItemSchema = createInsertSchema(taxSimulationItems).pick({
+  simulationId: true,
+  universalProductId: true,
+  description: true,
+  quantity: true,
+  unitValue: true,
+  totalValue: true,
+  ncm: true,
+  cfop: true,
+  unitOfMeasure: true,
+  icmsValue: true,
+  icmsStValue: true,
+  ipiValue: true,
+  pisValue: true,
+  cofinsValue: true,
+  issValue: true,
+  discountValue: true,
+  netValue: true,
+  profitMargin: true,
+  costPrice: true,
+});
+
+// Schema de inserção para kits de produtos
+export const insertProductKitSchema = createInsertSchema(productKits).pick({
+  code: true,
+  name: true,
+  description: true,
+  basePrice: true,
+  active: true,
+  notes: true,
+  createdBy: true,
+});
+
+// Tipos exportados
+export type InsertUniversalProduct = typeof universalProducts.$inferInsert;
+export type UniversalProduct = typeof universalProducts.$inferSelect;
+export type InsertTaxSimulation = typeof taxSimulations.$inferInsert;
+export type TaxSimulation = typeof taxSimulations.$inferSelect;
+export type InsertTaxSimulationItem = typeof taxSimulationItems.$inferInsert;
+export type TaxSimulationItem = typeof taxSimulationItems.$inferSelect;
+export type InsertProductKit = typeof productKits.$inferInsert;
+export type ProductKit = typeof productKits.$inferSelect;

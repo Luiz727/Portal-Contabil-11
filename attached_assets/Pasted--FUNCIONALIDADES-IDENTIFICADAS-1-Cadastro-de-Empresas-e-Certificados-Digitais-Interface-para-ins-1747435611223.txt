@@ -1,0 +1,161 @@
+❁ FUNCIONALIDADES IDENTIFICADAS
+
+1. Cadastro de Empresas e Certificados Digitais
+
+Interface para inserção de dados da empresa:
+
+Razão Social, Nome Fantasia, CNPJ, Inscrição Estadual, CNAE
+
+Regime tributário, tipo de emissor, modelo
+
+Upload de certificado digital A1 (.pfx)
+
+Armazenamento seguro com senha vinculada
+
+Validação da data de validade e status do certificado
+
+2. Cadastro de Produtos
+
+Campos:
+
+Descrição, NCM, CFOP, Código interno, CST/CSOSN
+
+Unidade de medida, Preço de venda, Preço de custo
+
+Estoque, CST IPI, Alíquotas ICMS/PIS/COFINS
+
+Função de importador de produtos via planilha
+
+3. Cadastro de Clientes
+
+CPF/CNPJ, nome/razão social, endereço completo, email
+
+Tipo de contribuinte, estado, país, inscrição estadual
+
+Opção para consumidor final ou contribuinte isento
+
+4. Emissão de NF-e
+
+Tela de emissão baseada em seleção de cliente e produtos
+
+Campos automáticos:
+
+Natureza da operação, modelo, série, número
+
+Forma de pagamento, transporte, volume, frete
+
+Cálculo automático de tributos e totais
+
+Geração de XML conforme leiaute SEFAZ
+
+Validação de schema antes do envio
+
+Envio via webservice com SOAP
+
+Retorno de protocolo e status
+
+Impressão da DANFE (PDF)
+
+5. Consulta de NF-e Emitidas
+
+Listagem por filtros: cliente, data, status, número
+
+Ações:
+
+Reenviar NF-e
+
+Baixar XML
+
+Visualizar DANFE
+
+Cancelar NF-e (com justificativa)
+
+Inutilização de numeração
+
+6. Integração com SEFAZ
+
+Certificado A1 utilizado para autenticação
+
+Webservices para:
+
+Envio da NF-e
+
+Consulta de protocolo
+
+Cancelamento
+
+Inutilização
+
+URL por estado e ambiente (homologação/produção)
+
+Gerador de QR Code para NFC-e (quando aplicável)
+
+7. Geração e Validação de XML
+
+Classes que geram XML em conformidade com versão 4.00
+
+Mapeamento dos campos obrigatórios e condições de presença
+
+Estrutura modular: emitente, destinatário, produtos, totais, transporte, pagamentos
+
+Validação contra XSD da SEFAZ
+
+8. Envio de Documentos
+
+Envio de DANFE e XML por e-mail para o cliente
+
+Integração com API de WhatsApp (via endpoint externo)
+
+9. Logs e Histórico
+
+Logs armazenados por nota:
+
+Hora da transmissão
+
+Status SEFAZ
+
+Código de retorno
+
+Eventos posteriores (cancelamento, carta de correção)
+
+✍️ ARQUIVOS DE DESTAQUE (EXTRAÇÃO)
+
+nfe_emitir.php: tela de emissão da NF com seleção de cliente, produtos, tributação
+
+certificado_upload.php: upload do certificado A1
+
+funcoes/xml_generator.php: criação do XML da NF-e
+
+funcoes/sefaz_client.php: envio do XML via SOAP
+
+danfe.php: geração da DANFE em PDF
+
+ajax/consulta_nf.php: busca notas emitidas
+
+🔗 ESTRUTURA DE CAMPOS COMUNS (NF-E)
+
+Emitente: CNPJ, IE, IM, Razão Social, Endereço, Regime Tributário
+
+Destinatário: CPF/CNPJ, Nome/Razão, Endereço, IE, Email
+
+Produtos: Código, NCM, CFOP, CST, Unidade, Quantidade, Valor Unitário, Alíquotas
+
+Totais: Base ICMS, Valor ICMS, PIS, COFINS, Total NF
+
+Transporte: Modal, Transportadora, Volume, Peso
+
+Pagamentos: Forma, Valor, Condição
+
+🌐 SUGESTÃO DE INTEGRAÇÃO EM NOVO SISTEMA (REPLIT/OUTROS)
+
+Reaproveitar as classes de geração de XML e integração com SEFAZ
+
+Criar APIs REST para operações (emitir, cancelar, consultar)
+
+Utilizar frontend moderno (React ou Vue) com formulários dinâmicos
+
+Utilizar JWT para autenticação de clientes e colabores
+
+Banco de dados: PostgreSQL com relações empresa-clientes-notas
+
+Upload seguro e criptografado de certificados
