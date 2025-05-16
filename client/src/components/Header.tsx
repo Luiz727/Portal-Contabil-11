@@ -22,12 +22,12 @@ export default function Header({ toggleSidebar }: HeaderProps) {
       <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center md:hidden">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
             onClick={toggleSidebar}
-            className="text-neutral-500 hover:text-neutral-600 focus:outline-none"
+            className="flex items-center gap-2 text-primary-600 hover:text-primary-700 focus:outline-none hover:bg-primary-50"
           >
             <span className="material-icons">menu</span>
+            <span>Menu</span>
           </Button>
           <div className="ml-3">
             <h1 className="text-lg font-medium">ContaSmart</h1>

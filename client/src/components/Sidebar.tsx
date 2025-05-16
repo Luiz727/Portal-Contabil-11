@@ -13,15 +13,15 @@ type NavItemProps = {
 const NavItem = ({ icon, label, href, active }: NavItemProps) => {
   return (
     <Link href={href}>
-      <a
+      <div
         className={cn(
-          "flex items-center px-4 py-3 text-primary-100 rounded-md mx-2 mb-1",
+          "flex items-center px-4 py-3 text-primary-100 rounded-md mx-2 mb-1 cursor-pointer",
           active ? "bg-primary-700" : "hover:bg-primary-700"
         )}
       >
         <span className="material-icons mr-3 text-primary-300">{icon}</span>
         <span>{label}</span>
-      </a>
+      </div>
     </Link>
   );
 };
@@ -144,6 +144,13 @@ export default function Sidebar() {
               icon="bar_chart" 
               label="Relatórios" 
               active={location === "/reports"} 
+            />
+            
+            <NavItem 
+              href="/integrations" 
+              icon="extension" 
+              label="Integrações" 
+              active={location === "/integrations"} 
             />
             
             <NavItem 
