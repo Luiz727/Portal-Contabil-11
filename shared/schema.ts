@@ -650,7 +650,7 @@ export const insertDocumentPatternSchema = createInsertSchema(documentPatterns).
   regexPattern: true,
   categoriaId: true,
   palavrasChave: true,
-  confidence: true,
+  confiancaValor: true,
   ativo: true
 });
 
