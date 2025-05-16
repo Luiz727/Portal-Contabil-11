@@ -15,6 +15,7 @@ import Inventory from "@/pages/Inventory";
 import Reconciliation from "@/pages/Reconciliation";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import Integrations from "@/pages/Integrations";
 import MainLayout from "@/layouts/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 
