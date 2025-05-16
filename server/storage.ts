@@ -679,13 +679,17 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(invoices.issueDate))
       .limit(5);
     
+    // Converter para número antes de fazer a operação aritmética
+    const incomeSumValue = Number(incomeSum.sum) || 0;
+    const expenseSumValue = Number(expenseSum.sum) || 0;
+    
     return {
       pendingNfeCount: Number(pendingNfeCount.count) || 0,
       pendingNfseCount: Number(pendingNfseCount.count) || 0,
       lowStockCount: Number(lowStockCount.count) || 0,
-      monthlyIncome: incomeSum.sum || 0,
-      monthlyExpense: expenseSum.sum || 0,
-      balance: (incomeSum.sum || 0) - (expenseSum.sum || 0),
+      monthlyIncome: incomeSumValue,
+      monthlyExpense: expenseSumValue,
+      balance: incomeSumValue - expenseSumValue,
       recentInvoices
     };
   }

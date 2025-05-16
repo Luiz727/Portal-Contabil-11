@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { registerNfeRoutes } from "./nfeRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -13,9 +14,16 @@ import {
   insertEventSchema,
   insertInvoiceSchema,
   insertFinancialTransactionSchema,
-  insertInventoryItemSchema
+  insertInventoryItemSchema,
+  insertNfeSchema,
+  insertNfeItemSchema,
+  insertNfseSchema,
+  insertSupplierSchema,
+  insertProductCategorySchema,
+  insertApiIntegrationSchema,
+  insertImportExportLogSchema
 } from "@shared/schema";
-import { xml2js } from "xml-js";
+import { xml2js, js2xml } from "xml-js";
 
 // Set up multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -60,6 +68,9 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Registrar as rotas para módulo de notas fiscais eletrônicas
+  registerNfeRoutes(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
