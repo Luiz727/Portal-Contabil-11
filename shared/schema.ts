@@ -12,6 +12,7 @@ import {
   decimal,
   primaryKey,
   foreignKey,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -205,6 +206,145 @@ export const inventoryMovements = pgTable("inventory_movements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// NFe - Notas Fiscais Eletrônicas
+export const nfes = pgTable("nfes", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  number: text("number").notNull(),
+  series: text("series").notNull(),
+  issueDate: date("issue_date").notNull(),
+  operationType: text("operation_type").notNull(), // entrada, saída
+  nature: text("nature").notNull(), // Venda, Devolução, etc.
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  taxValue: decimal("tax_value", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("draft").notNull(), // draft, pending, approved, rejected, cancelled
+  xmlPath: text("xml_path"), // Caminho para o arquivo XML
+  pdfPath: text("pdf_path"), // Caminho para o DANFE em PDF
+  notes: text("notes"),
+  accessKey: text("access_key"), // Chave de acesso da NFe
+  protocol: text("protocol"), // Protocolo de autorização
+  invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: 'set null' }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    clientNumberSeriesIdx: uniqueIndex("client_number_series_idx").on(table.clientId, table.number, table.series),
+  };
+});
+
+// NFe Items
+export const nfeItems = pgTable("nfe_items", {
+  id: serial("id").primaryKey(),
+  nfeId: integer("nfe_id").references(() => nfes.id, { onDelete: 'cascade' }),
+  itemId: integer("item_id").references(() => inventoryItems.id, { onDelete: 'set null' }),
+  description: text("description").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 3 }).notNull(),
+  unitValue: decimal("unit_value", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  ncm: text("ncm").notNull(), // Nomenclatura Comum do Mercosul
+  cfop: text("cfop").notNull(), // Código Fiscal de Operações e Prestações
+  unitOfMeasure: text("unit_of_measure").notNull(), // UN, KG, etc.
+  taxGroup: text("tax_group"), // Grupo tributário
+  icmsValue: decimal("icms_value", { precision: 10, scale: 2 }),
+  icmsRate: decimal("icms_rate", { precision: 5, scale: 2 }),
+  ipiValue: decimal("ipi_value", { precision: 10, scale: 2 }),
+  ipiRate: decimal("ipi_rate", { precision: 5, scale: 2 }),
+  pisValue: decimal("pis_value", { precision: 10, scale: 2 }),
+  pisRate: decimal("pis_rate", { precision: 5, scale: 2 }),
+  cofinsValue: decimal("cofins_value", { precision: 10, scale: 2 }),
+  cofinsRate: decimal("cofins_rate", { precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// NFSe - Notas Fiscais de Serviço Eletrônicas
+export const nfses = pgTable("nfses", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  number: text("number").notNull(),
+  verificationCode: text("verification_code"),
+  issueDate: date("issue_date").notNull(),
+  serviceDescription: text("service_description").notNull(),
+  serviceCode: text("service_code").notNull(), // Código de serviço municipal
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  issCity: text("iss_city").notNull(), // Cidade de prestação do serviço
+  issRate: decimal("iss_rate", { precision: 5, scale: 2 }).notNull(),
+  issValue: decimal("iss_value", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("draft").notNull(), // draft, pending, approved, rejected, cancelled
+  xmlPath: text("xml_path"), // Caminho para o arquivo XML
+  pdfPath: text("pdf_path"), // Caminho para o PDF
+  notes: text("notes"),
+  accessKey: text("access_key"), // Chave de acesso da NFSe
+  protocol: text("protocol"), // Protocolo de autorização
+  invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: 'set null' }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    clientNumberIdx: uniqueIndex("client_number_idx").on(table.clientId, table.number),
+  };
+});
+
+// Suppliers for inventory items and services
+export const suppliers = pgTable("suppliers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  cnpj: text("cnpj").unique().notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  contact: text("contact"),
+  notes: text("notes"),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Product categories for inventory
+export const productCategories = pgTable("product_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// API integrations
+export const apiIntegrations = pgTable("api_integrations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // nfe, nfse, banking, marketplace, etc.
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  config: jsonb("config").notNull(), // Configuration details (endpoints, credentials, etc.)
+  active: boolean("active").default(true),
+  lastSyncDate: timestamp("last_sync_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Import/Export logs
+export const importExportLogs = pgTable("import_export_logs", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  type: text("type").notNull(), // import, export
+  format: text("format").notNull(), // xml, csv, txt, etc.
+  status: text("status").default("pending").notNull(), // pending, processing, completed, failed
+  filePath: text("file_path"), // Path to imported/exported file
+  processedItems: integer("processed_items").default(0),
+  totalItems: integer("total_items").default(0),
+  errorDetails: text("error_details"),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  createdBy: varchar("created_by").references(() => users.id),
+});
+
 // WhatsApp messages
 export const whatsappMessages = pgTable("whatsapp_messages", {
   id: serial("id").primaryKey(),
@@ -324,6 +464,111 @@ export const insertInventoryItemSchema = createInsertSchema(inventoryItems).pick
   clientId: true,
 });
 
+// Schemas para as novas tabelas
+export const insertNfeSchema = createInsertSchema(nfes).pick({
+  clientId: true,
+  number: true,
+  series: true,
+  issueDate: true,
+  operationType: true,
+  nature: true,
+  totalValue: true,
+  taxValue: true,
+  status: true,
+  xmlPath: true,
+  pdfPath: true,
+  notes: true,
+  accessKey: true,
+  protocol: true,
+  invoiceId: true,
+  createdBy: true,
+});
+
+export const insertNfeItemSchema = createInsertSchema(nfeItems).pick({
+  nfeId: true,
+  itemId: true,
+  description: true,
+  quantity: true,
+  unitValue: true,
+  totalValue: true,
+  ncm: true,
+  cfop: true,
+  unitOfMeasure: true,
+  taxGroup: true,
+  icmsValue: true,
+  icmsRate: true,
+  ipiValue: true,
+  ipiRate: true,
+  pisValue: true,
+  pisRate: true,
+  cofinsValue: true,
+  cofinsRate: true,
+});
+
+export const insertNfseSchema = createInsertSchema(nfses).pick({
+  clientId: true,
+  number: true,
+  verificationCode: true,
+  issueDate: true,
+  serviceDescription: true,
+  serviceCode: true,
+  totalValue: true,
+  issCity: true,
+  issRate: true,
+  issValue: true,
+  status: true,
+  xmlPath: true,
+  pdfPath: true,
+  notes: true,
+  accessKey: true,
+  protocol: true,
+  invoiceId: true,
+  createdBy: true,
+});
+
+export const insertSupplierSchema = createInsertSchema(suppliers).pick({
+  name: true,
+  cnpj: true,
+  email: true,
+  phone: true,
+  address: true,
+  city: true,
+  state: true,
+  postalCode: true,
+  contact: true,
+  notes: true,
+  clientId: true,
+  active: true,
+});
+
+export const insertProductCategorySchema = createInsertSchema(productCategories).pick({
+  name: true,
+  description: true,
+  clientId: true,
+});
+
+export const insertApiIntegrationSchema = createInsertSchema(apiIntegrations).pick({
+  name: true,
+  type: true,
+  clientId: true,
+  config: true,
+  active: true,
+});
+
+export const insertImportExportLogSchema = createInsertSchema(importExportLogs).pick({
+  clientId: true,
+  type: true,
+  format: true,
+  status: true,
+  filePath: true,
+  processedItems: true,
+  totalItems: true,
+  errorDetails: true,
+  startedAt: true,
+  completedAt: true,
+  createdBy: true,
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertClient = typeof clients.$inferInsert;
@@ -340,3 +585,19 @@ export type InsertFinancialTransaction = typeof financialTransactions.$inferInse
 export type FinancialTransaction = typeof financialTransactions.$inferSelect;
 export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
 export type InventoryItem = typeof inventoryItems.$inferSelect;
+
+// Tipos para as novas tabelas
+export type InsertNfe = typeof nfes.$inferInsert;
+export type Nfe = typeof nfes.$inferSelect;
+export type InsertNfeItem = typeof nfeItems.$inferInsert;
+export type NfeItem = typeof nfeItems.$inferSelect;
+export type InsertNfse = typeof nfses.$inferInsert;
+export type Nfse = typeof nfses.$inferSelect;
+export type InsertSupplier = typeof suppliers.$inferInsert;
+export type Supplier = typeof suppliers.$inferSelect;
+export type InsertProductCategory = typeof productCategories.$inferInsert;
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type InsertApiIntegration = typeof apiIntegrations.$inferInsert;
+export type ApiIntegration = typeof apiIntegrations.$inferSelect;
+export type InsertImportExportLog = typeof importExportLogs.$inferInsert;
+export type ImportExportLog = typeof importExportLogs.$inferSelect;

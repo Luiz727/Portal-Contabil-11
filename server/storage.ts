@@ -8,6 +8,14 @@ import {
   financialTransactions,
   financialAccounts,
   inventoryItems,
+  inventoryMovements,
+  nfes,
+  nfeItems,
+  nfses,
+  suppliers,
+  productCategories,
+  apiIntegrations,
+  importExportLogs,
   whatsappMessages,
   notifications,
   type User,
@@ -19,9 +27,16 @@ import {
   type FinancialTransaction,
   type InventoryItem,
   type UpsertUser,
+  type Nfe,
+  type NfeItem,
+  type Nfse,
+  type Supplier,
+  type ProductCategory,
+  type ApiIntegration,
+  type ImportExportLog,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, desc, sql } from "drizzle-orm";
+import { eq, and, gte, desc, sql, lt, or, like, not, isNull } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -78,9 +93,52 @@ export interface IStorage {
   getLowStockItems(): Promise<InventoryItem[]>;
   createInventoryItem(item: InventoryItem): Promise<InventoryItem>;
   updateInventoryItem(id: number, item: Partial<InventoryItem>): Promise<InventoryItem | undefined>;
+  registerInventoryMovement(movement: any): Promise<any>;
+  
+  // NFe operations
+  getNfe(id: number): Promise<Nfe | undefined>;
+  getNfesByClient(clientId: number): Promise<Nfe[]>;
+  getNfesByStatus(status: string): Promise<Nfe[]>;
+  createNfe(nfe: Nfe): Promise<Nfe>;
+  updateNfe(id: number, nfe: Partial<Nfe>): Promise<Nfe | undefined>;
+  getNfeItems(nfeId: number): Promise<NfeItem[]>;
+  createNfeItem(item: NfeItem): Promise<NfeItem>;
+  
+  // NFSe operations
+  getNfse(id: number): Promise<Nfse | undefined>;
+  getNfsesByClient(clientId: number): Promise<Nfse[]>;
+  getNfsesByStatus(status: string): Promise<Nfse[]>;
+  createNfse(nfse: Nfse): Promise<Nfse>;
+  updateNfse(id: number, nfse: Partial<Nfse>): Promise<Nfse | undefined>;
+  
+  // Supplier operations
+  getSupplier(id: number): Promise<Supplier | undefined>;
+  getSuppliers(): Promise<Supplier[]>;
+  getSuppliersByClient(clientId: number): Promise<Supplier[]>;
+  createSupplier(supplier: Supplier): Promise<Supplier>;
+  updateSupplier(id: number, supplier: Partial<Supplier>): Promise<Supplier | undefined>;
+  
+  // Product category operations
+  getProductCategory(id: number): Promise<ProductCategory | undefined>;
+  getProductCategories(): Promise<ProductCategory[]>;
+  getProductCategoriesByClient(clientId: number): Promise<ProductCategory[]>;
+  createProductCategory(category: ProductCategory): Promise<ProductCategory>;
+  
+  // API integration operations
+  getApiIntegration(id: number): Promise<ApiIntegration | undefined>;
+  getApiIntegrationsByClient(clientId: number): Promise<ApiIntegration[]>;
+  getApiIntegrationsByType(type: string): Promise<ApiIntegration[]>;
+  createApiIntegration(integration: ApiIntegration): Promise<ApiIntegration>;
+  updateApiIntegration(id: number, integration: Partial<ApiIntegration>): Promise<ApiIntegration | undefined>;
+  
+  // Import/Export operations
+  createImportExportLog(log: ImportExportLog): Promise<ImportExportLog>;
+  getImportExportLogsByClient(clientId: number): Promise<ImportExportLog[]>;
+  updateImportExportLog(id: number, log: Partial<ImportExportLog>): Promise<ImportExportLog | undefined>;
   
   // Dashboard operations
   getDashboardStats(): Promise<any>;
+  getClientDashboardStats(clientId: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -304,6 +362,202 @@ export class DatabaseStorage implements IStorage {
     return updatedItem;
   }
 
+  // Inventory movement operations
+  async registerInventoryMovement(movement: any): Promise<any> {
+    const [newMovement] = await db.insert(inventoryMovements).values(movement).returning();
+    
+    // Update the inventory item quantity
+    const item = await this.getInventoryItem(movement.itemId);
+    if (item) {
+      const newQuantity = movement.type === 'in'
+        ? item.quantity + movement.quantity
+        : item.quantity - movement.quantity;
+      
+      await this.updateInventoryItem(item.id, { 
+        quantity: newQuantity,
+        updatedAt: new Date() 
+      });
+    }
+    
+    return newMovement;
+  }
+
+  // NFe operations
+  async getNfe(id: number): Promise<Nfe | undefined> {
+    const [nfe] = await db.select().from(nfes).where(eq(nfes.id, id));
+    return nfe;
+  }
+
+  async getNfesByClient(clientId: number): Promise<Nfe[]> {
+    return await db.select().from(nfes)
+      .where(eq(nfes.clientId, clientId))
+      .orderBy(desc(nfes.issueDate));
+  }
+
+  async getNfesByStatus(status: string): Promise<Nfe[]> {
+    return await db.select().from(nfes)
+      .where(eq(nfes.status, status))
+      .orderBy(desc(nfes.issueDate));
+  }
+
+  async createNfe(nfe: Nfe): Promise<Nfe> {
+    const [newNfe] = await db.insert(nfes).values(nfe).returning();
+    return newNfe;
+  }
+
+  async updateNfe(id: number, nfe: Partial<Nfe>): Promise<Nfe | undefined> {
+    const [updatedNfe] = await db
+      .update(nfes)
+      .set({ ...nfe, updatedAt: new Date() })
+      .where(eq(nfes.id, id))
+      .returning();
+    return updatedNfe;
+  }
+
+  async getNfeItems(nfeId: number): Promise<NfeItem[]> {
+    return await db.select().from(nfeItems)
+      .where(eq(nfeItems.nfeId, nfeId));
+  }
+
+  async createNfeItem(item: NfeItem): Promise<NfeItem> {
+    const [newItem] = await db.insert(nfeItems).values(item).returning();
+    return newItem;
+  }
+
+  // NFSe operations
+  async getNfse(id: number): Promise<Nfse | undefined> {
+    const [nfse] = await db.select().from(nfses).where(eq(nfses.id, id));
+    return nfse;
+  }
+
+  async getNfsesByClient(clientId: number): Promise<Nfse[]> {
+    return await db.select().from(nfses)
+      .where(eq(nfses.clientId, clientId))
+      .orderBy(desc(nfses.issueDate));
+  }
+
+  async getNfsesByStatus(status: string): Promise<Nfse[]> {
+    return await db.select().from(nfses)
+      .where(eq(nfses.status, status))
+      .orderBy(desc(nfses.issueDate));
+  }
+
+  async createNfse(nfse: Nfse): Promise<Nfse> {
+    const [newNfse] = await db.insert(nfses).values(nfse).returning();
+    return newNfse;
+  }
+
+  async updateNfse(id: number, nfse: Partial<Nfse>): Promise<Nfse | undefined> {
+    const [updatedNfse] = await db
+      .update(nfses)
+      .set({ ...nfse, updatedAt: new Date() })
+      .where(eq(nfses.id, id))
+      .returning();
+    return updatedNfse;
+  }
+
+  // Supplier operations
+  async getSupplier(id: number): Promise<Supplier | undefined> {
+    const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
+    return supplier;
+  }
+
+  async getSuppliers(): Promise<Supplier[]> {
+    return await db.select().from(suppliers).orderBy(suppliers.name);
+  }
+
+  async getSuppliersByClient(clientId: number): Promise<Supplier[]> {
+    return await db.select().from(suppliers)
+      .where(eq(suppliers.clientId, clientId))
+      .orderBy(suppliers.name);
+  }
+
+  async createSupplier(supplier: Supplier): Promise<Supplier> {
+    const [newSupplier] = await db.insert(suppliers).values(supplier).returning();
+    return newSupplier;
+  }
+
+  async updateSupplier(id: number, supplier: Partial<Supplier>): Promise<Supplier | undefined> {
+    const [updatedSupplier] = await db
+      .update(suppliers)
+      .set({ ...supplier, updatedAt: new Date() })
+      .where(eq(suppliers.id, id))
+      .returning();
+    return updatedSupplier;
+  }
+
+  // Product category operations
+  async getProductCategory(id: number): Promise<ProductCategory | undefined> {
+    const [category] = await db.select().from(productCategories).where(eq(productCategories.id, id));
+    return category;
+  }
+
+  async getProductCategories(): Promise<ProductCategory[]> {
+    return await db.select().from(productCategories).orderBy(productCategories.name);
+  }
+
+  async getProductCategoriesByClient(clientId: number): Promise<ProductCategory[]> {
+    return await db.select().from(productCategories)
+      .where(eq(productCategories.clientId, clientId))
+      .orderBy(productCategories.name);
+  }
+
+  async createProductCategory(category: ProductCategory): Promise<ProductCategory> {
+    const [newCategory] = await db.insert(productCategories).values(category).returning();
+    return newCategory;
+  }
+
+  // API integration operations
+  async getApiIntegration(id: number): Promise<ApiIntegration | undefined> {
+    const [integration] = await db.select().from(apiIntegrations).where(eq(apiIntegrations.id, id));
+    return integration;
+  }
+
+  async getApiIntegrationsByClient(clientId: number): Promise<ApiIntegration[]> {
+    return await db.select().from(apiIntegrations)
+      .where(eq(apiIntegrations.clientId, clientId));
+  }
+
+  async getApiIntegrationsByType(type: string): Promise<ApiIntegration[]> {
+    return await db.select().from(apiIntegrations)
+      .where(eq(apiIntegrations.type, type));
+  }
+
+  async createApiIntegration(integration: ApiIntegration): Promise<ApiIntegration> {
+    const [newIntegration] = await db.insert(apiIntegrations).values(integration).returning();
+    return newIntegration;
+  }
+
+  async updateApiIntegration(id: number, integration: Partial<ApiIntegration>): Promise<ApiIntegration | undefined> {
+    const [updatedIntegration] = await db
+      .update(apiIntegrations)
+      .set({ ...integration, updatedAt: new Date() })
+      .where(eq(apiIntegrations.id, id))
+      .returning();
+    return updatedIntegration;
+  }
+
+  // Import/Export operations
+  async createImportExportLog(log: ImportExportLog): Promise<ImportExportLog> {
+    const [newLog] = await db.insert(importExportLogs).values(log).returning();
+    return newLog;
+  }
+
+  async getImportExportLogsByClient(clientId: number): Promise<ImportExportLog[]> {
+    return await db.select().from(importExportLogs)
+      .where(eq(importExportLogs.clientId, clientId))
+      .orderBy(desc(importExportLogs.startedAt));
+  }
+
+  async updateImportExportLog(id: number, log: Partial<ImportExportLog>): Promise<ImportExportLog | undefined> {
+    const [updatedLog] = await db
+      .update(importExportLogs)
+      .set(log)
+      .where(eq(importExportLogs.id, id))
+      .returning();
+    return updatedLog;
+  }
+
   // Dashboard operations
   async getDashboardStats(): Promise<any> {
     // Count pending tasks
@@ -347,6 +601,92 @@ export class DatabaseStorage implements IStorage {
       newDocuments: Number(newDocumentsCount.count) || 0,
       upcomingEvents: Number(upcomingEventsCount.count) || 0,
       accountsReceivable: accountsReceivable.sum || 0,
+    };
+  }
+
+  // Client Dashboard stats (for the client portal)
+  async getClientDashboardStats(clientId: number): Promise<any> {
+    // Count pending NFe/NFSe
+    const [pendingNfeCount] = await db
+      .select({ count: sql`count(*)` })
+      .from(nfes)
+      .where(
+        and(
+          eq(nfes.clientId, clientId),
+          eq(nfes.status, 'pending')
+        )
+      );
+    
+    const [pendingNfseCount] = await db
+      .select({ count: sql`count(*)` })
+      .from(nfses)
+      .where(
+        and(
+          eq(nfses.clientId, clientId),
+          eq(nfses.status, 'pending')
+        )
+      );
+    
+    // Count low stock items
+    const [lowStockCount] = await db
+      .select({ count: sql`count(*)` })
+      .from(inventoryItems)
+      .where(
+        and(
+          eq(inventoryItems.clientId, clientId),
+          sql`${inventoryItems.quantity} <= ${inventoryItems.minQuantity}`
+        )
+      );
+    
+    // Get financial summary
+    const [incomeSum] = await db
+      .select({ sum: sql`COALESCE(SUM(amount), 0)` })
+      .from(financialTransactions)
+      .innerJoin(
+        financialAccounts,
+        eq(financialTransactions.accountId, financialAccounts.id)
+      )
+      .where(
+        and(
+          eq(financialAccounts.clientId, clientId),
+          eq(financialTransactions.type, 'income'),
+          eq(financialTransactions.status, 'completed'),
+          sql`${financialTransactions.date} >= DATE_TRUNC('month', CURRENT_DATE)`
+        )
+      );
+    
+    const [expenseSum] = await db
+      .select({ sum: sql`COALESCE(SUM(amount), 0)` })
+      .from(financialTransactions)
+      .innerJoin(
+        financialAccounts,
+        eq(financialTransactions.accountId, financialAccounts.id)
+      )
+      .where(
+        and(
+          eq(financialAccounts.clientId, clientId),
+          eq(financialTransactions.type, 'expense'),
+          eq(financialTransactions.status, 'completed'),
+          sql`${financialTransactions.date} >= DATE_TRUNC('month', CURRENT_DATE)`
+        )
+      );
+    
+    // Get recent invoices
+    const recentInvoices = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.clientId, clientId))
+      .orderBy(desc(invoices.issueDate))
+      .limit(5);
+    
+    return {
+      pendingNfeCount: Number(pendingNfeCount.count) || 0,
+      pendingNfseCount: Number(pendingNfseCount.count) || 0,
+      lowStockCount: Number(lowStockCount.count) || 0,
+      monthlyIncome: incomeSum.sum || 0,
+      monthlyExpense: expenseSum.sum || 0,
+      balance: (incomeSum.sum || 0) - (expenseSum.sum || 0),
+      recentInvoices
     };
   }
 }
