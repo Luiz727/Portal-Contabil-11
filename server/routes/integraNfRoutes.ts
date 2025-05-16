@@ -69,10 +69,12 @@ export function registerIntegraNfRoutes(app: Express) {
         numero: nfe.number,
         serie: nfe.series,
         naturezaOperacao: nfe.nature,
-        dataEmissao: typeof nfe.issueDate === 'string' 
-          ? nfe.issueDate 
-          : nfe.issueDate.toISOString().split('T')[0],
-        tipoOperacao: nfe.operationType === 'saída' ? 'saida' : 'entrada',
+        dataEmissao: typeof nfe.issueDate === 'string'
+          ? nfe.issueDate
+          : typeof nfe.issueDate?.toISOString === 'function'
+            ? nfe.issueDate.toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
+        tipoOperacao: (nfe.operationType === 'saída' || nfe.operationType === 'saida') ? 'saida' : 'entrada',
         valorTotal: Number(nfe.totalValue),
         items: items.map(item => ({
           descricao: item.description,
@@ -158,18 +160,22 @@ export function registerIntegraNfRoutes(app: Express) {
       }
       
       // Buscar dados do cliente
-      const cliente = await storage.getClient(nfse.clientId);
+      const cliente = await storage.getClient(nfse.clientId || 0);
       if (!cliente) {
         return res.status(404).json({ message: "Cliente não encontrado" });
       }
       
       // Preparar parâmetros para emissão via IntegraNF
       const emissaoParams = {
-        clientId: nfse.clientId,
+        clientId: nfse.clientId || 0,
         valorServico: Number(nfse.totalValue),
         descricaoServico: nfse.serviceDescription,
         codigoServico: nfse.serviceCode,
-        dataEmissao: nfse.issueDate.toISOString().split('T')[0],
+        dataEmissao: typeof nfse.issueDate === 'string'
+          ? nfse.issueDate
+          : typeof nfse.issueDate?.toISOString === 'function'
+            ? nfse.issueDate.toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
         tomador: {
           cnpj: cliente.cnpj,
           nome: cliente.name,
@@ -177,7 +183,7 @@ export function registerIntegraNfRoutes(app: Express) {
           cidade: cliente.city || "",
           estado: cliente.state || "",
           cep: cliente.postalCode || "",
-          email: cliente.email
+          email: cliente.email || ""
         }
       };
       
