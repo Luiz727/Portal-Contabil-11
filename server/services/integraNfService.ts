@@ -1,21 +1,25 @@
 import axios from 'axios';
+import fs from 'fs';
 import { db } from '../db';
 import { apiIntegrations } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import memoizee from 'memoizee';
 
+// Interface para a configuração do IntegraNF
 interface IntegraNfConfig {
+  apiUrl: string;
   apiKey: string;
-  endpoint: string;
-  companyId: string;
+  cnpj: string;
 }
 
+// Interface para os parâmetros de emissão de NFe
 interface EmissaoNFeParams {
   clientId: number;
   numero: string;
   serie: string;
   naturezaOperacao: string;
   dataEmissao: string;
-  tipoOperacao: string; // 'entrada' ou 'saida'
+  tipoOperacao: 'entrada' | 'saida';
   valorTotal: number;
   items: Array<{
     descricao: string;
@@ -37,6 +41,7 @@ interface EmissaoNFeParams {
   };
 }
 
+// Interface para os parâmetros de emissão de NFSe
 interface EmissaoNFSeParams {
   clientId: number;
   valorServico: number;
@@ -54,18 +59,35 @@ interface EmissaoNFSeParams {
   };
 }
 
-export class IntegraNfService {
-  private static instance: IntegraNfService;
+// Resultado padrão para operações de NFe/NFSe
+interface ResultadoIntegraNf {
+  success: boolean;
+  message?: string;
+  chaveAcesso?: string;
+  numero?: string;
+  serie?: string;
+  protocolo?: string;
+  status?: string;
+  codigoVerificacao?: string;
+  urlPdf?: string;
+  xml?: string;
+}
+
+/**
+ * Serviço para integração com a API do IntegraNF
+ */
+class IntegraNfService {
+  // Cache de configurações por clientId
   private configs: Map<number, IntegraNfConfig> = new Map();
   
-  private constructor() {}
-  
-  public static getInstance(): IntegraNfService {
-    if (!IntegraNfService.instance) {
-      IntegraNfService.instance = new IntegraNfService();
-    }
-    return IntegraNfService.instance;
-  }
+  // O método `clienteTemIntegracao` é memoizado para evitar consultas repetidas ao BD
+  public clienteTemIntegracao = memoizee(
+    async (clientId: number): Promise<boolean> => {
+      const config = await this.loadConfig(clientId);
+      return config !== null;
+    },
+    { maxAge: 60000, promise: true } // Cache por 1 minuto
+  );
   
   /**
    * Carrega a configuração do IntegraNF para um cliente específico
@@ -80,267 +102,302 @@ export class IntegraNfService {
     const [integration] = await db
       .select()
       .from(apiIntegrations)
-      .where(
-        eq(apiIntegrations.clientId, clientId),
-        eq(apiIntegrations.type, 'integra_nf'),
-        eq(apiIntegrations.active, true)
-      );
+      .where(eq(apiIntegrations.clientId, clientId));
     
     if (!integration || !integration.config) {
       console.log(`Nenhuma configuração do IntegraNF encontrada para o cliente ${clientId}`);
       return null;
     }
     
-    const config = integration.config as unknown as IntegraNfConfig;
+    // Assume que temos um objeto JSON válido em integration.config
+    const config = typeof integration.config === 'string' 
+      ? JSON.parse(integration.config) 
+      : integration.config;
     
-    // Salva em memória para uso futuro
+    if (!config.apiUrl || !config.apiKey || !config.cnpj) {
+      console.log(`Configuração do IntegraNF incompleta para o cliente ${clientId}`);
+      return null;
+    }
+    
+    // Armazena em cache para uso futuro
     this.configs.set(clientId, config);
     
     return config;
   }
   
   /**
-   * Emite uma NFe através do IntegraNF
+   * Emite uma Nota Fiscal Eletrônica (NFe) via IntegraNF
    */
-  public async emitirNFe(params: EmissaoNFeParams): Promise<any> {
-    const config = await this.loadConfig(params.clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
+  public async emitirNFe(params: EmissaoNFeParams): Promise<ResultadoIntegraNf> {
     try {
-      // Preparando o payload para a API do IntegraNF
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        documento: {
-          modelo: '55', // NFe
-          numero: params.numero,
-          serie: params.serie,
-          naturezaOperacao: params.naturezaOperacao,
-          dataEmissao: params.dataEmissao,
-          tipoOperacao: params.tipoOperacao === 'saida' ? '1' : '0',
-          valorTotal: params.valorTotal,
-          itens: params.items.map((item, index) => ({
-            numeroItem: index + 1,
-            descricao: item.descricao,
-            quantidade: item.quantidade,
-            valorUnitario: item.valorUnitario,
-            valorTotal: item.valorTotal,
-            ncm: item.ncm,
-            cfop: item.cfop,
-            unidadeMedida: item.unidadeMedida,
-          })),
-          destinatario: {
-            cnpj: params.destinatario.cnpj.replace(/\D/g, ''),
-            nome: params.destinatario.nome,
-            endereco: params.destinatario.endereco,
-            cidade: params.destinatario.cidade,
-            estado: params.destinatario.estado,
-            cep: params.destinatario.cep.replace(/\D/g, ''),
-            telefone: params.destinatario.telefone?.replace(/\D/g, ''),
+      const config = await this.loadConfig(params.clientId);
+      if (!config) {
+        return {
+          success: false,
+          message: "Configuração do IntegraNF não encontrada para este cliente"
+        };
+      }
+      
+      // Chamada à API do IntegraNF
+      const response = await axios.post(
+        `${config.apiUrl}/nfe/emitir`,
+        {
+          ...params,
+          cnpjEmitente: config.cnpj
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`,
+            'Content-Type': 'application/json'
           }
         }
-      };
+      );
       
-      // Enviando para a API do IntegraNF
-      const response = await axios.post(`${config.endpoint}/emitir-nfe`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        }
-      });
-      
-      return response.data;
+      // Verifica se a requisição foi bem-sucedida
+      if (response.status === 200 && response.data.success) {
+        return {
+          success: true,
+          chaveAcesso: response.data.chaveAcesso,
+          numero: response.data.numero,
+          serie: response.data.serie,
+          protocolo: response.data.protocolo,
+          status: response.data.status,
+          urlPdf: response.data.urlPdf,
+          xml: response.data.xml
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || "Falha na emissão da NFe"
+        };
+      }
     } catch (error) {
-      console.error('Erro ao emitir NFe através do IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao emitir NFe via IntegraNF:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Erro desconhecido ao emitir NFe"
+      };
     }
   }
   
   /**
-   * Emite uma NFSe através do IntegraNF
+   * Emite uma Nota Fiscal de Serviço Eletrônica (NFSe) via IntegraNF
    */
-  public async emitirNFSe(params: EmissaoNFSeParams): Promise<any> {
-    const config = await this.loadConfig(params.clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
+  public async emitirNFSe(params: EmissaoNFSeParams): Promise<ResultadoIntegraNf> {
     try {
-      // Preparando o payload para a API do IntegraNF
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        documento: {
-          modelo: 'nfse',
-          valorServico: params.valorServico,
-          descricaoServico: params.descricaoServico,
-          codigoServico: params.codigoServico,
-          dataEmissao: params.dataEmissao,
-          tomador: {
-            cnpj: params.tomador.cnpj.replace(/\D/g, ''),
-            nome: params.tomador.nome,
-            endereco: params.tomador.endereco,
-            cidade: params.tomador.cidade,
-            estado: params.tomador.estado,
-            cep: params.tomador.cep.replace(/\D/g, ''),
-            email: params.tomador.email,
+      const config = await this.loadConfig(params.clientId);
+      if (!config) {
+        return {
+          success: false,
+          message: "Configuração do IntegraNF não encontrada para este cliente"
+        };
+      }
+      
+      // Chamada à API do IntegraNF
+      const response = await axios.post(
+        `${config.apiUrl}/nfse/emitir`,
+        {
+          ...params,
+          cnpjPrestador: config.cnpj
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`,
+            'Content-Type': 'application/json'
           }
         }
-      };
+      );
       
-      // Enviando para a API do IntegraNF
-      const response = await axios.post(`${config.endpoint}/emitir-nfse`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        }
-      });
-      
-      return response.data;
+      // Verifica se a requisição foi bem-sucedida
+      if (response.status === 200 && response.data.success) {
+        return {
+          success: true,
+          chaveAcesso: response.data.chaveAcesso,
+          numero: response.data.numero,
+          protocolo: response.data.protocolo,
+          status: response.data.status,
+          codigoVerificacao: response.data.codigoVerificacao,
+          urlPdf: response.data.urlPdf,
+          xml: response.data.xml
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || "Falha na emissão da NFSe"
+        };
+      }
     } catch (error) {
-      console.error('Erro ao emitir NFSe através do IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao emitir NFSe via IntegraNF:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Erro desconhecido ao emitir NFSe"
+      };
     }
   }
   
   /**
-   * Consulta o status de uma nota fiscal no IntegraNF
+   * Consulta o status de uma nota fiscal pela chave de acesso
    */
-  public async consultarStatusNota(clientId: number, chaveAcesso: string): Promise<any> {
-    const config = await this.loadConfig(clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
+  public async consultarStatusNota(clientId: number, chaveAcesso: string): Promise<ResultadoIntegraNf> {
     try {
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        chaveAcesso
-      };
+      const config = await this.loadConfig(clientId);
+      if (!config) {
+        return {
+          success: false,
+          message: "Configuração do IntegraNF não encontrada para este cliente"
+        };
+      }
       
-      const response = await axios.post(`${config.endpoint}/consultar-nota`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
+      // Chamada à API do IntegraNF
+      const response = await axios.get(
+        `${config.apiUrl}/nota/consultar/${chaveAcesso}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`
+          }
         }
-      });
+      );
       
-      return response.data;
+      // Verifica se a requisição foi bem-sucedida
+      if (response.status === 200 && response.data.success) {
+        return {
+          success: true,
+          chaveAcesso: chaveAcesso,
+          status: response.data.status,
+          message: response.data.mensagem
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || "Falha na consulta da nota fiscal"
+        };
+      }
     } catch (error) {
-      console.error('Erro ao consultar status da nota fiscal no IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao consultar nota fiscal via IntegraNF:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Erro desconhecido ao consultar nota fiscal"
+      };
     }
   }
   
   /**
-   * Cancela uma nota fiscal no IntegraNF
+   * Cancela uma nota fiscal
    */
-  public async cancelarNota(clientId: number, chaveAcesso: string, justificativa: string): Promise<any> {
-    const config = await this.loadConfig(clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
+  public async cancelarNota(clientId: number, chaveAcesso: string, justificativa: string): Promise<ResultadoIntegraNf> {
     try {
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        chaveAcesso,
-        justificativa
-      };
+      const config = await this.loadConfig(clientId);
+      if (!config) {
+        return {
+          success: false,
+          message: "Configuração do IntegraNF não encontrada para este cliente"
+        };
+      }
       
-      const response = await axios.post(`${config.endpoint}/cancelar-nota`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
+      // Chamada à API do IntegraNF
+      const response = await axios.post(
+        `${config.apiUrl}/nota/cancelar`,
+        {
+          chaveAcesso,
+          justificativa,
+          cnpj: config.cnpj
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
       
-      return response.data;
+      // Verifica se a requisição foi bem-sucedida
+      if (response.status === 200 && response.data.success) {
+        return {
+          success: true,
+          chaveAcesso: chaveAcesso,
+          protocolo: response.data.protocolo,
+          message: "Nota fiscal cancelada com sucesso"
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || "Falha no cancelamento da nota fiscal"
+        };
+      }
     } catch (error) {
-      console.error('Erro ao cancelar nota fiscal no IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao cancelar nota fiscal via IntegraNF:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Erro desconhecido ao cancelar nota fiscal"
+      };
     }
   }
   
   /**
-   * Download do PDF da DANFE/DANFSE
+   * Faz download do PDF de uma nota fiscal
    */
   public async downloadPdf(clientId: number, chaveAcesso: string): Promise<Buffer> {
-    const config = await this.loadConfig(clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
     try {
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        chaveAcesso
-      };
+      const config = await this.loadConfig(clientId);
+      if (!config) {
+        throw new Error("Configuração do IntegraNF não encontrada para este cliente");
+      }
       
-      const response = await axios.post(`${config.endpoint}/download-pdf`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        },
-        responseType: 'arraybuffer'
-      });
+      // Chamada à API do IntegraNF
+      const response = await axios.get(
+        `${config.apiUrl}/nota/pdf/${chaveAcesso}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`
+          },
+          responseType: 'arraybuffer'
+        }
+      );
+      
+      // Verifica se a resposta é válida
+      if (response.status !== 200) {
+        throw new Error(`Erro ao baixar PDF. Status: ${response.status}`);
+      }
+      
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error('Erro ao baixar PDF via IntegraNF:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Faz download do XML de uma nota fiscal
+   */
+  public async downloadXml(clientId: number, chaveAcesso: string): Promise<string> {
+    try {
+      const config = await this.loadConfig(clientId);
+      if (!config) {
+        throw new Error("Configuração do IntegraNF não encontrada para este cliente");
+      }
+      
+      // Chamada à API do IntegraNF
+      const response = await axios.get(
+        `${config.apiUrl}/nota/xml/${chaveAcesso}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`
+          }
+        }
+      );
+      
+      // Verifica se a resposta é válida
+      if (response.status !== 200) {
+        throw new Error(`Erro ao baixar XML. Status: ${response.status}`);
+      }
       
       return response.data;
     } catch (error) {
-      console.error('Erro ao fazer download do PDF no IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      console.error('Erro ao baixar XML via IntegraNF:', error);
+      throw error;
     }
-  }
-  
-  /**
-   * Download do XML da NFe/NFSe
-   */
-  public async downloadXml(clientId: number, chaveAcesso: string): Promise<string> {
-    const config = await this.loadConfig(clientId);
-    
-    if (!config) {
-      throw new Error(`Cliente não possui configuração válida do IntegraNF`);
-    }
-    
-    try {
-      const payload = {
-        apiKey: config.apiKey,
-        companyId: config.companyId,
-        chaveAcesso
-      };
-      
-      const response = await axios.post(`${config.endpoint}/download-xml`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        }
-      });
-      
-      return response.data.xml;
-    } catch (error) {
-      console.error('Erro ao fazer download do XML no IntegraNF:', error);
-      throw new Error(`Falha na comunicação com o IntegraNF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-    }
-  }
-  
-  /**
-   * Verifica se um cliente tem a configuração do IntegraNF ativa
-   */
-  public async clienteTemIntegracao(clientId: number): Promise<boolean> {
-    const config = await this.loadConfig(clientId);
-    return config !== null;
   }
 }
 
-// Exporta uma instância singleton
-export const integraNfService = IntegraNfService.getInstance();
+// Exporta uma instância única do serviço
+export const integraNfService = new IntegraNfService();

@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { registerNfeRoutes } from "./nfeRoutes";
+import { registerIntegraNfRoutes } from "./routes/integraNfRoutes";
+import { registerHonorariosRoutes } from "./honorariosRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -69,8 +71,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   
-  // Registrar as rotas para módulo de notas fiscais eletrônicas
+  // Registrar as rotas para os diversos módulos
   registerNfeRoutes(app);
+  registerIntegraNfRoutes(app);
+  registerHonorariosRoutes(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
