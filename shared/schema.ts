@@ -1,0 +1,342 @@
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  varchar,
+  jsonb,
+  index,
+  date,
+  decimal,
+  primaryKey,
+  foreignKey,
+} from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table for authentication and profile information
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  role: text("role").default("client").notNull(), // admin, accountant, client
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company clients
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  cnpj: text("cnpj").unique().notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  groupId: integer("group_id"), // For companies in a holding or economic group
+  responsible: text("responsible"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company groups (holdings)
+export const companyGroups = pgTable("company_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Client user relationships - connects users to client companies
+export const clientUsers = pgTable("client_users", {
+  clientId: integer("client_id").notNull().references(() => clients.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+}, (table) => ({
+  pk: primaryKey(table.clientId, table.userId),
+}));
+
+// Tasks for the team
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'set null' }),
+  assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: 'set null' }),
+  priority: text("priority").default("normal").notNull(), // low, normal, high, urgent
+  status: text("status").default("pending").notNull(), // pending, in_progress, completed, cancelled
+  dueDate: timestamp("due_date"),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: text("recurring_pattern"), // monthly, quarterly, yearly, etc.
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Document categories
+export const documentCategories = pgTable("document_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+});
+
+// Documents
+export const documents = pgTable("documents", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  path: text("path").notNull(),
+  fileType: text("file_type").notNull(), // pdf, doc, xlsx, xml, etc.
+  size: integer("size").notNull(), // Size in bytes
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  categoryId: integer("category_id").references(() => documentCategories.id, { onDelete: 'set null' }),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Calendar events
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  allDay: boolean("all_day").default(false),
+  location: text("location"),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'set null' }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// XML invoices
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  number: text("number").notNull(),
+  type: text("type").notNull(), // NFe, NFSe
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  issueDate: date("issue_date").notNull(),
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  xmlData: text("xml_data"), // Store the full XML data
+  documentId: integer("document_id").references(() => documents.id, { onDelete: 'set null' }), // Reference to the XML document
+  status: text("status").default("active").notNull(), // active, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Financial accounts (bank accounts, cash accounts, etc.)
+export const financialAccounts = pgTable("financial_accounts", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // checking, savings, cash, credit_card
+  bankName: text("bank_name"),
+  accountNumber: text("account_number"),
+  branch: text("branch"),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  initialBalance: decimal("initial_balance", { precision: 10, scale: 2 }).default("0").notNull(),
+  currentBalance: decimal("current_balance", { precision: 10, scale: 2 }).default("0").notNull(),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Financial transactions
+export const financialTransactions = pgTable("financial_transactions", {
+  id: serial("id").primaryKey(),
+  accountId: integer("account_id").references(() => financialAccounts.id, { onDelete: 'cascade' }),
+  type: text("type").notNull(), // income, expense, transfer
+  category: text("category"),
+  description: text("description"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  date: date("date").notNull(),
+  status: text("status").default("pending").notNull(), // pending, completed, cancelled
+  invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: 'set null' }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Inventory items
+export const inventoryItems = pgTable("inventory_items", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  sku: text("sku"),
+  quantity: integer("quantity").default(0).notNull(),
+  unit: text("unit"), // units, kg, pieces, etc.
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }),
+  salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
+  minQuantity: integer("min_quantity"), // For low stock alerts
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Inventory movements
+export const inventoryMovements = pgTable("inventory_movements", {
+  id: serial("id").primaryKey(),
+  itemId: integer("item_id").references(() => inventoryItems.id, { onDelete: 'cascade' }),
+  type: text("type").notNull(), // in, out
+  quantity: integer("quantity").notNull(),
+  date: date("date").notNull(),
+  description: text("description"),
+  invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: 'set null' }),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// WhatsApp messages
+export const whatsappMessages = pgTable("whatsapp_messages", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'cascade' }),
+  phone: text("phone").notNull(),
+  content: text("content").notNull(),
+  type: text("type").default("outgoing").notNull(), // incoming, outgoing
+  status: text("status").default("pending").notNull(), // pending, sent, delivered, read, failed
+  documentId: integer("document_id").references(() => documents.id, { onDelete: 'set null' }),
+  sentAt: timestamp("sent_at"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Notifications
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  type: text("type").notNull(), // task, document, event, system
+  read: boolean("read").default(false),
+  relatedId: integer("related_id"), // ID of the related entity (task, document, etc.)
+  relatedType: text("related_type"), // Type of the related entity
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).pick({
+  email: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+});
+
+export const insertClientSchema = createInsertSchema(clients).pick({
+  name: true,
+  cnpj: true,
+  email: true,
+  phone: true,
+  address: true,
+  city: true,
+  state: true,
+  postalCode: true,
+  groupId: true,
+  responsible: true,
+  active: true,
+});
+
+export const insertTaskSchema = createInsertSchema(tasks).pick({
+  title: true,
+  description: true,
+  clientId: true,
+  assignedTo: true,
+  priority: true,
+  status: true,
+  dueDate: true,
+  isRecurring: true,
+  recurringPattern: true,
+  createdBy: true,
+});
+
+export const insertDocumentSchema = createInsertSchema(documents).pick({
+  name: true,
+  description: true,
+  path: true,
+  fileType: true,
+  size: true,
+  clientId: true,
+  categoryId: true,
+  uploadedBy: true,
+});
+
+export const insertEventSchema = createInsertSchema(events).pick({
+  title: true,
+  description: true,
+  startDate: true,
+  endDate: true,
+  allDay: true,
+  location: true,
+  clientId: true,
+  createdBy: true,
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).pick({
+  number: true,
+  type: true,
+  clientId: true,
+  issueDate: true,
+  totalValue: true,
+  xmlData: true,
+  documentId: true,
+  status: true,
+});
+
+export const insertFinancialTransactionSchema = createInsertSchema(financialTransactions).pick({
+  accountId: true,
+  type: true,
+  category: true,
+  description: true,
+  amount: true,
+  date: true,
+  status: true,
+  invoiceId: true,
+  createdBy: true,
+});
+
+export const insertInventoryItemSchema = createInsertSchema(inventoryItems).pick({
+  name: true,
+  description: true,
+  sku: true,
+  quantity: true,
+  unit: true,
+  costPrice: true,
+  salePrice: true,
+  minQuantity: true,
+  clientId: true,
+});
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type InsertClient = typeof clients.$inferInsert;
+export type Client = typeof clients.$inferSelect;
+export type InsertTask = typeof tasks.$inferInsert;
+export type Task = typeof tasks.$inferSelect;
+export type InsertDocument = typeof documents.$inferInsert;
+export type Document = typeof documents.$inferSelect;
+export type InsertEvent = typeof events.$inferInsert;
+export type Event = typeof events.$inferSelect;
+export type InsertInvoice = typeof invoices.$inferInsert;
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertFinancialTransaction = typeof financialTransactions.$inferInsert;
+export type FinancialTransaction = typeof financialTransactions.$inferSelect;
+export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
+export type InventoryItem = typeof inventoryItems.$inferSelect;
