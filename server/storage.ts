@@ -714,6 +714,66 @@ export class DatabaseStorage implements IStorage {
       recentInvoices
     };
   }
+  
+  // Operações para honorários
+  async getHonorarios(): Promise<Honorario[]> {
+    return await db.select().from(honorarios);
+  }
+  
+  async getHonorario(id: number): Promise<Honorario | undefined> {
+    const [result] = await db.select().from(honorarios).where(eq(honorarios.id, id));
+    return result;
+  }
+  
+  async getHonorariosByClient(clientId: number): Promise<Honorario[]> {
+    return await db.select().from(honorarios).where(eq(honorarios.clientId, clientId));
+  }
+  
+  async getHonorariosByStatus(status: string): Promise<Honorario[]> {
+    return await db.select().from(honorarios).where(eq(honorarios.status, status));
+  }
+  
+  async createHonorario(data: InsertHonorario): Promise<Honorario> {
+    const [result] = await db.insert(honorarios).values(data).returning();
+    return result;
+  }
+  
+  async updateHonorario(id: number, data: Partial<Honorario>): Promise<Honorario | undefined> {
+    const [result] = await db
+      .update(honorarios)
+      .set(data)
+      .where(eq(honorarios.id, id))
+      .returning();
+    return result;
+  }
+  
+  // Operações para padrões de documentos
+  async getDocumentPatterns(): Promise<DocumentPattern[]> {
+    return await db.select().from(documentPatterns);
+  }
+  
+  async getDocumentPattern(id: number): Promise<DocumentPattern | undefined> {
+    const [result] = await db.select().from(documentPatterns).where(eq(documentPatterns.id, id));
+    return result;
+  }
+  
+  async getDocumentPatternsByCategory(categoryId: number): Promise<DocumentPattern[]> {
+    return await db.select().from(documentPatterns).where(eq(documentPatterns.categoriaId, categoryId));
+  }
+  
+  async createDocumentPattern(data: InsertDocumentPattern): Promise<DocumentPattern> {
+    const [result] = await db.insert(documentPatterns).values(data).returning();
+    return result;
+  }
+  
+  async updateDocumentPattern(id: number, data: Partial<DocumentPattern>): Promise<DocumentPattern | undefined> {
+    const [result] = await db
+      .update(documentPatterns)
+      .set(data)
+      .where(eq(documentPatterns.id, id))
+      .returning();
+    return result;
+  }
 }
 
 export const storage = new DatabaseStorage();
