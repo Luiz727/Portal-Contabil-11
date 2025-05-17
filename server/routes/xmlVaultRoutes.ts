@@ -4,8 +4,9 @@ import { xmlVaultService } from "../services/xmlVaultService";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { z } from "zod";
 
-// Configuração para upload de arquivos XML
+// Configuração do multer para upload de arquivos XML
 const uploadDir = path.join(process.cwd(), "uploads", "temp");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -21,232 +22,245 @@ const storage = multer.diskStorage({
   },
 });
 
-const xmlUpload = multer({
+const xmlFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Aceitar apenas arquivos XML
+  if (file.mimetype === "application/xml" || file.mimetype === "text/xml" || path.extname(file.originalname).toLowerCase() === '.xml') {
+    cb(null, true);
+  } else {
+    cb(new Error("Apenas arquivos XML são permitidos"));
+  }
+};
+
+const upload = multer({
   storage,
+  fileFilter: xmlFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limite
-  },
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype === "text/xml" ||
-      file.mimetype === "application/xml" ||
-      file.originalname.endsWith(".xml")
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error("Apenas arquivos XML são permitidos"), false);
-    }
+    fileSize: 10 * 1024 * 1024, // 10MB
   },
 });
 
 /**
- * Registra as rotas do Cofre de XML
+ * Registra as rotas do XML Vault
  */
 export function registerXmlVaultRoutes(app: Express) {
-  // Adicionar XML ao cofre via upload
-  app.post("/api/xml-vault/upload", isAuthenticated, xmlUpload.single("file"), async (req: any, res: Response) => {
+  // Rota para upload de XML fiscal
+  app.post("/api/xml-vault/upload", isAuthenticated, upload.single("xmlFile"), async (req: any, res: Response) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: "Nenhum arquivo enviado" });
+        return res.status(400).json({
+          success: false,
+          message: "Nenhum arquivo XML foi enviado",
+        });
       }
 
-      const {
-        chaveAcesso,
-        tipo = "XML",
-        clientId,
-        metadados = "{}"
-      } = req.body;
-
-      if (!chaveAcesso) {
-        return res.status(400).json({ message: "Chave de acesso é obrigatória" });
-      }
-
-      if (!clientId) {
-        return res.status(400).json({ message: "ID do cliente é obrigatório" });
-      }
-
-      // Ler o arquivo
+      // Obter informações do XML
       const xmlContent = fs.readFileSync(req.file.path, "utf8");
-
-      // Processar metadados
-      let parsedMetadados = {};
-      try {
-        parsedMetadados = JSON.parse(metadados);
-      } catch (e) {
-        console.warn("Metadados inválidos, usando objeto vazio");
+      
+      // Extrair informações básicas do XML
+      const xmlInfo = xmlVaultService.extractXmlInfo(xmlContent);
+      
+      if (!xmlInfo) {
+        // Limpar arquivo temporário
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: "Não foi possível interpretar o arquivo XML enviado",
+        });
       }
-
-      // Armazenar no cofre
+      
+      // Validar o XML
+      const validation = xmlVaultService.validateXml(xmlContent, xmlInfo.type || 'NFe');
+      
+      if (!validation.valid) {
+        // Limpar arquivo temporário
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: "O arquivo XML fornecido é inválido",
+          errors: validation.errors,
+        });
+      }
+      
+      // Armazenar o XML no cofre
       const userId = req.user.claims.sub;
-      const result = await xmlVaultService.storeXml(
-        xmlContent,
-        chaveAcesso,
-        tipo,
-        parseInt(clientId),
-        userId,
-        parsedMetadados
-      );
-
-      // Remover arquivo temporário
-      fs.unlinkSync(req.file.path);
-
-      res.status(201).json({
-        message: "XML armazenado com sucesso",
-        documentId: result.id
-      });
-    } catch (error) {
-      console.error("Erro no upload de XML:", error);
-      res.status(500).json({
-        message: "Erro ao processar o arquivo XML",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
-      });
-    }
-  });
-
-  // Adicionar XML ao cofre via JSON
-  app.post("/api/xml-vault/store", isAuthenticated, async (req: any, res: Response) => {
-    try {
-      const {
-        xmlContent,
-        chaveAcesso,
-        tipo = "XML",
+      const clientId = req.body.clientId ? parseInt(req.body.clientId) : undefined;
+      
+      const result = await xmlVaultService.storeXml({
+        ...xmlInfo,
         clientId,
-        metadados = {}
-      } = req.body;
-
-      if (!xmlContent) {
-        return res.status(400).json({ message: "Conteúdo XML é obrigatório" });
-      }
-
-      if (!chaveAcesso) {
-        return res.status(400).json({ message: "Chave de acesso é obrigatória" });
-      }
-
-      if (!clientId) {
-        return res.status(400).json({ message: "ID do cliente é obrigatório" });
-      }
-
-      // Armazenar no cofre
-      const userId = req.user.claims.sub;
-      const result = await xmlVaultService.storeXml(
-        xmlContent,
-        chaveAcesso,
-        tipo,
-        parseInt(clientId),
         userId,
-        metadados
-      );
-
+        type: xmlInfo.type as 'NFe' | 'NFSe' | 'CTe' | 'MDFe',
+      } as any);
+      
+      // Limpar arquivo temporário
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
       res.status(201).json({
-        message: "XML armazenado com sucesso",
-        documentId: result.id
+        success: true,
+        documentId: result.id,
+        message: "Documento fiscal armazenado com sucesso no XML Vault",
       });
     } catch (error) {
-      console.error("Erro ao armazenar XML:", error);
+      console.error("Erro no upload para XML Vault:", error);
+      
+      // Limpar arquivo temporário em caso de erro
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
       res.status(500).json({
-        message: "Erro ao armazenar XML",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
+        success: false,
+        message: error instanceof Error ? error.message : "Erro ao processar XML",
       });
     }
   });
-
-  // Obter XML do cofre por ID
+  
+  // Rota para recuperar XML
   app.get("/api/xml-vault/document/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const documentId = parseInt(req.params.id);
+      
       if (isNaN(documentId)) {
-        return res.status(400).json({ message: "ID inválido" });
+        return res.status(400).json({
+          success: false,
+          message: "ID de documento inválido",
+        });
       }
-
-      const { content, metadata } = await xmlVaultService.getXmlById(documentId);
-
-      res.setHeader("Content-Type", "application/xml");
-      res.setHeader("Content-Disposition", `attachment; filename="${metadata.tipo || 'documento'}_${metadata.chaveAcesso || documentId}.xml"`);
-      res.send(content);
+      
+      const result = await xmlVaultService.retrieveXml(documentId);
+      
+      res.set("Content-Type", "application/xml");
+      res.set("Content-Disposition", `attachment; filename="document_${documentId}.xml"`);
+      res.send(result.xmlContent);
     } catch (error) {
-      console.error("Erro ao obter XML:", error);
-      res.status(500).json({
-        message: "Erro ao obter XML",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
+      console.error("Erro ao recuperar XML do Vault:", error);
+      
+      res.status(404).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Documento não encontrado",
       });
     }
   });
-
-  // Obter metadados de um XML por ID
-  app.get("/api/xml-vault/metadata/:id", isAuthenticated, async (req: Request, res: Response) => {
+  
+  // Rota para buscar documentos fiscais
+  app.get("/api/xml-vault/search", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { type, emitterCnpj, receiverCnpj, clientId, startDate, endDate } = req.query;
+      
+      const searchParams: any = {};
+      
+      if (type) searchParams.type = type as string;
+      if (emitterCnpj) searchParams.emitterCnpj = emitterCnpj as string;
+      if (receiverCnpj) searchParams.receiverCnpj = receiverCnpj as string;
+      if (clientId) searchParams.clientId = parseInt(clientId as string);
+      if (startDate) searchParams.startDate = new Date(startDate as string);
+      if (endDate) searchParams.endDate = new Date(endDate as string);
+      
+      const documents = await xmlVaultService.searchDocuments(searchParams);
+      
+      res.json({
+        success: true,
+        data: documents,
+      });
+    } catch (error) {
+      console.error("Erro na busca de documentos fiscais:", error);
+      
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Erro ao buscar documentos",
+      });
+    }
+  });
+  
+  // Rota para verificar validade de XML
+  app.post("/api/xml-vault/validate", isAuthenticated, upload.single("xmlFile"), async (req: any, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Nenhum arquivo XML foi enviado",
+        });
+      }
+      
+      // Obter conteúdo do XML
+      const xmlContent = fs.readFileSync(req.file.path, "utf8");
+      
+      // Extrair informações básicas
+      const xmlInfo = xmlVaultService.extractXmlInfo(xmlContent);
+      
+      if (!xmlInfo || !xmlInfo.type) {
+        // Limpar arquivo temporário
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: "Não foi possível interpretar o arquivo XML enviado",
+        });
+      }
+      
+      // Validar o XML
+      const validation = xmlVaultService.validateXml(xmlContent, xmlInfo.type as 'NFe' | 'NFSe' | 'CTe' | 'MDFe');
+      
+      // Limpar arquivo temporário
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      res.json({
+        success: true,
+        valid: validation.valid,
+        errors: validation.errors,
+        info: xmlInfo,
+      });
+    } catch (error) {
+      console.error("Erro na validação de XML:", error);
+      
+      // Limpar arquivo temporário em caso de erro
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Erro ao validar XML",
+      });
+    }
+  });
+  
+  // Rota para informações sobre um documento
+  app.get("/api/xml-vault/info/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const documentId = parseInt(req.params.id);
+      
       if (isNaN(documentId)) {
-        return res.status(400).json({ message: "ID inválido" });
+        return res.status(400).json({
+          success: false,
+          message: "ID de documento inválido",
+        });
       }
-
-      const { metadata } = await xmlVaultService.getXmlById(documentId);
-      res.json(metadata);
-    } catch (error) {
-      console.error("Erro ao obter metadados do XML:", error);
-      res.status(500).json({
-        message: "Erro ao obter metadados",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
+      
+      const result = await xmlVaultService.retrieveXml(documentId);
+      
+      res.json({
+        success: true,
+        metadata: result.metadata,
       });
-    }
-  });
-
-  // Verificar integridade do XML
-  app.get("/api/xml-vault/verify/:id", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const documentId = parseInt(req.params.id);
-      if (isNaN(documentId)) {
-        return res.status(400).json({ message: "ID inválido" });
-      }
-
-      const result = await xmlVaultService.verifyXmlIntegrity(documentId);
-      res.json(result);
     } catch (error) {
-      console.error("Erro ao verificar integridade do XML:", error);
-      res.status(500).json({
-        message: "Erro ao verificar integridade",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
-      });
-    }
-  });
-
-  // Listar XMLs por cliente
-  app.get("/api/xml-vault/client/:clientId", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const clientId = parseInt(req.params.clientId);
-      if (isNaN(clientId)) {
-        return res.status(400).json({ message: "ID do cliente inválido" });
-      }
-
-      const xmlList = await xmlVaultService.listClientXmls(clientId);
-      res.json(xmlList);
-    } catch (error) {
-      console.error("Erro ao listar XMLs do cliente:", error);
-      res.status(500).json({
-        message: "Erro ao listar XMLs",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
-      });
-    }
-  });
-
-  // Buscar XML por chave de acesso
-  app.get("/api/xml-vault/chave/:chaveAcesso", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { chaveAcesso } = req.params;
-      if (!chaveAcesso) {
-        return res.status(400).json({ message: "Chave de acesso é obrigatória" });
-      }
-
-      const { content, metadata } = await xmlVaultService.getXmlByChaveAcesso(chaveAcesso);
-
-      res.setHeader("Content-Type", "application/xml");
-      res.setHeader("Content-Disposition", `attachment; filename="${metadata.tipo || 'documento'}_${chaveAcesso}.xml"`);
-      res.send(content);
-    } catch (error) {
-      console.error("Erro ao obter XML por chave de acesso:", error);
-      res.status(500).json({
-        message: "Erro ao obter XML",
-        error: error instanceof Error ? error.message : "Erro desconhecido"
+      console.error("Erro ao obter informações do documento:", error);
+      
+      res.status(404).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Documento não encontrado",
       });
     }
   });

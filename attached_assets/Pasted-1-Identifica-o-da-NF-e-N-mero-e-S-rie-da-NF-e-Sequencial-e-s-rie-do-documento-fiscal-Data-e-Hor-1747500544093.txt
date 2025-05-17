@@ -1,0 +1,178 @@
+1. Identificação da NF-e
+Número e Série da NF-e: Sequencial e série do documento fiscal.
+
+Data e Hora de Emissão: Momento da geração da nota.
+
+Tipo de Operação: Entrada ou saída de mercadoria.
+
+Natureza da Operação: Descrição da operação, como venda ou devolução.
+Nota Fiscal Eletrônica
++1
+Blog | Consultar Danfe
++1
+docs-habilis-biz.netlify.app
++2
+Bling!
++2
+Nota Simples
++2
+integranfe.tomticket.com
++4
+Qive
++4
+Softin Sistemas
++4
+docs-habilis-biz.netlify.app
++1
+SimplesVet
++1
+
+2. Emitente
+Razão Social e Nome Fantasia: Identificação da empresa emissora.
+
+CNPJ e Inscrição Estadual: Dados fiscais do emitente.
+
+Endereço Completo: Localização da empresa.
+Blog | Consultar Danfe
++1
+Qive
++1
+
+3. Destinatário
+Razão Social ou Nome: Identificação do cliente ou fornecedor.
+
+CNPJ/CPF e Inscrição Estadual: Dados fiscais do destinatário.
+
+Endereço Completo: Localização do destinatário.
+Qive
++1
+Softin Sistemas
++1
+Softin Sistemas
++1
+Central de Ajuda da Bluesoft
++1
+
+4. Produtos e Serviços
+Código do Produto: Identificação interna do item.
+
+Descrição do Produto: Detalhamento do item.
+
+NCM (Nomenclatura Comum do Mercosul): Classificação fiscal do produto.
+
+CFOP (Código Fiscal de Operações e Prestações): Natureza da operação.
+
+Unidade de Medida, Quantidade, Valor Unitário e Total: Informações quantitativas e monetárias.
+Qive
+Suporte Shop Magento
++20
+Bling!
++20
+Softin Sistemas
++20
+
+5. Tributos
+CST/CSOSN: Código de Situação Tributária.
+
+Base de Cálculo e Alíquota: Para ICMS, IPI, PIS, COFINS, entre outros.
+
+Valores dos Impostos: Montantes devidos.
+Qive
+Softin Sistemas
++1
+docs-habilis-biz.netlify.app
++1
+
+6. Transporte
+Modalidade do Frete: Por conta do emitente, destinatário, terceiros ou sem frete.
+
+Dados do Transportador: Nome, CNPJ/CPF, endereço, entre outros.
+
+Informações do Veículo: Placa, UF, ANTT, etc.
+Softin Sistemas
+integranfe.tomticket.com
+
+7. Totais e Pagamento
+Valor Total da NF-e: Soma dos produtos e serviços.
+
+Descontos, Frete, Seguro e Outras Despesas: Valores adicionais ou redutores.
+
+Forma de Pagamento: À vista, a prazo, cartão, boleto, etc.
+Omie
+integranfe.tomticket.com
++3
+docs-habilis-biz.netlify.app
++3
+Grupo Módulos
++3
+integranfe.tomticket.com
+
+8. Informações Adicionais
+Informações Complementares: Dados relevantes não contemplados nos campos anteriores.
+
+Informações de Interesse do Fisco: Dados exigidos pela legislação tributária.
+Blog | Consultar Danfe
+
+Fonte: Qive - Campos da NF-e
+
+🧩 Módulos Essenciais de um Sistema ERP com Emissor de NF-e e Controle de Estoque
+Um sistema ERP integrado facilita a gestão empresarial. Os módulos essenciais incluem:
+
+1. Cadastro
+Clientes e Fornecedores: Registro de informações comerciais e fiscais.
+
+Produtos e Serviços: Detalhamento, classificação fiscal, preços e estoque mínimo.
+
+Transportadoras: Dados para logística e frete.
+
+2. Vendas
+Orçamentos e Pedidos: Geração e acompanhamento.
+
+Emissão de NF-e/NFC-e: Notas de venda, devolução e ajuste.
+
+Controle de Comissões: Gestão de remuneração de vendedores.
+SimplesVet
++4
+docs-habilis-biz.netlify.app
++4
+LinhaClipp –
++4
+
+3. Compras
+Pedidos de Compra: Solicitação e controle de aquisições.
+
+Recebimento de Mercadorias: Entrada no estoque e conferência.
+
+Emissão de NF-e de Entrada: Notas de compra e devolução.
+Suporte Shop Magento
++1
+LinhaClipp –
++1
+
+4. Estoque
+Controle de Entradas e Saídas: Movimentação de produtos.
+
+Inventário: Contagem e ajuste de estoque.
+
+Alertas de Estoque Mínimo: Notificações para reposição.
+
+5. Financeiro
+Contas a Pagar e Receber: Gestão de fluxo de caixa.
+
+Emissão de Boletos e Notas de Débito: Cobrança de clientes.
+
+Conciliação Bancária: Verificação de extratos e lançamentos.
+
+6. Fiscal
+Apuração de Impostos: Cálculo de tributos devidos.
+
+Geração de SPED Fiscal e Contribuições: Obrigações acessórias.
+
+Relatórios Fiscais: Demonstrativos para o fisco.
+Wikipédia
+Qive
+
+7. Relatórios e BI
+Análises Gerenciais: Vendas, compras, estoque e financeiro.
+
+Dashboards Personalizados: Visualização de indicadores-chave.

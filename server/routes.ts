@@ -5,6 +5,8 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { registerNfeRoutes } from "./nfeRoutes";
 import { registerIntegraNfRoutes } from "./routes/integraNfRoutes";
 import { registerHonorariosRoutes } from "./honorariosRoutes";
+import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
+import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -75,6 +77,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerNfeRoutes(app);
   registerIntegraNfRoutes(app);
   registerHonorariosRoutes(app);
+  registerTaxCalculatorRoutes(app);
+  try {
+    registerXmlVaultRoutes(app);
+  } catch (error) {
+    console.error("Erro ao registrar rotas do XML Vault:", error);
+  }
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

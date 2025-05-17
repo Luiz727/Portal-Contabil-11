@@ -20,6 +20,10 @@ import WhatsApp from "@/pages/WhatsApp";
 import MainLayout from "@/layouts/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 
+// Páginas do Módulo Fiscal
+import FiscalDashboard from "@/pages/fiscal/FiscalDashboard";
+import EmissaoNFe from "@/pages/fiscal/emissor/EmissaoNFe";
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -127,6 +131,23 @@ function Router() {
         <Route path="/whatsapp">
           <MainLayout>
             <WhatsApp />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {/* Rotas do Módulo Fiscal */}
+      {isAuthenticated && (
+        <Route path="/fiscal">
+          <MainLayout>
+            <FiscalDashboard />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/emissor/nfe">
+          <MainLayout>
+            <EmissaoNFe />
           </MainLayout>
         </Route>
       )}

@@ -1,0 +1,44 @@
+Fluxo da API
+Entenda como é realizado os passos da emissão do documento fiscal.
+
+
+Introdução
+A API da Integra Notas foi desenvolvida de acordo com os melhores padrões REST. Seus endpoints possuem nomes intuitivos que indicam os recursos disponíveis. As operações são feitas de acordo com os verbos HTTP, com corpos de mensagem em JSON. As respostas podem ser interpretadas através do código de status HTTP. Isso permite que quaisquer aplicações consumam a API de forma simples e clara, independente da linguagem utilizada.
+
+Endpoint
+As chamadas para a API devem ser feitas o endpoint https://api.integranotas.com.br/v1 ou https://hom-api.integranotas.com.br/v1
+
+Retenção de arquivos XML
+Os arquivos XML ficam retidos em nosso banco de dados e acessiveis via api ou gestão por 1 ano após sua emissão, a partir disso ficam disponiveis por mais 1 ano compactados em um disco S3 ficando disponiveis pra ser solicitados via api.
+Todos os arquivos XML devem ser armazenados pelo sistema da softhouse contratante por um período de 5 anos conforme legislação vigente.
+
+Timeouts
+A API tem uma configuração padrão de 40 a 60 segundos de timeout entre a API a e sefaz ou prefeitura, então para evitar problemas na captura do retorno da API, sua aplicação deve ter no minimo 60 segundos de timeout quando fizer a chamada em nosso endpoint.
+
+Rejeições
+Sempre que for enviado um documento fiscal para ser processado e o mesmo retorne com sucesso = false, esse documento fiscal é deletado da API, portanto deve ser corrigido a rejeição e enviado novamente com a mesma numeração.
+
+Certificado Digital
+É suportado apenas o certificado digital A1, podendo ser *.pfx ou *.p12.
+O certificado digital deve ser enviado para emissão dos documentos fiscais quando exigido, esse arquivo fica armazenado em nosso sistema com uma criptografia segura, é utilizado apenas na comunicação com a SEFAZ/Prefeitura.
+
+Requisições
+O tamanho máximo do body da requisição não pode passar de 2MB, caso seja enviado com tamanho superior será retornado um http 413 e não processada a requisição.
+
+Rate limit
+As chamadas na API sao gerenciadas por limite de tempo entre elas, que o obedece a seguinte regra:
+
+/soft: 5 chamadas por minuto
+/{chave}: 2 chamadas por minuto (TOKEN + CHAVE) (Exemplo aqui)
+demais rotas: 60 chamadas por minuto
+
+Essas regras são feitas por TOKEN e tem a duração do bloqueio de por 5 minutos.
+
+Evite paralelismo para fazer requisições de emissão e consulta sem tomar o cuidado de manter as requisições dentro dos limites aceitáveis, caso contrário seu IP pode ser bloqueado por alguns minutos.
+
+SLA
+Clique aqui para ver
+
+Base 64
+Base64 é um algoritmo de codificação (encoding) que permite transformar qualquer caractere de qualquer idioma em um alfabeto que consiste em letras latinas, dígitos e sinais. Com isso podemos converter caracteres especiais como os logogramas chineses, emoji e até imagens em uma sequência “legível” (para qualquer computador), que pode ser salvo e/ou transferido para qualquer outro lugar. É utilizado frequentemente para transmitir dados binários por meio de transmissões que lidam apenas com texto, como, por exemplo, para enviar imagens e arquivos em anexo por e-mail.
+Clique aqui para ver
