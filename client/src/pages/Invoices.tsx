@@ -1,253 +1,449 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import InvoiceForm from "@/components/invoices/InvoiceForm";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
 
-export default function Invoices() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [clientFilter, setClientFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [isInvoiceFormOpen, setIsInvoiceFormOpen] = useState(false);
+// Tipos de produtos para a simulação
+interface Produto {
+  id: number;
+  nome: string;
+  codigo: string;
+  ncm: string;
+  unidade: string;
+  precoBase: number;
+  aliquotaICMS: number;
+  aliquotaIPI: number;
+  aliquotaPIS: number;
+  aliquotaCOFINS: number;
+}
 
-  // Fetch all invoices
-  const { data: invoices, isLoading } = useQuery({
-    queryKey: ["/api/invoices"],
-  });
+// Lista de produtos com alíquotas predefinidas
+const produtosDisponiveis: Produto[] = [
+  {
+    id: 1,
+    nome: "Smartphone",
+    codigo: "SMRTPHNE001",
+    ncm: "8517.12.31",
+    unidade: "UN",
+    precoBase: 1999.90,
+    aliquotaICMS: 18,
+    aliquotaIPI: 15,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 2,
+    nome: "Notebook",
+    codigo: "NOTEBK002",
+    ncm: "8471.30.12",
+    unidade: "UN",
+    precoBase: 4500.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 15,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 3,
+    nome: "Monitor LED 24''",
+    codigo: "MONTR003",
+    ncm: "8528.52.20",
+    unidade: "UN",
+    precoBase: 800.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 15,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 4,
+    nome: "Teclado Mecânico",
+    codigo: "TECL004",
+    ncm: "8471.60.52",
+    unidade: "UN",
+    precoBase: 300.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 10,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 5,
+    nome: "Mouse Gamer",
+    codigo: "MOUSE005",
+    ncm: "8471.60.53",
+    unidade: "UN",
+    precoBase: 150.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 10,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 6,
+    nome: "Impressora Laser",
+    codigo: "IMPR006",
+    ncm: "8443.32.23",
+    unidade: "UN",
+    precoBase: 1200.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 15,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 7,
+    nome: "Caixa de Som Bluetooth",
+    codigo: "CXSOM007",
+    ncm: "8518.22.00",
+    unidade: "UN",
+    precoBase: 250.00,
+    aliquotaICMS: 18,
+    aliquotaIPI: 20,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  },
+  {
+    id: 8,
+    nome: "Carregador USB-C",
+    codigo: "CARREG008",
+    ncm: "8504.40.10",
+    unidade: "UN",
+    precoBase: 89.90,
+    aliquotaICMS: 18,
+    aliquotaIPI: 15,
+    aliquotaPIS: 1.65,
+    aliquotaCOFINS: 7.6
+  }
+];
 
-  // Fetch clients for filter
-  const { data: clients, isLoading: isLoadingClients } = useQuery({
-    queryKey: ["/api/clients"],
-  });
+// Estados para simulação
+const estados = [
+  { sigla: "SP", nome: "São Paulo", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "RJ", nome: "Rio de Janeiro", aliquotaInterna: 20, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "MG", nome: "Minas Gerais", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "RS", nome: "Rio Grande do Sul", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "PR", nome: "Paraná", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "SC", nome: "Santa Catarina", aliquotaInterna: 17, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "ES", nome: "Espírito Santo", aliquotaInterna: 17, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "BA", nome: "Bahia", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } },
+  { sigla: "DF", nome: "Distrito Federal", aliquotaInterna: 18, aliquotaInterestadual: { sul: 12, outros: 7 } }
+];
 
-  // Filter invoices
-  const filteredInvoices = invoices?.filter((invoice: any) => {
-    // Text search
-    const matchesSearch = 
-      searchQuery === "" || 
-      invoice.number.includes(searchQuery);
+export default function TaxCalculator() {
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
+  const [quantidade, setQuantidade] = useState<number>(1);
+  const [estadoOrigem, setEstadoOrigem] = useState<string>("SP");
+  const [estadoDestino, setEstadoDestino] = useState<string>("RJ");
+  const [tipoOperacao, setTipoOperacao] = useState<string>("venda");
+  const [tipoContribuinte, setTipoContribuinte] = useState<string>("contribuinte");
+  const [resultados, setResultados] = useState<any>(null);
+  const [precoVenda, setPrecoVenda] = useState<number>(0);
+
+  // Calcular todos os impostos quando o usuário clicar em Calcular
+  const calcularImpostos = () => {
+    if (!produtoSelecionado) return;
+
+    // Preço base para cálculos
+    const valorUnitario = precoVenda > 0 ? precoVenda : produtoSelecionado.precoBase;
+    const valorTotal = valorUnitario * quantidade;
+
+    // Alíquotas
+    const aliquotaICMS = obterAliquotaICMS(estadoOrigem, estadoDestino, tipoContribuinte);
+    const valorICMS = (valorTotal * aliquotaICMS) / 100;
+
+    const aliquotaIPI = produtoSelecionado.aliquotaIPI;
+    const valorIPI = (valorTotal * aliquotaIPI) / 100;
+
+    const aliquotaPIS = produtoSelecionado.aliquotaPIS;
+    const valorPIS = (valorTotal * aliquotaPIS) / 100;
+
+    const aliquotaCOFINS = produtoSelecionado.aliquotaCOFINS;
+    const valorCOFINS = (valorTotal * aliquotaCOFINS) / 100;
+
+    // Calcula DIFAL para operações interestaduais
+    let valorDIFAL = 0;
+    if (estadoOrigem !== estadoDestino && tipoContribuinte === "contribuinte") {
+      const estadoOrigemObj = estados.find(e => e.sigla === estadoOrigem);
+      const estadoDestinoObj = estados.find(e => e.sigla === estadoDestino);
+      
+      if (estadoOrigemObj && estadoDestinoObj) {
+        const aliquotaInterna = estadoDestinoObj.aliquotaInterna;
+        const aliquotaInterestadual = obterAliquotaICMS(estadoOrigem, estadoDestino, tipoContribuinte);
+        valorDIFAL = (valorTotal * (aliquotaInterna - aliquotaInterestadual)) / 100;
+      }
+    }
+
+    // Total de impostos
+    const totalImpostos = valorICMS + valorIPI + valorPIS + valorCOFINS + valorDIFAL;
+    const percentualImpostos = (totalImpostos / valorTotal) * 100;
+
+    // Valor com impostos
+    const valorComImpostos = valorTotal + valorIPI; // IPI é "por fora"
+
+    setResultados({
+      valorUnitario,
+      valorTotal,
+      impostos: {
+        icms: { aliquota: aliquotaICMS, valor: valorICMS },
+        ipi: { aliquota: aliquotaIPI, valor: valorIPI },
+        pis: { aliquota: aliquotaPIS, valor: valorPIS },
+        cofins: { aliquota: aliquotaCOFINS, valor: valorCOFINS },
+        difal: { valor: valorDIFAL }
+      },
+      totalImpostos,
+      percentualImpostos,
+      valorComImpostos
+    });
+  };
+
+  // Obter alíquota de ICMS baseada nos estados de origem e destino
+  const obterAliquotaICMS = (origem: string, destino: string, tipoContribuinte: string) => {
+    // Se for a mesma UF, usa a alíquota interna
+    if (origem === destino) {
+      const estado = estados.find(e => e.sigla === origem);
+      return estado ? estado.aliquotaInterna : 18; // default para SP
+    }
     
-    // Client filter
-    const matchesClient = clientFilter === "all" || invoice.clientId === parseInt(clientFilter);
+    // Se for para não contribuinte, usa a alíquota interna do estado de origem
+    if (tipoContribuinte === "nao-contribuinte") {
+      const estado = estados.find(e => e.sigla === origem);
+      return estado ? estado.aliquotaInterna : 18;
+    }
     
-    // Type filter
-    const matchesType = typeFilter === "all" || invoice.type === typeFilter;
+    // Para operações interestaduais
+    const estadoOrigem = estados.find(e => e.sigla === origem);
+    const regiaoSul = ["RS", "SC", "PR"];
+    const regiaoSudeste = ["SP", "RJ", "MG", "ES"];
     
-    return matchesSearch && matchesClient && matchesType;
-  });
+    if (regiaoSul.includes(destino) || regiaoSudeste.includes(destino)) {
+      return 12; // Alíquota para Sul e Sudeste
+    } else {
+      return 7; // Alíquota para as demais regiões
+    }
+  };
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-800">Notas Fiscais</h2>
-          <p className="mt-1 text-sm text-neutral-500">Gerenciamento de notas fiscais eletrônicas (NF-e e NFS-e)</p>
-        </div>
-        <div className="mt-4 md:mt-0">
-          <Dialog open={isInvoiceFormOpen} onOpenChange={setIsInvoiceFormOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <span className="material-icons text-sm mr-1">add</span>
-                Nova Nota Fiscal
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Emitir Nova Nota Fiscal</DialogTitle>
-              </DialogHeader>
-              <InvoiceForm 
-                onSuccess={() => setIsInvoiceFormOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+    <div className="container-fluid py-4">
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary text-white">
+              <h2 className="mb-0 fs-4">Calculadora de Impostos</h2>
+              <p className="mb-0 small">Simule os impostos para operações fiscais</p>
+            </div>
+            <div className="card-body">
+              <div className="row">
+                <div className="col-md-8">
+                  <div className="form-group mb-3">
+                    <label htmlFor="produto" className="form-label">Selecione o Produto</label>
+                    <select 
+                      id="produto" 
+                      className="form-select" 
+                      onChange={(e) => {
+                        const produto = produtosDisponiveis.find(p => p.id === parseInt(e.target.value));
+                        setProdutoSelecionado(produto || null);
+                        if (produto) setPrecoVenda(produto.precoBase);
+                      }}
+                      value={produtoSelecionado?.id || ""}
+                    >
+                      <option value="">Selecione um produto</option>
+                      {produtosDisponiveis.map(produto => (
+                        <option key={produto.id} value={produto.id}>
+                          {produto.nome} - {produto.codigo} - NCM: {produto.ncm}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="form-group mb-3">
+                    <label htmlFor="quantidade" className="form-label">Quantidade</label>
+                    <input 
+                      type="number" 
+                      id="quantidade" 
+                      className="form-control" 
+                      value={quantidade} 
+                      onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
+                      min="1"
+                    />
+                  </div>
+                </div>
+              </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Input
-              placeholder="Buscar por número..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          
-          <div>
-            <Select value={clientFilter} onValueChange={setClientFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Clientes</SelectItem>
-                {!isLoadingClients && clients?.map((client: any) => (
-                  <SelectItem key={client.id} value={client.id.toString()}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Tipos</SelectItem>
-                <SelectItem value="NFe">NF-e</SelectItem>
-                <SelectItem value="NFSe">NFS-e</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      {/* Invoices Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        {isLoading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-          </div>
-        ) : filteredInvoices?.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Data de Emissão</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredInvoices.map((invoice: any) => {
-                // Find client name
-                const client = clients?.find((c: any) => c.id === invoice.clientId);
-                
-                return (
-                  <TableRow key={invoice.id}>
-                    <TableCell className="font-medium">{invoice.number}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {invoice.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{client?.name || "Cliente não encontrado"}</TableCell>
-                    <TableCell>{formatDate(invoice.issueDate)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(invoice.totalValue)}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={invoice.status === "active" ? "default" : "destructive"}
-                      >
-                        {invoice.status === "active" ? "Ativa" : "Cancelada"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="outline" size="sm">
-                          <span className="material-icons text-sm">visibility</span>
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <span className="material-icons text-sm">download</span>
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <span className="material-icons text-sm">more_vert</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Detalhes da Nota Fiscal</DialogTitle>
-                            </DialogHeader>
-                            <div className="py-4">
-                              <h3 className="text-lg font-medium">
-                                Nota Fiscal {invoice.number}
-                              </h3>
-                              <div className="mt-4 space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <p className="text-sm text-neutral-500">Tipo</p>
-                                    <p>{invoice.type}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-sm text-neutral-500">Status</p>
-                                    <p>{invoice.status === "active" ? "Ativa" : "Cancelada"}</p>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <p className="text-sm text-neutral-500">Cliente</p>
-                                  <p>{client?.name || "Cliente não encontrado"}</p>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <p className="text-sm text-neutral-500">Data de Emissão</p>
-                                    <p>{formatDate(invoice.issueDate)}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-sm text-neutral-500">Valor Total</p>
-                                    <p className="font-medium">{formatCurrency(invoice.totalValue)}</p>
-                                  </div>
-                                </div>
-                                
-                                {invoice.documentId && (
-                                  <div>
-                                    <p className="text-sm text-neutral-500">Documento XML</p>
-                                    <div className="mt-2">
-                                      <Button variant="outline" size="sm">
-                                        <span className="material-icons text-sm mr-1">download</span>
-                                        Download XML
-                                      </Button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex justify-between">
-                              <Button variant="outline">
-                                Duplicar Nota
-                              </Button>
-                              <Button variant="destructive">
-                                {invoice.status === "active" ? "Cancelar Nota" : "Reativar Nota"}
-                              </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+              {produtoSelecionado && (
+                <>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group mb-3">
+                        <label htmlFor="precoVenda" className="form-label">Preço de Venda (R$)</label>
+                        <input 
+                          type="number" 
+                          id="precoVenda" 
+                          className="form-control" 
+                          value={precoVenda} 
+                          onChange={(e) => setPrecoVenda(parseFloat(e.target.value) || 0)}
+                          min="0"
+                          step="0.01"
+                        />
                       </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="text-center py-10">
-            <span className="material-icons text-neutral-400 text-4xl">receipt_long</span>
-            <p className="mt-2 text-neutral-500">Nenhuma nota fiscal encontrada</p>
-            <Button 
-              variant="outline" 
-              className="mt-4"
-              onClick={() => setIsInvoiceFormOpen(true)}
-            >
-              <span className="material-icons text-sm mr-1">add</span>
-              Emitir Nova Nota
-            </Button>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group mb-3">
+                        <label htmlFor="tipoOperacao" className="form-label">Tipo de Operação</label>
+                        <select 
+                          id="tipoOperacao" 
+                          className="form-select" 
+                          value={tipoOperacao} 
+                          onChange={(e) => setTipoOperacao(e.target.value)}
+                        >
+                          <option value="venda">Venda</option>
+                          <option value="transferencia">Transferência</option>
+                          <option value="devolucao">Devolução</option>
+                          <option value="bonificacao">Bonificação</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="row">
+                    <div className="col-md-4">
+                      <div className="form-group mb-3">
+                        <label htmlFor="estadoOrigem" className="form-label">Estado de Origem</label>
+                        <select 
+                          id="estadoOrigem" 
+                          className="form-select" 
+                          value={estadoOrigem} 
+                          onChange={(e) => setEstadoOrigem(e.target.value)}
+                        >
+                          {estados.map(estado => (
+                            <option key={estado.sigla} value={estado.sigla}>
+                              {estado.sigla} - {estado.nome}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="form-group mb-3">
+                        <label htmlFor="estadoDestino" className="form-label">Estado de Destino</label>
+                        <select 
+                          id="estadoDestino" 
+                          className="form-select" 
+                          value={estadoDestino} 
+                          onChange={(e) => setEstadoDestino(e.target.value)}
+                        >
+                          {estados.map(estado => (
+                            <option key={estado.sigla} value={estado.sigla}>
+                              {estado.sigla} - {estado.nome}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="form-group mb-3">
+                        <label htmlFor="tipoContribuinte" className="form-label">Destinatário</label>
+                        <select 
+                          id="tipoContribuinte" 
+                          className="form-select" 
+                          value={tipoContribuinte} 
+                          onChange={(e) => setTipoContribuinte(e.target.value)}
+                        >
+                          <option value="contribuinte">Contribuinte ICMS</option>
+                          <option value="nao-contribuinte">Não Contribuinte</option>
+                          <option value="isento">Contribuinte Isento</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="d-grid mt-3">
+                    <button 
+                      className="btn btn-primary btn-lg" 
+                      onClick={calcularImpostos}
+                      disabled={!produtoSelecionado}
+                    >
+                      Calcular Impostos
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {resultados && (
+        <div className="row">
+          <div className="col-12">
+            <div className="card border-0 shadow-sm">
+              <div className="card-header bg-success text-white">
+                <h3 className="mb-0 fs-4">Resultado da Simulação</h3>
+              </div>
+              <div className="card-body">
+                <div className="row mb-4">
+                  <div className="col-md-4">
+                    <div className="card h-100 border-primary">
+                      <div className="card-header bg-primary text-white">Valores</div>
+                      <div className="card-body">
+                        <p><strong>Valor Unitário:</strong> {formatCurrency(resultados.valorUnitario)}</p>
+                        <p><strong>Quantidade:</strong> {quantidade}</p>
+                        <p><strong>Valor Total:</strong> {formatCurrency(resultados.valorTotal)}</p>
+                        <p><strong>Valor com Impostos:</strong> {formatCurrency(resultados.valorComImpostos)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="card h-100 border-danger">
+                      <div className="card-header bg-danger text-white">Impostos</div>
+                      <div className="card-body">
+                        <p><strong>ICMS ({resultados.impostos.icms.aliquota}%):</strong> {formatCurrency(resultados.impostos.icms.valor)}</p>
+                        <p><strong>IPI ({resultados.impostos.ipi.aliquota}%):</strong> {formatCurrency(resultados.impostos.ipi.valor)}</p>
+                        <p><strong>PIS ({resultados.impostos.pis.aliquota}%):</strong> {formatCurrency(resultados.impostos.pis.valor)}</p>
+                        <p><strong>COFINS ({resultados.impostos.cofins.aliquota}%):</strong> {formatCurrency(resultados.impostos.cofins.valor)}</p>
+                        {resultados.impostos.difal.valor > 0 && (
+                          <p><strong>DIFAL:</strong> {formatCurrency(resultados.impostos.difal.valor)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="card h-100 border-info">
+                      <div className="card-header bg-info text-white">Resumo</div>
+                      <div className="card-body">
+                        <p><strong>Total de Impostos:</strong> {formatCurrency(resultados.totalImpostos)}</p>
+                        <p><strong>Percentual sobre Valor:</strong> {resultados.percentualImpostos.toFixed(2)}%</p>
+                        <hr />
+                        <p className="alert alert-warning">
+                          <strong>Nota:</strong> Esta é apenas uma simulação. Consulte seu contador para valores exatos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-12">
+                    <div className="progress" style={{ height: '30px' }}>
+                      <div 
+                        className="progress-bar bg-danger" 
+                        role="progressbar" 
+                        style={{ width: `${resultados.percentualImpostos}%` }} 
+                        aria-valuenow={resultados.percentualImpostos} 
+                        aria-valuemin={0} 
+                        aria-valuemax={100}
+                      >
+                        {resultados.percentualImpostos.toFixed(2)}% em Impostos
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
