@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 
 type HeaderProps = {
   toggleSidebar: () => void;
+  fiscalModule?: boolean;
 };
 
-export default function Header({ toggleSidebar }: HeaderProps) {
+export default function Header({ toggleSidebar, fiscalModule = false }: HeaderProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 

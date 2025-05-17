@@ -12,6 +12,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
   const [location, navigate] = useLocation();
+  const isFiscalModule = location.startsWith('/fiscal');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -47,6 +48,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return null;
   }
 
+  // Para o módulo fiscal, usamos apenas o header, sem o sidebar principal
+  if (isFiscalModule) {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        {/* Main content */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <Header toggleSidebar={toggleSidebar} fiscalModule={true} />
+          
+          <div className="flex-1 overflow-auto bg-neutral-50">
+            {children}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Para os outros módulos, mantemos o layout original
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Mobile sidebar */}
