@@ -30,6 +30,7 @@ import ProdutosCadastro from "@/pages/fiscal/cadastros/Produtos";
 import ClientesCadastro from "@/pages/fiscal/cadastros/Clientes";
 import FornecedoresCadastro from "@/pages/fiscal/cadastros/Fornecedores";
 import TransportadorasCadastro from "@/pages/fiscal/cadastros/Transportadoras";
+import FormasPagamentoCadastro from "@/pages/fiscal/cadastros/FormasPagamento";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -211,6 +212,14 @@ function Router() {
         <Route path="/fiscal/cadastros/transportadoras">
           <MainLayout>
             <TransportadorasCadastro />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/formas-pagamento">
+          <MainLayout>
+            <FormasPagamentoCadastro />
           </MainLayout>
         </Route>
       )}
