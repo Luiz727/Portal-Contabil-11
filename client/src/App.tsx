@@ -27,6 +27,9 @@ import ConfiguracaoEmpresa from "@/pages/fiscal/ajustes/ConfiguracaoEmpresa";
 import CertificadoDigital from "@/pages/fiscal/ajustes/CertificadoDigital";
 import ConsultarDocumentos from "@/pages/fiscal/emissor/ConsultarDocumentos";
 import ProdutosCadastro from "@/pages/fiscal/cadastros/Produtos";
+import ClientesCadastro from "@/pages/fiscal/cadastros/Clientes";
+import FornecedoresCadastro from "@/pages/fiscal/cadastros/Fornecedores";
+import TransportadorasCadastro from "@/pages/fiscal/cadastros/Transportadoras";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -184,6 +187,30 @@ function Router() {
         <Route path="/fiscal/cadastros/produtos">
           <MainLayout>
             <ProdutosCadastro />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/clientes">
+          <MainLayout>
+            <ClientesCadastro />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/fornecedores">
+          <MainLayout>
+            <FornecedoresCadastro />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/transportadoras">
+          <MainLayout>
+            <TransportadorasCadastro />
           </MainLayout>
         </Route>
       )}
