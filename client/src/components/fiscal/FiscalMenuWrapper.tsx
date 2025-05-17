@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FiscalSidebar from './FiscalSidebar';
 
 type FiscalMenuProps = {
@@ -9,11 +9,22 @@ type FiscalMenuProps = {
 // Este componente serve como um wrapper para manter a compatibilidade com código existente
 // enquanto implementamos a nova navegação por sidebar
 const FiscalMenuWrapper: React.FC<FiscalMenuProps> = ({ activeSection = 'dashboard', children }) => {
+  // Define CSS variables para o tamanho do sidebar
+  useEffect(() => {
+    const isSidebarCollapsed = localStorage.getItem('fiscalMenuCollapsed');
+    const sidebarWidth = isSidebarCollapsed === 'true' ? '64px' : '250px';
+    document.documentElement.style.setProperty('--sidebar-width', sidebarWidth);
+    
+    return () => {
+      document.documentElement.style.removeProperty('--sidebar-width');
+    };
+  }, []);
+
   return (
     <div className="flex">
       <FiscalSidebar activeSection={activeSection} />
-      <div className={`flex-1 ml-[64px] transition-all`} style={{ marginLeft: 'var(--sidebar-width, 64px)' }}>
-        <div className="container mx-auto py-6">
+      <div className="flex-1 pt-[64px] transition-all" style={{ marginLeft: 'var(--sidebar-width, 250px)' }}>
+        <div className="container mx-auto py-6 px-4">
           {children}
         </div>
       </div>
