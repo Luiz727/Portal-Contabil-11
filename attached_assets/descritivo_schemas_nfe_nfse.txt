@@ -1,0 +1,154 @@
+===== SCHEMA_NFSE_V2.04 (1) =====
+
+--- Arquivo: schema nfse v2-04.xsd ---
+Elemento: ListaMensagemRetornoLote | Tipo: complexType
+Elemento: ListaMensagemRetorno | Tipo: complexType
+Elemento: ListaMensagemAlertaRetorno | Tipo: complexType
+Elemento: cabecalho | Tipo: complexType
+Elemento: CompNfse | Tipo: tcCompNfse
+Elemento: EnviarLoteRpsEnvio | Tipo: complexType
+Elemento: EnviarLoteRpsResposta | Tipo: complexType
+Elemento: EnviarLoteRpsSincronoEnvio | Tipo: complexType
+Elemento: EnviarLoteRpsSincronoResposta | Tipo: complexType
+Elemento: GerarNfseEnvio | Tipo: complexType
+Elemento: GerarNfseResposta | Tipo: complexType
+Elemento: CancelarNfseEnvio | Tipo: complexType
+Elemento: CancelarNfseResposta | Tipo: complexType
+Elemento: SubstituirNfseEnvio | Tipo: complexType
+Elemento: SubstituirNfseResposta | Tipo: complexType
+Elemento: ConsultarLoteRpsEnvio | Tipo: complexType
+Elemento: ConsultarLoteRpsResposta | Tipo: complexType
+Elemento: ConsultarNfseRpsEnvio | Tipo: complexType
+Elemento: ConsultarNfseRpsResposta | Tipo: complexType
+Elemento: ConsultarNfseServicoPrestadoEnvio | Tipo: complexType
+Elemento: ConsultarNfseServicoPrestadoResposta | Tipo: complexType
+Elemento: ConsultarNfseServicoTomadoEnvio | Tipo: complexType
+Elemento: ConsultarNfseServicoTomadoResposta | Tipo: complexType
+Elemento: ConsultarNfseFaixaEnvio | Tipo: complexType
+Elemento: ConsultarNfseFaixaResposta | Tipo: complexType
+ComplexType: tcCpfCnpj
+ComplexType: tcEndereco
+ComplexType: tcEnderecoExterior
+ComplexType: tcContato
+ComplexType: tcIdentificacaoOrgaoGerador
+ComplexType: tcIdentificacaoRps
+ComplexType: tcIdentificacaoPessoaEmpresa
+ComplexType: tcDadosTomador
+ComplexType: tcDadosIntermediario
+ComplexType: tcValoresDeclaracaoServico
+ComplexType: tcValoresNfse
+ComplexType: tcDadosServico
+ComplexType: tcDadosConstrucaoCivil
+ComplexType: tcEvento
+ComplexType: tcDadosPrestador
+ComplexType: tcIdentificacaoNfseDeducao
+ComplexType: tcIdentificacaoNfeDeducao
+ComplexType: tcOutroDocumentoDeducao
+ComplexType: tcIdentificacaoDocumentoDeducao
+ComplexType: tcIdentificacaoFornecedor
+ComplexType: tcFornecedorExterior
+ComplexType: tcDadosFornecedor
+ComplexType: tcDadosDeducao
+ComplexType: tcInfRps
+ComplexType: tcInfDeclaracaoPrestacaoServico
+ComplexType: tcDeclaracaoPrestacaoServico
+ComplexType: tcIdentificacaoNfse
+ComplexType: tcInfNfse
+ComplexType: tcNfse
+ComplexType: tcInfPedidoCancelamento
+ComplexType: tcPedidoCancelamento
+ComplexType: tcConfirmacaoCancelamento
+ComplexType: tcCancelamentoNfse
+ComplexType: tcRetCancelamento
+ComplexType: tcInfSubstituicaoNfse
+ComplexType: tcSubstituicaoNfse
+ComplexType: tcCompNfse
+ComplexType: tcMensagemRetorno
+ComplexType: tcMensagemRetornoLote
+ComplexType: tcLoteRps
+===== PL_009N_NT2023_004_V101_E_NT2019_001_V162 =====
+
+--- Arquivo: consReciNFe_v4.00.xsd ---
+Elemento: consReciNFe | Tipo: TConsReciNFe
+
+--- Arquivo: consSitNFe_v4.00.xsd ---
+Elemento: consSitNFe | Tipo: TConsSitNFe
+
+--- Arquivo: consStatServ_v4.00.xsd ---
+Elemento: consStatServ | Tipo: TConsStatServ
+
+--- Arquivo: enviNFe_v4.00.xsd ---
+Elemento: enviNFe | Tipo: TEnviNFe
+
+--- Arquivo: inutNFe_v4.00.xsd ---
+Elemento: inutNFe | Tipo: TInutNFe
+
+--- Arquivo: leiauteConsSitNFe_v4.00.xsd ---
+ComplexType: TConsSitNFe
+ComplexType: TRetConsSitNFe
+ComplexType: TProtNFe
+ComplexType: TRetCancNFe
+ComplexType: TEvento
+ComplexType: TRetEvento
+ComplexType: TProcEvento
+
+--- Arquivo: leiauteConsStatServ_v4.00.xsd ---
+ComplexType: TConsStatServ
+ComplexType: TRetConsStatServ
+
+--- Arquivo: leiauteInutNFe_v4.00.xsd ---
+ComplexType: TInutNFe
+ComplexType: TRetInutNFe
+ComplexType: TProcInutNFe
+
+--- Arquivo: leiauteNFe_v4.00.xsd ---
+ComplexType: TNFe
+ComplexType: TProtNFe
+ComplexType: TEnviNFe
+ComplexType: TRetEnviNFe
+ComplexType: TConsReciNFe
+ComplexType: TRetConsReciNFe
+ComplexType: TNfeProc
+ComplexType: TEndereco
+ComplexType: TEnderEmi
+ComplexType: TLocal
+ComplexType: TInfRespTec
+ComplexType: TVeiculo
+ComplexType: TIpi
+
+--- Arquivo: nfe_v4.00.xsd ---
+Elemento: NFe | Tipo: TNFe
+
+--- Arquivo: procInutNFe_v4.00.xsd ---
+Elemento: ProcInutNFe | Tipo: TProcInutNFe
+
+--- Arquivo: procNFe_v4.00.xsd ---
+Elemento: nfeProc | Tipo: TNfeProc
+
+--- Arquivo: retConsReciNFe_v4.00.xsd ---
+Elemento: retConsReciNFe | Tipo: TRetConsReciNFe
+
+--- Arquivo: retConsSitNFe_v4.00.xsd ---
+Elemento: retConsSitNFe | Tipo: TRetConsSitNFe
+
+--- Arquivo: retConsStatServ_v4.00.xsd ---
+Elemento: retConsStatServ | Tipo: TRetConsStatServ
+
+--- Arquivo: retEnviNFe_v4.00.xsd ---
+Elemento: retEnviNFe | Tipo: TRetEnviNFe
+
+--- Arquivo: retInutNFe_v4.00.xsd ---
+Elemento: retInutNFe | Tipo: TRetInutNFe
+
+--- Arquivo: tiposBasico_v4.00.xsd ---
+
+--- Arquivo: xmldsig-core-schema_v1.01.xsd ---
+Elemento: Signature | Tipo: ds:SignatureType
+ComplexType: SignatureType
+ComplexType: SignatureValueType
+ComplexType: SignedInfoType
+ComplexType: ReferenceType
+ComplexType: TransformsType
+ComplexType: TransformType
+ComplexType: KeyInfoType
+ComplexType: X509DataType

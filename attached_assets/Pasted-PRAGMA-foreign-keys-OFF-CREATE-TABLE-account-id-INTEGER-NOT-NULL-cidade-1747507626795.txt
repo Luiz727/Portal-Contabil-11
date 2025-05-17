@@ -1,0 +1,889 @@
+PRAGMA foreign_keys=OFF; 
+
+CREATE TABLE account( 
+      id  INTEGER    NOT NULL  , 
+      cidade_id int   , 
+      system_user_id int   , 
+      nome_responsavel text   NOT NULL  , 
+      razao_social text   NOT NULL  , 
+      tipo_pessoa char  (1)     DEFAULT 'J', 
+      documento text   , 
+      email text   , 
+      telefone text   , 
+      cep text   , 
+      rua text   , 
+      numero text   , 
+      complemento text   , 
+      bairro text   , 
+      mes_criacao int   , 
+      ano_criacao int   , 
+      created_at datetime   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(cidade_id) REFERENCES cidade(id),
+FOREIGN KEY(system_user_id) REFERENCES system_users(id)) ; 
+
+CREATE TABLE cep_cache( 
+      id  INTEGER    NOT NULL  , 
+      cep varchar  (12)   NOT NULL  , 
+      codigo_ibge text   , 
+      rua text   , 
+      cidade text   , 
+      uf text   , 
+      cidade_id int   , 
+      bairro text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE cidade( 
+      id  INTEGER    NOT NULL  , 
+      estado_id int   NOT NULL  , 
+      nome text   NOT NULL  , 
+      codigo_ibge text   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(estado_id) REFERENCES estado(id)) ; 
+
+CREATE TABLE estado( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      sigla char  (2)   NOT NULL  , 
+      codigo_ibge text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE nota_fiscal_status( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      cor text   NOT NULL  , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_configuracao( 
+      id  INTEGER    NOT NULL  , 
+      cidade_id int   , 
+      saas_plano_valor_trial_id int   , 
+      contrato_inativo_system_group_id int   , 
+      parametro_fiscal_id int   , 
+      razao_social text   , 
+      nome_fantasia text   , 
+      cnpj text   , 
+      inscricao_estadual text   , 
+      inscricao_municipal text   , 
+      cep text   , 
+      rua text   , 
+      bairro text   , 
+      numero text   , 
+      complemento text   , 
+      email text   NOT NULL  , 
+      telefone text   NOT NULL  , 
+      dias_trial int   , 
+      contrato text   , 
+      regime_tributacao text   , 
+      token_integra_notas text   , 
+      token_integra_notas_homologacao text   , 
+      token_integra_notas_software_house text   , 
+      nfse_emissao_producao char  (1)   NOT NULL    DEFAULT 'F', 
+      nfse_numero text   , 
+      nfse_serie text   , 
+      nfse_info text   , 
+      termo_uso text   , 
+      email_port text   , 
+      email_username text   , 
+      email_password text   , 
+      email_host text   , 
+      email_from text   , 
+      email_from_name text   , 
+      email_smtp_auth char  (1)     DEFAULT 'F', 
+      dias_renovacao_contrato int   , 
+      dias_vencimento_pagamento int   , 
+      url_sistema text   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(cidade_id) REFERENCES cidade(id),
+FOREIGN KEY(saas_plano_valor_trial_id) REFERENCES saas_plano_valor(id),
+FOREIGN KEY(contrato_inativo_system_group_id) REFERENCES system_group(id)) ; 
+
+CREATE TABLE saas_contrato( 
+      id  INTEGER    NOT NULL  , 
+      saas_plano_valor_id int   NOT NULL  , 
+      account_id int   NOT NULL  , 
+      saas_contrato_status_id int   NOT NULL  , 
+      valor_total double   , 
+      data_inicial date   NOT NULL  , 
+      data_final date   , 
+      criado_em datetime   , 
+      renovacao char  (1)     DEFAULT 'F', 
+      total_usuarios int   , 
+      total_unidades int   , 
+      gateway_assinatura_id text   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(account_id) REFERENCES account(id),
+FOREIGN KEY(saas_contrato_status_id) REFERENCES saas_contrato_status(id),
+FOREIGN KEY(saas_plano_valor_id) REFERENCES saas_plano_valor(id)) ; 
+
+CREATE TABLE saas_contrato_grupo( 
+      id  INTEGER    NOT NULL  , 
+      saas_contrato_id int   NOT NULL  , 
+      system_group_id int   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_group_id) REFERENCES system_group(id),
+FOREIGN KEY(saas_contrato_id) REFERENCES saas_contrato(id)) ; 
+
+CREATE TABLE saas_contrato_status( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      cor text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_email_log( 
+      id  INTEGER    NOT NULL  , 
+      titulo text   , 
+      conteudo text   , 
+      destinatario text   , 
+      created_at datetime   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_error_log( 
+      id  INTEGER    NOT NULL  , 
+      system_unit_id int   , 
+      system_user_id int   , 
+      error_class varchar  (255)   , 
+      error_method varchar  (255)   , 
+      message text   , 
+      payload text   , 
+      created_at datetime   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_unit_id) REFERENCES system_unit(id),
+FOREIGN KEY(system_user_id) REFERENCES system_users(id)) ; 
+
+CREATE TABLE saas_forma_pagamento( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_gateway_forma_pagamento( 
+      id  INTEGER    NOT NULL  , 
+      saas_forma_pagamento_id int   NOT NULL  , 
+      saas_gateway_pagamento_id int   NOT NULL  , 
+      codigo text   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_forma_pagamento_id) REFERENCES saas_forma_pagamento(id),
+FOREIGN KEY(saas_gateway_pagamento_id) REFERENCES saas_gateway_pagamento(id)) ; 
+
+CREATE TABLE saas_gateway_pagamento( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      ativo char  (1)   NOT NULL    DEFAULT 'T', 
+      public_key text   , 
+      access_token text   , 
+      client_secret text   , 
+      client_id text   , 
+      oauth_token text   , 
+      oauth_token_created_at datetime   , 
+      certificado_crt text   , 
+      certificado_key text   , 
+      webhook_url text   , 
+      webhook_certificado_cert text   , 
+      fl_homologacao char  (1)     DEFAULT 'T', 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_gateway_pagamento_status( 
+      id  INTEGER    NOT NULL  , 
+      saas_gateway_pagamento_id int   NOT NULL  , 
+      saas_status_pagamento_id int   NOT NULL  , 
+      codigo text   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_gateway_pagamento_id) REFERENCES saas_gateway_pagamento(id),
+FOREIGN KEY(saas_status_pagamento_id) REFERENCES saas_status_pagamento(id)) ; 
+
+CREATE TABLE saas_imposto( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      codigo text   NOT NULL  , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_nota_fiscal_servico( 
+      id  INTEGER    NOT NULL  , 
+      saas_pagamento_id int   , 
+      saas_plano_valor_id int   , 
+      saas_servico_id int   , 
+      cidade_tomador_id int   NOT NULL  , 
+      cidade_prestador_id int   NOT NULL  , 
+      municipio_prestacao_servico_id int   NOT NULL  , 
+      nota_fiscal_status_id int   NOT NULL  , 
+      account_id int   NOT NULL  , 
+      natureza_operacao text   , 
+      data_hora_emissao datetime   NOT NULL  , 
+      discriminacao text   NOT NULL  , 
+      numero text   , 
+      codigo_verificacao text   , 
+      id_gateway_externo text   , 
+      dados_gateway_externo text   , 
+      nome_tomador text   NOT NULL  , 
+      documento_tomador text   NOT NULL  , 
+      endereco_tomador text   NOT NULL  , 
+      email_tomador text   NOT NULL  , 
+      telefone_tomador text   , 
+      numero_tomador text   NOT NULL  , 
+      bairro_tomador text   NOT NULL  , 
+      cep_tomador text   NOT NULL  , 
+      inscricao_municipal_tomador text   , 
+      inscricao_municipal_prestador text   , 
+      nome_prestador text   NOT NULL  , 
+      documento_prestador text   NOT NULL  , 
+      endereco_prestador text   NOT NULL  , 
+      email_prestador text   NOT NULL  , 
+      telefone_prestador text   , 
+      numero_prestador text   NOT NULL  , 
+      bairro_prestador text   NOT NULL  , 
+      cep_prestador text   NOT NULL  , 
+      iss_retido char  (1)     DEFAULT 'F', 
+      desconto_incondicionado double     DEFAULT 0.00, 
+      desconto_condicionado double     DEFAULT 0.00, 
+      base_calculo_iss double   , 
+      aliquota_iss double   , 
+      aliquota_pis double   , 
+      aliquota_cofins double   , 
+      aliquota_csll double   , 
+      aliquota_irrf double   , 
+      aliquota_inss double   , 
+      valor_deducoes double   , 
+      valor_retencoes double   , 
+      valor_outras_retencoes double   , 
+      valor_liquido double   , 
+      valor_servicos double   , 
+      valor_iss double   , 
+      valor_pis double     DEFAULT 0.00, 
+      valor_inss double     DEFAULT 0.00, 
+      valor_cofins double     DEFAULT 0.00, 
+      valor_csll double   , 
+      valor_irrf double     DEFAULT 0.00, 
+      incentivador_cultural char  (1)     DEFAULT 'F', 
+      optante_simples_nacional char  (1)     DEFAULT 'F', 
+      nfse_status text   , 
+      ano text   , 
+      mes text   , 
+      ano_mes text   , 
+      pdf text   , 
+      xml text   , 
+      link_pdf_prefeitura text   , 
+      regime_tributario_municipal text   , 
+      numero_rps text   , 
+      mensagem_erro text   , 
+      email_enviado char  (1)     DEFAULT 'F', 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_pagamento_id) REFERENCES saas_pagamento(id),
+FOREIGN KEY(cidade_prestador_id) REFERENCES cidade(id),
+FOREIGN KEY(municipio_prestacao_servico_id) REFERENCES cidade(id),
+FOREIGN KEY(nota_fiscal_status_id) REFERENCES nota_fiscal_status(id),
+FOREIGN KEY(saas_plano_valor_id) REFERENCES saas_plano_valor(id),
+FOREIGN KEY(saas_servico_id) REFERENCES saas_servico(id),
+FOREIGN KEY(cidade_tomador_id) REFERENCES cidade(id),
+FOREIGN KEY(account_id) REFERENCES account(id)) ; 
+
+CREATE TABLE saas_pagamento( 
+      id  INTEGER    NOT NULL  , 
+      account_id int   NOT NULL  , 
+      saas_status_pagamento_id int   NOT NULL  , 
+      saas_contrato_id int   , 
+      saas_servico_id int   , 
+      saas_forma_pagamento_id int   NOT NULL  , 
+      saas_gateway_pagamento_id int   NOT NULL  , 
+      saas_nota_fiscal_servico_id int   , 
+      valor double   NOT NULL  , 
+      data_compra datetime   NOT NULL  , 
+      data_vencimento date   , 
+      data_pagamento date   , 
+      dados_gateway text   , 
+      id_gateway text   , 
+      payment_id text   , 
+      link_gateway text   , 
+      mes_compra int   , 
+      ano_compra int   , 
+      ano_pagamento int   , 
+      mes_pagamento int   , 
+      mes_ano_pagamento text   , 
+      mes_ano_compra text   , 
+      renovacao char  (1)     DEFAULT 'F', 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_status_pagamento_id) REFERENCES saas_status_pagamento(id),
+FOREIGN KEY(saas_contrato_id) REFERENCES saas_contrato(id),
+FOREIGN KEY(saas_forma_pagamento_id) REFERENCES saas_forma_pagamento(id),
+FOREIGN KEY(saas_gateway_pagamento_id) REFERENCES saas_gateway_pagamento(id),
+FOREIGN KEY(saas_servico_id) REFERENCES saas_servico(id),
+FOREIGN KEY(account_id) REFERENCES account(id),
+FOREIGN KEY(saas_nota_fiscal_servico_id) REFERENCES saas_nota_fiscal_servico(id)) ; 
+
+CREATE TABLE saas_plano( 
+      id  INTEGER    NOT NULL  , 
+      saas_servico_id int   , 
+      nome text   NOT NULL  , 
+      descricao text   NOT NULL  , 
+      ativo char  (1)   NOT NULL    DEFAULT 'T', 
+      limite_usuarios int   , 
+      limite_unidades int   , 
+      discriminacao text   , 
+      ordem int   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_servico_id) REFERENCES saas_servico(id)) ; 
+
+CREATE TABLE saas_plano_grupo( 
+      id  INTEGER    NOT NULL  , 
+      saas_plano_id int   NOT NULL  , 
+      system_group_id int   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_group_id) REFERENCES system_group(id),
+FOREIGN KEY(saas_plano_id) REFERENCES saas_plano(id)) ; 
+
+CREATE TABLE saas_plano_valor( 
+      id  INTEGER    NOT NULL  , 
+      saas_plano_id int   NOT NULL  , 
+      valor double   NOT NULL  , 
+      nome text   NOT NULL  , 
+      duracao int   , 
+      ativo char  (1)     DEFAULT 'T', 
+      desativado_em datetime   , 
+      recorrencia char  (1)     DEFAULT 'F', 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_plano_id) REFERENCES saas_plano(id)) ; 
+
+CREATE TABLE saas_servico( 
+      id  INTEGER    NOT NULL  , 
+      servico_grupo_imposto_id int   , 
+      nome text   NOT NULL  , 
+      preco double   , 
+      descricao text   NOT NULL  , 
+      ativo char  (1)   NOT NULL    DEFAULT 'T', 
+ PRIMARY KEY (id),
+FOREIGN KEY(servico_grupo_imposto_id) REFERENCES saas_servico_grupo_imposto(id)) ; 
+
+CREATE TABLE saas_servico_grupo_imposto( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      codigo_cnae text   , 
+      codigo_tributacao_municipio text   , 
+      codigo_nbs text   , 
+      codigo text   , 
+      descricao_servico_municipio text   , 
+      iss_retido text   , 
+      natureza_operacao text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_servico_grupo_imposto_item( 
+      id  INTEGER    NOT NULL  , 
+      saas_servico_grupo_imposto_id int   NOT NULL  , 
+      saas_imposto_id int   NOT NULL  , 
+      aliquota double   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(saas_servico_grupo_imposto_id) REFERENCES saas_servico_grupo_imposto(id),
+FOREIGN KEY(saas_imposto_id) REFERENCES saas_imposto(id)) ; 
+
+CREATE TABLE saas_status_pagamento( 
+      id  INTEGER    NOT NULL  , 
+      nome text   NOT NULL  , 
+      cor text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE saas_template_email( 
+      id  INTEGER    NOT NULL  , 
+      descricao text   , 
+      titulo text   , 
+      conteudo text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE system_group( 
+      id int   NOT NULL  , 
+      name text   NOT NULL  , 
+      uuid varchar  (36)   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE system_group_program( 
+      id int   NOT NULL  , 
+      system_group_id int   NOT NULL  , 
+      system_program_id int   NOT NULL  , 
+      actions text   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_program_id) REFERENCES system_program(id),
+FOREIGN KEY(system_group_id) REFERENCES system_group(id)) ; 
+
+CREATE TABLE system_preference( 
+      id varchar  (255)   NOT NULL  , 
+      preference text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE system_program( 
+      id int   NOT NULL  , 
+      name text   NOT NULL  , 
+      controller text   NOT NULL  , 
+      actions text   , 
+ PRIMARY KEY (id)) ; 
+
+CREATE TABLE system_unit( 
+      id int   NOT NULL  , 
+      name text   NOT NULL  , 
+      account_id int   , 
+      connection_name text   , 
+      active char  (1)     DEFAULT 'T', 
+ PRIMARY KEY (id),
+FOREIGN KEY(account_id) REFERENCES account(id)) ; 
+
+CREATE TABLE system_user_group( 
+      id int   NOT NULL  , 
+      system_user_id int   NOT NULL  , 
+      system_group_id int   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_group_id) REFERENCES system_group(id),
+FOREIGN KEY(system_user_id) REFERENCES system_users(id)) ; 
+
+CREATE TABLE system_user_program( 
+      id int   NOT NULL  , 
+      system_user_id int   NOT NULL  , 
+      system_program_id int   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_program_id) REFERENCES system_program(id),
+FOREIGN KEY(system_user_id) REFERENCES system_users(id)) ; 
+
+CREATE TABLE system_users( 
+      id int   NOT NULL  , 
+      name text   NOT NULL  , 
+      login text   NOT NULL  , 
+      password text   NOT NULL  , 
+      email text   , 
+      frontpage_id int   , 
+      system_unit_id int   , 
+      active char  (1)   , 
+      account_id int   , 
+      accepted_term_policy_at text   , 
+      accepted_term_policy char  (1)   , 
+      two_factor_enabled char  (1)     DEFAULT 'N', 
+      two_factor_type varchar  (100)   , 
+      two_factor_secret varchar  (255)   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_unit_id) REFERENCES system_unit(id),
+FOREIGN KEY(frontpage_id) REFERENCES system_program(id),
+FOREIGN KEY(account_id) REFERENCES account(id)) ; 
+
+CREATE TABLE system_user_unit( 
+      id int   NOT NULL  , 
+      system_user_id int   NOT NULL  , 
+      system_unit_id int   NOT NULL  , 
+ PRIMARY KEY (id),
+FOREIGN KEY(system_user_id) REFERENCES system_users(id),
+FOREIGN KEY(system_unit_id) REFERENCES system_unit(id)) ; 
+
+CREATE TABLE webhook_log( 
+      id  INTEGER    NOT NULL  , 
+      gateway_pagamento_id int   , 
+      payload text   , 
+      created_at datetime   , 
+ PRIMARY KEY (id),
+FOREIGN KEY(gateway_pagamento_id) REFERENCES saas_gateway_pagamento(id)) ; 
+
+ 
+ CREATE UNIQUE INDEX unique_idx_cep_cache_cep ON cep_cache(cep);
+ INSERT INTO account (id,cidade_id,system_user_id,nome_responsavel,razao_social,tipo_pessoa,documento,email,telefone,cep,rua,numero,complemento,bairro,mes_criacao,ano_criacao,created_at) VALUES (1,1,1,'Administrador','Administrador','F','','admin@admin.com','','','','','','',null,null,null); 
+
+INSERT INTO account (id,cidade_id,system_user_id,nome_responsavel,razao_social,tipo_pessoa,documento,email,telefone,cep,rua,numero,complemento,bairro,mes_criacao,ano_criacao,created_at) VALUES (2,1,null,'Juca Bala','Juca Bala','','','','','','','','','',null,null,null); 
+
+INSERT INTO cidade (id,estado_id,nome,codigo_ibge) VALUES (1,21,'Lajeado','4311403'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (1,'Acre','AC','12'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (2,'Alagoas','AL','27'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (3,'Amapá','AP','16'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (4,'Amazonas','AM','13'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (5,'Bahia','BA','29'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (6,'Ceará','CE','23'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (7,'Distrito Federal','DF','53'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (8,'Espírito Santo','ES','32'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (9,'Goiás','GO','52'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (10,'Maranhão','MA','21'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (11,'Mato Grosso','MT','51'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (12,'Mato Grosso do Sul','MS','50'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (13,'Minas Gerais','MG','31'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (14,'Pará','PA','15'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (15,'Paraíba','PB','25'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (16,'Paraná','PR','41'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (17,'Pernambuco','PE','26'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (18,'Piauí','PI','22'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (19,'Rio de Janeiro','RJ','33'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (20,'Rio Grande do Norte','RN','24'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (21,'Rio Grande do Sul','RS','43'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (22,'Rondônia','RO','11'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (23,'Roraima','RR','14'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (24,'Santa Catarina','SC','42'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (25,'São Paulo','SP','35'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (26,'Sergipe','SE','28'); 
+
+INSERT INTO estado (id,nome,sigla,codigo_ibge) VALUES (27,'Tocantins','TO','17'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (1,'Pendente','#95a5a6'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (2,'Enviada','#3498db'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (3,'Autorizada','#2ecc71'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (4,'Cancelada','#2c3e50'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (5,'Rejeitada','#e74c3c'); 
+
+INSERT INTO nota_fiscal_status (id,nome,cor) VALUES (6,'Em processamento','#9b59b6'); 
+
+INSERT INTO saas_configuracao (id,cidade_id,saas_plano_valor_trial_id,contrato_inativo_system_group_id,parametro_fiscal_id,razao_social,nome_fantasia,cnpj,inscricao_estadual,inscricao_municipal,cep,rua,bairro,numero,complemento,email,telefone,dias_trial,contrato,regime_tributacao,token_integra_notas,token_integra_notas_homologacao,token_integra_notas_software_house,nfse_emissao_producao,nfse_numero,nfse_serie,nfse_info,termo_uso,email_port,email_username,email_password,email_host,email_from,email_from_name,email_smtp_auth,dias_renovacao_contrato,dias_vencimento_pagamento,url_sistema) VALUES (1,1,6,null,null,'MadSaaS','Builder Saas','','','','','','','','','builder@madbuilder.com.br','55999999999',5,'','1','','','','F','','','','','','','','','','','T',10,1,''); 
+
+INSERT INTO saas_contrato (id,saas_plano_valor_id,account_id,saas_contrato_status_id,valor_total,data_inicial,data_final,criado_em,renovacao,total_usuarios,total_unidades,gateway_assinatura_id) VALUES (1,2,1,2,1000,'2024-04-01','2024-07-15',null,'F',null,null,null); 
+
+INSERT INTO saas_contrato_status (id,nome,cor) VALUES (1,'Aguardando pagamento','#3498db'); 
+
+INSERT INTO saas_contrato_status (id,nome,cor) VALUES (2,'Ativo','#2ecc71'); 
+
+INSERT INTO saas_contrato_status (id,nome,cor) VALUES (3,'Pagamento atrazado','#e67e22'); 
+
+INSERT INTO saas_contrato_status (id,nome,cor) VALUES (4,'Inativo','#e74c3c'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (1,'Dinheiro'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (2,'Boleto & Pix'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (3,'Cartão de Crédito'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (4,'Cartão de Débito'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (5,'Transferência'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (6,'Moeda digital'); 
+
+INSERT INTO saas_forma_pagamento (id,nome) VALUES (7,'Cartão Pré-Pago'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (1,1,2,'account_money'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (2,2,2,'ticket'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (4,3,2,'credit_card'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (5,4,2,'debit_card'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (6,5,2,'bank_transfer'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (7,6,2,'digital_currency'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (8,7,2,'prepaid_card'); 
+
+INSERT INTO saas_gateway_forma_pagamento (id,saas_forma_pagamento_id,saas_gateway_pagamento_id,codigo) VALUES (9,2,1,'boleto_pix'); 
+
+INSERT INTO saas_gateway_pagamento (id,nome,ativo,public_key,access_token,client_secret,client_id,oauth_token,oauth_token_created_at,certificado_crt,certificado_key,webhook_url,webhook_certificado_cert,fl_homologacao) VALUES (1,'Banco Inter Boleto e Pix','T','','','','','',null,'','','','','T'); 
+
+INSERT INTO saas_gateway_pagamento (id,nome,ativo,public_key,access_token,client_secret,client_id,oauth_token,oauth_token_created_at,certificado_crt,certificado_key,webhook_url,webhook_certificado_cert,fl_homologacao) VALUES (2,'Mercado Pago','T','','','','','',null,'','','','','T'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (1,2,1,'pending'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (2,2,2,'approved'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (3,2,1,'inprocess'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (4,2,1,'inmediation'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (5,2,3,'rejected'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (6,2,3,'cancelled'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (7,2,4,'refunded'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (8,1,2,'RECEBIDO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (9,1,1,'EMPROCESSAMENTO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (10,1,6,'VENCIDO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (11,1,2,'PAGO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (12,1,6,'EXPIRADO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (13,1,3,'CANCELADO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (14,1,1,'A_RECEBER'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (15,1,2,'MARCADO_RECEBIDO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (16,1,6,'ATRASADO'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (17,2,2,'authorized'); 
+
+INSERT INTO saas_gateway_pagamento_status (id,saas_gateway_pagamento_id,saas_status_pagamento_id,codigo) VALUES (18,2,3,'paused'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (1,'ISS (Valor devido)','iss'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (2,'PIS (Retenção)','pis'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (3,'COFINS (Retenção)','cofins'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (4,'INSS (Retenção)','inss'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (5,'IR (Retenção)','ir'); 
+
+INSERT INTO saas_imposto (id,nome,codigo) VALUES (6,'CSLL (Retenção)','csll'); 
+
+INSERT INTO saas_pagamento (id,account_id,saas_status_pagamento_id,saas_contrato_id,saas_servico_id,saas_forma_pagamento_id,saas_gateway_pagamento_id,saas_nota_fiscal_servico_id,valor,data_compra,data_vencimento,data_pagamento,dados_gateway,id_gateway,payment_id,link_gateway,mes_compra,ano_compra,ano_pagamento,mes_pagamento,mes_ano_pagamento,mes_ano_compra,renovacao) VALUES (1,1,2,1,1,1,2,null,1000,'2024-04-01','2024-04-10','2024-04-01','','',null,'',4,2024,2024,4,'04/2024','04/2024','F'); 
+
+INSERT INTO saas_plano (id,saas_servico_id,nome,descricao,ativo,limite_usuarios,limite_unidades,discriminacao,ordem) VALUES (1,1,'Standard','Plano standard','T',5,2,'Plano standard',3); 
+
+INSERT INTO saas_plano (id,saas_servico_id,nome,descricao,ativo,limite_usuarios,limite_unidades,discriminacao,ordem) VALUES (2,1,'Enterprise','Plano enterprise','T',15,5,'Plano enterprise',2); 
+
+INSERT INTO saas_plano (id,saas_servico_id,nome,descricao,ativo,limite_usuarios,limite_unidades,discriminacao,ordem) VALUES (3,1,'Premium','Plano premium','T',100,10,'Plano premium',1); 
+
+INSERT INTO saas_plano (id,saas_servico_id,nome,descricao,ativo,limite_usuarios,limite_unidades,discriminacao,ordem) VALUES (4,1,'Trial','Trial teste','T',1,1,'Trial teste',4); 
+
+INSERT INTO saas_plano_grupo (id,saas_plano_id,system_group_id) VALUES (1,1,2); 
+
+INSERT INTO saas_plano_grupo (id,saas_plano_id,system_group_id) VALUES (2,2,2); 
+
+INSERT INTO saas_plano_grupo (id,saas_plano_id,system_group_id) VALUES (3,3,2); 
+
+INSERT INTO saas_plano_grupo (id,saas_plano_id,system_group_id) VALUES (4,4,2); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (1,1,100,'Mensal',1,null,null,null); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (2,1,1000,'Anual',12,null,null,null); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (3,2,200,'Mensal',1,null,null,null); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (4,2,2000,'Anual',12,null,null,null); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (5,3,1500,'Anual',12,null,null,null); 
+
+INSERT INTO saas_plano_valor (id,saas_plano_id,valor,nome,duracao,ativo,desativado_em,recorrencia) VALUES (6,4,0,'Mensal',0,null,null,null); 
+
+INSERT INTO saas_servico (id,servico_grupo_imposto_id,nome,preco,descricao,ativo) VALUES (1,1,'Licença Software',100,'Licença de Software','T'); 
+
+INSERT INTO saas_servico_grupo_imposto (id,nome,codigo_cnae,codigo_tributacao_municipio,codigo_nbs,codigo,descricao_servico_municipio,iss_retido,natureza_operacao) VALUES (1,'Licença Software','','1.03','','1.03','Serviços de processamento de documentos fiscais eletrônicos','',''); 
+
+INSERT INTO saas_servico_grupo_imposto_item (id,saas_servico_grupo_imposto_id,saas_imposto_id,aliquota) VALUES (1,1,1,3); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (1,'Aguardando Pagamento','#34495e'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (2,'Pago','#27ae60'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (3,'Cancelado','#e74c3c'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (4,'Retornado','#f39c12'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (5,'Iniciado','#34495e'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (6,'Rejeitado','#f39c12'); 
+
+INSERT INTO saas_status_pagamento (id,nome,cor) VALUES (7,'Em análise','#34495e'); 
+
+INSERT INTO saas_template_email (id,descricao,titulo,conteudo) VALUES (1,'Bem vindo','Bem-vindo ao Builder SaaS','<div style=background: #f4f4f4;font-family: Arial, Helvetica, sans-serif;color:#5a6571cf;font-size: 15px;line-height: 25px; padding-top: 40px; padding-bottom: 40px;>    <div style=max-width: 650px;margin: auto;>       <div style=text-align: center; margin-bottom: 28px;>             <img alt=logo src=https://manager.madbuilder.com.br/app/images/logo-horizontal.png style=max-width: 300px;>         </div>       <div style=overflow: hidden;padding: 37px;background: #fff;border: 1px solid #eee;>          <div>             <div style=color: #5a6571;padding: 0px;font-weight: 400;font-size: 33px;line-height: 36px; text-align: center;>                     {$titulo}                 </div>          </div>          <div style=text-align: justify; margin-top: 60px;>             <p>Olá {$nome}!</p>             <p> Estamos felizes em tê-lo conosco. Comece a explorar nossa plataforma e descubra como podemos ajudar você a construir e gerenciar seus projetos com facilidade. </p>             <br><br>                                                 <p>Atenciosamente,<br>Equipe Builder SaaS.</p>          </div>       </div>    </div> </div>'); 
+
+INSERT INTO saas_template_email (id,descricao,titulo,conteudo) VALUES (2,'Criação de nota fiscal','Sua nota Fiscal Chegou','<div style=background: #f4f4f4;font-family: Arial, Helvetica, sans-serif;color:#5a6571cf;font-size: 15px;line-height: 25px; padding-top: 40px; padding-bottom: 40px;>    <div style=max-width: 650px;margin: auto;>       <div style=text-align: center; margin-bottom: 28px;>             <img alt=logo src=https://manager.madbuilder.com.br/app/images/logo-horizontal.png style=max-width: 300px;>         </div>       <div style=overflow: hidden;padding: 37px;background: #fff;border: 1px solid #eee;>          <div>             <div style=color: #5a6571;padding: 0px;font-weight: 400;font-size: 33px;line-height: 36px; text-align: center>                                      {$titulo}                              </div>          </div>          <div style=text-align: justify; margin-top: 60px;>             <p>Olá {$nome},</p>             <p>Informamos que sua nota fiscal referente à sua última compra no Builder SaaS está disponível em anexo.</p>             <p>Por favor, verifique o anexo para acessar a nota fiscal.</p>             <p>Se tiver alguma dúvida ou precisar de mais informações, nossa equipe de suporte está à disposição para ajudar.</p>             <p>Obrigado por escolher o Builder SaaS!</p>             <br><br>             <p>Atenciosamente,<br>Equipe Builder SaaS</p>          </div>       </div>    </div> </div>'); 
+
+INSERT INTO saas_template_email (id,descricao,titulo,conteudo) VALUES (3,'Aviso de vencimento do plano','Aviso de Vencimento','<div style=background: #f4f4f4;font-family: Arial, Helvetica, sans-serif;color:#5a6571cf;font-size: 15px;line-height: 25px; padding-top: 40px; padding-bottom: 40px;>    <div style=max-width: 650px;margin: auto;>       <div style=text-align: center; margin-bottom: 28px;>             <img alt=logo src=https://manager.madbuilder.com.br/app/images/logo-horizontal.png style=max-width: 300px;>         </div>       <div style=overflow: hidden;padding: 37px;background: #fff;border: 1px solid #eee;>          <div>             <div style=color: #5a6571;padding: 0px;font-weight: 400;font-size: 33px;line-height: 36px; text-align: center>                                      {$titulo}                              </div>          </div>          <div style=text-align: justify; margin-top: 60px;>             <p>Olá {$nome},</p>             <p>Esperamos que você esteja aproveitando ao máximo o Builder SaaS!</p>             <p>Gostaríamos de lembrá-lo que sua licença está prestes a vencer em {$data_vencimento}. Para evitar qualquer interrupção no seu acesso e continuar aproveitando todos os nossos recursos, por favor, renove sua licença antes da data de vencimento.</p>              <p>Se precisar de ajuda ou tiver alguma dúvida, nossa equipe de suporte está pronta para assisti-lo.</p>             <p>Obrigado por ser parte da nossa comunidade!</p>             <br><br>             <p>Atenciosamente,<br>Equipe Builder SaaS</p>          </div>       </div>    </div>'); 
+
+INSERT INTO saas_template_email (id,descricao,titulo,conteudo) VALUES (4,'Solicitação de resete de senha','Resetar a Senha','<div style=background: #f4f4f4;font-family: Arial, Helvetica, sans-serif;color:#5a6571cf;font-size: 15px;line-height: 25px; padding-top: 40px; padding-bottom: 40px;>     <div style=max-width: 650px;margin: auto;>         <div style=text-align: center; margin-bottom: 28px;>             <img alt=logo src=https://manager.madbuilder.com.br/app/images/logo-horizontal.png style=max-width: 300px;>         </div>         <div style=overflow: hidden;padding: 37px;background: #fff;border: 1px solid #eee;>             <div>                 <div style=color: #5a6571;padding: 0px;font-weight: 400;font-size: 33px;line-height: 36px; text-align: center;>                     {$titulo}                 </div>             </div>             <div style=text-align: justify; margin-top: 60px;>                 <p>Olá {$nome}!</p>                  <p> Para iniciar o processo de reset de senha clique no link: </p>                  <a href={$link} target=_blank>RESETAR A SENHA</a>                              <p>Atenciosamente,<br>Equipe Builder SaaS.</p>              </div>         </div>     </div> </div>'); 
+
+INSERT INTO saas_template_email (id,descricao,titulo,conteudo) VALUES (5,'Ativação do plano','Plano ativado','<div style=background: #f4f4f4;font-family: Arial, Helvetica, sans-serif;color:#5a6571cf;font-size: 15px;line-height: 25px; padding-top: 40px; padding-bottom: 40px;>     <div style=max-width: 650px;margin: auto;>         <div style=text-align: center; margin-bottom: 28px;>             <img alt=logo src=https://manager.madbuilder.com.br/app/images/logo-horizontal.png style=max-width: 300px;>         </div>         <div style=overflow: hidden;padding: 37px;background: #fff;border: 1px solid #eee;>             <div>                 <div style=color: #5a6571;padding: 0px;font-weight: 400;font-size: 33px;line-height: 36px; text-align: center;>                     {$titulo}                 </div>             </div>             <div style=text-align: justify; margin-top: 60px;>                 <p>Olá {$nome}!</p>                  <p>Seu plano foi ativado com sucesso.</p>                  <p>Para começar a utilizar todos os recursos do nosso sistema, clique no link abaixo:</p>                  <a href={$link} target=_blank>ACESSAR O SISTEMA</a>                  <p>Atenciosamente,<br>Equipe Builder SaaS.</p>             </div>         </div>     </div> </div>'); 
+
+INSERT INTO system_group (id,name,uuid) VALUES (1,'Admin',null); 
+
+INSERT INTO system_group (id,name,uuid) VALUES (2,'Standard',null); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (1,1,1,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (2,1,2,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (3,1,3,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (4,1,4,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (5,1,5,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (6,1,6,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (7,1,8,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (8,1,9,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (9,1,11,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (10,1,14,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (11,1,15,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (12,2,10,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (13,2,12,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (14,2,13,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (15,2,16,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (16,2,17,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (17,2,18,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (18,2,19,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (19,2,20,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (20,1,21,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (21,2,22,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (22,2,23,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (23,2,24,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (24,2,25,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (25,1,26,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (26,1,27,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (27,1,28,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (28,1,29,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (29,2,30,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (30,1,31,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (31,1,32,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (32,1,33,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (33,1,34,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (34,1,35,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (35,1,36,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (36,1,37,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (37,1,38,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (38,1,39,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (39,1,40,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (40,1,41,''); 
+
+INSERT INTO system_group_program (id,system_group_id,system_program_id,actions) VALUES (41,1,42,''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (1,'System Group Form','SystemGroupForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (2,'System Group List','SystemGroupList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (3,'System Program Form','SystemProgramForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (4,'System Program List','SystemProgramList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (5,'System User Form','SystemUserForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (6,'System User List','SystemUserList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (7,'Common Page','CommonPage',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (8,'System PHP Info','SystemPHPInfoView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (9,'System ChangeLog View','SystemChangeLogView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (10,'Welcome View','WelcomeView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (11,'System Sql Log','SystemSqlLogList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (12,'System Profile View','SystemProfileView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (13,'System Profile Form','SystemProfileForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (14,'System SQL Panel','SystemSQLPanel',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (15,'System Access Log','SystemAccessLogList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (16,'System Message Form','SystemMessageForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (17,'System Message List','SystemMessageList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (18,'System Message Form View','SystemMessageFormView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (19,'System Notification List','SystemNotificationList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (20,'System Notification Form View','SystemNotificationFormView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (21,'System Document Category List','SystemDocumentCategoryFormList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (22,'System Document Form','SystemDocumentForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (23,'System Document Upload Form','SystemDocumentUploadForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (24,'System Document List','SystemDocumentList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (25,'System Shared Document List','SystemSharedDocumentList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (26,'System Unit Form','SystemUnitForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (27,'System Unit List','SystemUnitList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (28,'System Access stats','SystemAccessLogStats',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (29,'System Preference form','SystemPreferenceForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (30,'System Support form','SystemSupportForm',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (31,'System PHP Error','SystemPHPErrorLogView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (32,'System Database Browser','SystemDatabaseExplorer',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (33,'System Table List','SystemTableList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (34,'System Data Browser','SystemDataBrowser',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (35,'System Menu Editor','SystemMenuEditor',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (36,'System Request Log','SystemRequestLogList',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (37,'System Request Log View','SystemRequestLogView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (38,'System Administration Dashboard','SystemAdministrationDashboard',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (39,'System Log Dashboard','SystemLogDashboard',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (40,'System Session dump','SystemSessionDumpView',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (41,'Files diff','SystemFilesDiff',''); 
+
+INSERT INTO system_program (id,name,controller,actions) VALUES (42,'System Information','SystemInformationView',''); 
+
+INSERT INTO system_unit (id,name,account_id,connection_name,active) VALUES (1,'Matriz',1,'matriz','T'); 
+
+INSERT INTO system_user_group (id,system_user_id,system_group_id) VALUES (1,1,1); 
+
+INSERT INTO system_user_group (id,system_user_id,system_group_id) VALUES (2,2,2); 
+
+INSERT INTO system_user_group (id,system_user_id,system_group_id) VALUES (3,1,2); 
+
+INSERT INTO system_user_program (id,system_user_id,system_program_id) VALUES (1,2,7); 
+
+INSERT INTO system_users (id,name,login,password,email,frontpage_id,system_unit_id,active,account_id,accepted_term_policy_at,accepted_term_policy,two_factor_enabled,two_factor_type,two_factor_secret) VALUES (1,'Administrator','admin','21232f297a57a5a743894a0e4a801fc3','admin@admin.net',10,null,'Y',1,'','',null,null,null); 
+
+INSERT INTO system_users (id,name,login,password,email,frontpage_id,system_unit_id,active,account_id,accepted_term_policy_at,accepted_term_policy,two_factor_enabled,two_factor_type,two_factor_secret) VALUES (2,'User','user','ee11cbb19052e40b07aac0ca060c23ee','user@user.net',7,null,'Y',2,'','',null,null,null); 
+
+INSERT INTO system_user_unit (id,system_user_id,system_unit_id) VALUES (1,1,1); 

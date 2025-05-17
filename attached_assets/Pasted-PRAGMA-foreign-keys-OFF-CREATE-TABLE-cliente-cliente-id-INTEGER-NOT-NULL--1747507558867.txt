@@ -1,0 +1,59 @@
+PRAGMA foreign_keys=OFF; 
+
+CREATE TABLE cliente( 
+      cliente_id  INTEGER    NOT NULL  , 
+      nome varchar  (50)   , 
+      cpf_cnpj varchar  (14)   , 
+      inscricao_estadual varchar  (15)   , 
+      cep varchar  (9)   , 
+      logradouro varchar  (50)   , 
+      numero varchar  (10)   , 
+      complemento varchar  (20)   , 
+      bairro varchar  (50)   , 
+      nome_municipio varchar  (50)   , 
+      codigo_municipio varchar  (10)   , 
+      indicador_ie int   , 
+      telefone varchar  (15)   , 
+      uf char  (2)   , 
+ PRIMARY KEY (cliente_id)) ; 
+
+CREATE TABLE produto( 
+      produto_id  INTEGER    NOT NULL  , 
+      descricao varchar  (100)   , 
+      valor_venda double   , 
+      unidade varchar  (6)   , 
+      ncm varchar  (10)   , 
+      origem int   , 
+      cest varchar  (8)   , 
+ PRIMARY KEY (produto_id)) ; 
+
+CREATE TABLE venda( 
+      venda_id  INTEGER    NOT NULL  , 
+      cliente_id int   NOT NULL  , 
+      data_venda datetime   , 
+      meio_pagamento char  (2)   , 
+      total_venda double   , 
+ PRIMARY KEY (venda_id),
+FOREIGN KEY(cliente_id) REFERENCES cliente(cliente_id)) ; 
+
+CREATE TABLE venda_item( 
+      venda_item_id  INTEGER    NOT NULL  , 
+      produto_id int   NOT NULL  , 
+      preco double   , 
+      quant int   , 
+      total double   , 
+      venda_id int   NOT NULL  , 
+ PRIMARY KEY (venda_item_id),
+FOREIGN KEY(produto_id) REFERENCES produto(produto_id),
+FOREIGN KEY(venda_id) REFERENCES venda(venda_id)) ; 
+
+ 
+ INSERT INTO cliente (cliente_id,nome,cpf_cnpj,inscricao_estadual,cep,logradouro,numero,complemento,bairro,nome_municipio,codigo_municipio,indicador_ie,telefone,uf) VALUES (1,'TESTE','01234567890','','85602400','TESTE','1','TESTE','TESTE','TESTE','4108403',9,'','PR'); 
+
+INSERT INTO produto (produto_id,descricao,valor_venda,unidade,ncm,origem,cest) VALUES (1,'TESTE',10,'un','84159020',0,''); 
+
+INSERT INTO venda (venda_id,cliente_id,data_venda,meio_pagamento,total_venda) VALUES (1,1,'2021-04-17 11:30:00','01',20); 
+
+INSERT INTO venda_item (venda_item_id,produto_id,preco,quant,total,venda_id) VALUES (1,1,10,1,10,1); 
+
+INSERT INTO venda_item (venda_item_id,produto_id,preco,quant,total,venda_id) VALUES (2,1,10,1,10,1); 
