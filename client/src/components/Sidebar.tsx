@@ -183,14 +183,14 @@ export default function Sidebar() {
           <div className="flex items-center">
             <img 
               className="h-8 w-8 rounded-full object-cover" 
-              src={user?.profileImageUrl || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} 
+              src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} 
               alt="Foto de perfil do usuário" 
             />
             <div className="ml-3">
               <p className="text-sm font-medium text-white">
-                {user?.firstName || "Usuário"} {user?.lastName || ""}
+                {"Usuário"}
               </p>
-              <p className="text-xs text-primary-300">{user?.role === "admin" ? "Administrador" : user?.role === "accountant" ? "Contador" : "Cliente"}</p>
+              <p className="text-xs text-primary-300">{"Cliente"}</p>
             </div>
             <a href="/api/logout" className="ml-auto text-primary-300 hover:text-white">
               <span className="material-icons text-sm">logout</span>

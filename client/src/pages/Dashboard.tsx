@@ -141,7 +141,7 @@ export default function Dashboard() {
       {/* Principais Módulos - Botões de Acesso Rápido */}
       <div className="bg-white shadow-sm rounded-lg p-4 my-6">
         <h3 className="text-sm font-medium text-neutral-600 mb-3">Acesso Rápido</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 gap-3">
           <Button 
             variant="outline" 
             className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
@@ -185,6 +185,15 @@ export default function Dashboard() {
           >
             <span className="material-icons mb-2 text-2xl">receipt</span>
             <span className="text-xs">Notas Fiscais</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex flex-col h-24 items-center justify-center hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 bg-blue-50 border-blue-100 text-blue-600"
+            onClick={() => window.location.href = '/fiscal'}
+          >
+            <span className="material-icons mb-2 text-2xl">receipt_long</span>
+            <span className="text-xs">Módulo Fiscal</span>
           </Button>
           
           <Button 
