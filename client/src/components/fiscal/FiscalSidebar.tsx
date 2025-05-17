@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 type FiscalSidebarProps = {
-  activeSection?: 'dashboard' | 'emissor' | 'ajustes' | 'cadastros' | 'relatorios' | 'importacao';
+  activeSection?: 'dashboard' | 'emissor' | 'ajustes' | 'cadastros' | 'relatorios' | 'importacao' | 'comunicacao';
 };
 
 interface MenuSection {

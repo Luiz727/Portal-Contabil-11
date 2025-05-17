@@ -15,7 +15,7 @@ const FiscalMenu: React.FC<FiscalMenuProps> = ({ activeSection, children }) => {
     return <FiscalMenuWrapper activeSection={activeSection}>{children}</FiscalMenuWrapper>;
   }
   
-  // Caso contrário, vamos usar o menu antigo temporariamente para manter compatibilidade com o código existente
+  // Caso contrário, vamos usar o menu sidebar
   return (
     <div>
       <FiscalSidebar activeSection={activeSection} />

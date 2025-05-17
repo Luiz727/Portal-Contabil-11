@@ -26,6 +26,7 @@ import EmissaoNFe from "@/pages/fiscal/emissor/EmissaoNFe";
 import ConfiguracaoEmpresa from "@/pages/fiscal/ajustes/ConfiguracaoEmpresa";
 import CertificadoDigital from "@/pages/fiscal/ajustes/CertificadoDigital";
 import ConsultarDocumentos from "@/pages/fiscal/emissor/ConsultarDocumentos";
+import ProdutosCadastro from "@/pages/fiscal/cadastros/Produtos";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -175,6 +176,14 @@ function Router() {
         <Route path="/fiscal/emissor/consultar">
           <MainLayout>
             <ConsultarDocumentos />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/produtos">
+          <MainLayout>
+            <ProdutosCadastro />
           </MainLayout>
         </Route>
       )}

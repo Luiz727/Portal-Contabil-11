@@ -2,7 +2,7 @@ import React from 'react';
 import FiscalSidebar from './FiscalSidebar';
 
 type FiscalMenuProps = {
-  activeSection?: 'dashboard' | 'emissor' | 'ajustes' | 'cadastros' | 'relatorios' | 'importacao';
+  activeSection?: 'dashboard' | 'emissor' | 'ajustes' | 'cadastros' | 'relatorios' | 'importacao' | 'comunicacao';
   children?: React.ReactNode;
 };
 
