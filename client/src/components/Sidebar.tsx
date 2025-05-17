@@ -30,12 +30,12 @@ type NavSectionProps = {
 
 const NavSection = ({ title, children }: NavSectionProps) => {
   return (
-    <>
-      <div className="px-4 mt-6 mb-2 text-xs font-semibold text-primary-200 uppercase tracking-wider">
-        {title}
+    <div className="mb-4">
+      <h6 className="text-uppercase fw-light text-white-50 fs-7 px-3 mb-2 mt-4">{title}</h6>
+      <div className="nav flex-column">
+        {children}
       </div>
-      {children}
-    </>
+    </div>
   );
 };
 
@@ -61,40 +61,40 @@ export default function Sidebar() {
   }, [location]);
 
   return (
-    <aside className="flex flex-shrink-0">
-      <div className="flex flex-col w-64 bg-primary-800 text-white h-screen overflow-y-auto">
+    <aside className="flex-shrink-0">
+      <div className="d-flex flex-column bg-dark text-white h-100 overflow-auto" style={{ width: '250px' }}>
         {/* Logo */}
-        <div className="px-4 py-6 flex items-center border-b border-primary-700">
-          <span className="material-icons mr-2">account_balance</span>
-          <h1 className="text-xl font-semibold">ContaSmart</h1>
+        <div className="p-3 border-bottom border-secondary">
+          <div className="d-flex align-items-center">
+            <span className="material-icons me-2">account_balance</span>
+            <h1 className="fs-5 fw-semibold mb-0">ContaSmart</h1>
+          </div>
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 pt-4 pb-4 overflow-y-auto scrollbar-hide">
-          <div className="px-4 mb-2 text-xs font-semibold text-primary-200 uppercase tracking-wider">
-            Principal
-          </div>
-          
-          <NavItem 
-            href="/" 
-            icon="dashboard" 
-            label="Dashboard" 
-            active={location === "/" || location === ""} 
-          />
-          
-          <NavItem 
-            href="/tasks" 
-            icon="assignment" 
-            label="Tarefas" 
-            active={location === "/tasks"} 
-          />
-          
-          <NavItem 
-            href="/clients" 
-            icon="people" 
-            label="Clientes" 
-            active={location === "/clients"} 
-          />
+        <nav className="flex-grow-1 p-3 overflow-auto">
+          <NavSection title="Principal">
+            <NavItem 
+              href="/" 
+              icon="dashboard" 
+              label="Dashboard" 
+              active={location === "/" || location === ""} 
+            />
+            
+            <NavItem 
+              href="/tasks" 
+              icon="assignment" 
+              label="Tarefas" 
+              active={location === "/tasks"} 
+            />
+            
+            <NavItem 
+              href="/clients" 
+              icon="people" 
+              label="Clientes" 
+              active={location === "/clients"} 
+            />
+          </NavSection>
 
           <NavSection title="Documentos">
             <NavItem 
@@ -107,7 +107,7 @@ export default function Sidebar() {
             <NavItem 
               href="/invoices" 
               icon="receipt" 
-              label="Notas Fiscais" 
+              label="Calculadora de Impostos" 
               active={location === "/invoices"} 
             />
             
@@ -176,21 +176,22 @@ export default function Sidebar() {
         </nav>
 
         {/* User Profile */}
-        <div className="border-t border-primary-700 p-4">
-          <div className="flex items-center">
+        <div className="border-top border-secondary p-3">
+          <div className="d-flex align-items-center">
             <img 
-              className="h-8 w-8 rounded-full object-cover" 
+              className="rounded-circle object-fit-cover"
+              style={{ width: '32px', height: '32px' }}
               src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} 
               alt="Foto de perfil do usuário" 
             />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white">
+            <div className="ms-2">
+              <p className="mb-0 small fw-medium text-white">
                 {"Usuário"}
               </p>
-              <p className="text-xs text-primary-300">{"Cliente"}</p>
+              <p className="mb-0 small text-white-50">{"Cliente"}</p>
             </div>
-            <a href="/api/logout" className="ml-auto text-primary-300 hover:text-white">
-              <span className="material-icons text-sm">logout</span>
+            <a href="/api/logout" className="ms-auto text-white-50 btn btn-link p-0">
+              <span className="material-icons small">logout</span>
             </a>
           </div>
         </div>
