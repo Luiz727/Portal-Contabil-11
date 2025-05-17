@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { cn } from "@/lib/utils";
 
 type NavItemProps = {
   icon: string;
@@ -13,15 +12,13 @@ type NavItemProps = {
 const NavItem = ({ icon, label, href, active }: NavItemProps) => {
   return (
     <Link href={href}>
-      <div
-        className={cn(
-          "flex items-center px-4 py-3 text-primary-100 rounded-md mx-2 mb-1 cursor-pointer",
-          active ? "bg-primary-700" : "hover:bg-primary-700"
-        )}
+      <a 
+        className={`nav-link d-flex align-items-center px-3 py-2 rounded-2 mb-1 ${active ? 'active bg-primary text-white' : 'text-white-50'}`}
+        style={{ textDecoration: 'none' }}
       >
-        <span className="material-icons mr-3 text-primary-300">{icon}</span>
+        <span className="material-icons me-2 small">{icon}</span>
         <span>{label}</span>
-      </div>
+      </a>
     </Link>
   );
 };

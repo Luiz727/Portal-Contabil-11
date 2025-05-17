@@ -38,8 +38,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen w-screen bg-neutral-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </div>
       </div>
     );
   }
@@ -51,12 +53,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Para o módulo fiscal, usamos apenas o header, sem o sidebar principal
   if (isFiscalModule) {
     return (
-      <div className="flex h-screen overflow-hidden">
+      <div className="d-flex h-100 overflow-hidden">
         {/* Main content */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-grow-1 d-flex flex-column overflow-hidden">
           <Header toggleSidebar={toggleSidebar} fiscalModule={true} />
           
-          <div className="flex-1 overflow-auto bg-neutral-50">
+          <div className="flex-grow-1 overflow-auto bg-light">
             {children}
           </div>
         </main>
@@ -64,32 +66,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // Para os outros módulos, mantemos o layout original
+  // Para os outros módulos, mantemos o layout original com Bootstrap 5
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="d-flex h-100 overflow-hidden">
       {/* Mobile sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="position-fixed top-0 start-0 bottom-0 end-0 z-index-1040 d-md-none">
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="position-fixed top-0 start-0 bottom-0 end-0 bg-dark opacity-50"
             onClick={toggleSidebar}
           ></div>
-          <div className="relative z-50">
+          <div className="position-relative z-index-1050">
             <Sidebar />
           </div>
         </div>
       )}
       
       {/* Desktop sidebar */}
-      <div className="hidden md:block">
+      <div className="d-none d-md-block">
         <Sidebar />
       </div>
       
       {/* Main content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-grow-1 d-flex flex-column overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
         
-        <div className="flex-1 overflow-auto bg-neutral-50 p-4 sm:p-6 lg:p-8">
+        <div className="flex-grow-1 overflow-auto bg-light p-3 p-sm-4 p-lg-5">
           {children}
         </div>
       </main>

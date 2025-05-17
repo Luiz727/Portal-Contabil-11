@@ -21,50 +21,51 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
   };
 
   return (
-    <header className="bg-white shadow-sm z-10">
-      <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <header className="bg-white shadow-sm z-index-1">
+      <div className="px-3 px-sm-4 px-lg-5 py-3 d-flex align-items-center justify-content-between">
         {fiscalModule ? (
-          <div className="flex items-center">
+          <div className="d-flex align-items-center">
             <Link href="/">
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 focus:outline-none hover:bg-primary-50 mr-2"
+              <button
+                type="button"
+                className="btn btn-link d-flex align-items-center text-primary me-2 p-1"
               >
                 <span className="material-icons">arrow_back</span>
-              </Button>
+              </button>
             </Link>
-            <span className="flex items-center">
-              <span className="text-lg font-medium">Módulo Fiscal</span>
-              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md">v1.0</span>
+            <span className="d-flex align-items-center">
+              <span className="fs-5 fw-medium">Módulo Fiscal</span>
+              <span className="ms-2 badge bg-primary rounded-pill">v1.0</span>
             </span>
           </div>
         ) : (
           <>
-            <div className="flex items-center md:hidden">
-              <Button
-                variant="outline"
+            <div className="d-flex align-items-center d-md-none">
+              <button
+                type="button"
+                className="btn btn-outline-primary d-flex align-items-center gap-2"
                 onClick={toggleSidebar}
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 focus:outline-none hover:bg-primary-50"
               >
                 <span className="material-icons">menu</span>
                 <span>Menu</span>
-              </Button>
-              <div className="ml-3">
-                <h1 className="text-lg font-medium">ContaSmart</h1>
+              </button>
+              <div className="ms-3">
+                <h1 className="fs-5 fw-medium mb-0">ContaSmart</h1>
               </div>
             </div>
 
-            <div className="hidden md:flex md:items-center">
-              <div className="relative">
+            <div className="d-none d-md-flex align-items-center">
+              <div className="position-relative">
                 <form onSubmit={handleSearch}>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="material-icons text-neutral-400 text-sm">search</span>
+                  <div className="position-relative">
+                    <span className="position-absolute top-50 start-0 translate-middle-y ms-3">
+                      <span className="material-icons text-muted small">search</span>
                     </span>
-                    <Input
+                    <input
                       type="text"
                       placeholder="Buscar..."
-                      className="pl-10 pr-4 py-2 border border-neutral-300 rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="form-control ps-5 pe-3"
+                      style={{ width: '260px' }}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -75,31 +76,30 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
           </>
         )}
 
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="relative p-1 text-neutral-500 hover:text-neutral-600 focus:outline-none"
+        <div className="d-flex align-items-center gap-3">
+          <button 
+            type="button"
+            className="btn btn-link position-relative p-1 text-body"
           >
             <span className="material-icons">notifications</span>
-            <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs font-bold leading-4 text-center">3</span>
-          </Button>
+            <span className="position-absolute top-0 end-0 badge rounded-pill bg-danger">3</span>
+          </button>
 
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="relative p-1 text-neutral-500 hover:text-neutral-600 focus:outline-none"
+          <button 
+            type="button"
+            className="btn btn-link position-relative p-1 text-body"
             onClick={() => window.location.href = "/whatsapp"}
           >
             <span className="material-icons">chat</span>
-            <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-blue-500 text-white text-xs font-bold leading-4 text-center">5</span>
-          </Button>
+            <span className="position-absolute top-0 end-0 badge rounded-pill bg-primary">5</span>
+          </button>
 
-          <div className="border-l border-neutral-200 h-6 mx-2 hidden md:block"></div>
+          <div className="border-start border-light d-none d-md-block h-75 mx-2"></div>
 
-          <div className="flex items-center md:hidden">
+          <div className="d-flex align-items-center d-md-none">
             <img 
-              className="h-8 w-8 rounded-full object-cover" 
+              className="rounded-circle object-fit-cover"
+              style={{ width: '32px', height: '32px' }}
               src={avatarUrl} 
               alt="Foto de perfil do usuário" 
             />
