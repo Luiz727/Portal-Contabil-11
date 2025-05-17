@@ -26,11 +26,9 @@ import EmissaoNFe from "@/pages/fiscal/emissor/EmissaoNFe";
 import ConfiguracaoEmpresa from "@/pages/fiscal/ajustes/ConfiguracaoEmpresa";
 import CertificadoDigital from "@/pages/fiscal/ajustes/CertificadoDigital";
 import ConsultarDocumentos from "@/pages/fiscal/emissor/ConsultarDocumentos";
-import ProdutosCadastro from "@/pages/fiscal/cadastros/Produtos";
-import ClientesCadastro from "@/pages/fiscal/cadastros/Clientes";
-import FornecedoresCadastro from "@/pages/fiscal/cadastros/Fornecedores";
-import TransportadorasCadastro from "@/pages/fiscal/cadastros/Transportadoras";
-import FormasPagamentoCadastro from "@/pages/fiscal/cadastros/FormasPagamento";
+// Novos módulos fiscais
+import FiscalDashboard from "@/modules/fiscal/pages/Dashboard";
+import FormasPagamento from "@/modules/fiscal/pages/FormasPagamento";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -146,81 +144,13 @@ function Router() {
       {/* Rotas do Módulo Fiscal */}
       {isAuthenticated && (
         <Route path="/fiscal">
-          <div className="h-screen">
-            <FiscalDashboard />
-          </div>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/emissor/nfe">
-          <div className="h-screen">
-            <EmissaoNFe />
-          </div>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/ajustes/empresa">
-          <MainLayout>
-            <ConfiguracaoEmpresa />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/ajustes/certificado">
-          <MainLayout>
-            <CertificadoDigital />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/emissor/consultar">
-          <MainLayout>
-            <ConsultarDocumentos />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/cadastros/produtos">
-          <MainLayout>
-            <ProdutosCadastro />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/cadastros/clientes">
-          <MainLayout>
-            <ClientesCadastro />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/cadastros/fornecedores">
-          <MainLayout>
-            <FornecedoresCadastro />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/fiscal/cadastros/transportadoras">
-          <MainLayout>
-            <TransportadorasCadastro />
-          </MainLayout>
+          <FiscalDashboard />
         </Route>
       )}
       
       {isAuthenticated && (
         <Route path="/fiscal/cadastros/formas-pagamento">
-          <MainLayout>
-            <FormasPagamentoCadastro />
-          </MainLayout>
+          <FormasPagamento />
         </Route>
       )}
       
