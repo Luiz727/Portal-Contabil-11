@@ -23,6 +23,9 @@ import { useAuth } from "@/hooks/useAuth";
 // Páginas do Módulo Fiscal
 import FiscalDashboard from "@/pages/fiscal/FiscalDashboard";
 import EmissaoNFe from "@/pages/fiscal/emissor/EmissaoNFe";
+import ConfiguracaoEmpresa from "@/pages/fiscal/ajustes/ConfiguracaoEmpresa";
+import CertificadoDigital from "@/pages/fiscal/ajustes/CertificadoDigital";
+import ConsultarDocumentos from "@/pages/fiscal/emissor/ConsultarDocumentos";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -148,6 +151,30 @@ function Router() {
         <Route path="/fiscal/emissor/nfe">
           <MainLayout>
             <EmissaoNFe />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/ajustes/empresa">
+          <MainLayout>
+            <ConfiguracaoEmpresa />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/ajustes/certificado">
+          <MainLayout>
+            <CertificadoDigital />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/emissor/consultar">
+          <MainLayout>
+            <ConsultarDocumentos />
           </MainLayout>
         </Route>
       )}
