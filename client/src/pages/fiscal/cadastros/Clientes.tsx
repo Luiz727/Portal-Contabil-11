@@ -328,7 +328,7 @@ const ClientesCadastro: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="">Todos os grupos</SelectItem>
                   {grupos.map(grupo => (
-                    <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                    <SelectItem key={grupo} value={grupo || ''}>{grupo || 'Sem grupo'}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -776,7 +776,7 @@ const ClientesCadastro: React.FC = () => {
                       <SelectContent>
                         <SelectItem value="">Nenhum</SelectItem>
                         {grupos.map(grupo => (
-                          <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                          <SelectItem key={grupo} value={grupo || ''}>{grupo || 'Sem grupo'}</SelectItem>
                         ))}
                         <SelectItem value="novo">+ Novo Grupo</SelectItem>
                       </SelectContent>

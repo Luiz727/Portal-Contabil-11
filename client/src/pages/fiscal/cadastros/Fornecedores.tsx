@@ -671,11 +671,11 @@ const FornecedoresCadastro: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {fornecedores.reduce((latest, current) => {
-                  if (!latest) return current.ultimaCompra;
-                  if (!current.ultimaCompra) return latest;
-                  return latest > current.ultimaCompra ? latest : current.ultimaCompra;
-                }, '')}
+                {fornecedores.length > 0 ? 
+                  fornecedores
+                    .filter(f => f.ultimaCompra)
+                    .sort((a, b) => new Date(b.ultimaCompra || '').getTime() - new Date(a.ultimaCompra || '').getTime())[0]?.ultimaCompra || 'Nenhuma' 
+                  : 'Nenhuma'}
               </div>
               <p className="text-xs text-muted-foreground">
                 Data da compra mais recente
