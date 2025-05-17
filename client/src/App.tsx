@@ -146,17 +146,17 @@ function Router() {
       {/* Rotas do Módulo Fiscal */}
       {isAuthenticated && (
         <Route path="/fiscal">
-          <MainLayout>
+          <div className="h-screen">
             <FiscalDashboard />
-          </MainLayout>
+          </div>
         </Route>
       )}
       
       {isAuthenticated && (
         <Route path="/fiscal/emissor/nfe">
-          <MainLayout>
+          <div className="h-screen">
             <EmissaoNFe />
-          </MainLayout>
+          </div>
         </Route>
       )}
       

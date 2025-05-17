@@ -301,8 +301,11 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
 
   // Renderiza o menu lateral
   return (
-    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-background border-r transform transition-all ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
-      <div className="flex justify-end p-2 border-b">
+    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-white border-r transform transition-all ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
+      <div className="flex justify-between p-2 border-b">
+        <div className={collapsed ? "hidden" : "flex items-center text-sm font-medium text-primary"}>
+          Módulo Fiscal
+        </div>
         <Button 
           variant="ghost" 
           size="sm" 

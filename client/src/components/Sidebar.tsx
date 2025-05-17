@@ -113,6 +113,13 @@ export default function Sidebar() {
               label="Notas Fiscais" 
               active={location === "/invoices"} 
             />
+            
+            <NavItem 
+              href="/fiscal" 
+              icon="receipt_long" 
+              label="Módulo Fiscal" 
+              active={location.startsWith("/fiscal")} 
+            />
           </NavSection>
 
           <NavSection title="Comunicação">
