@@ -26,9 +26,12 @@ import EmissaoNFe from "@/pages/fiscal/emissor/EmissaoNFe";
 import ConfiguracaoEmpresa from "@/pages/fiscal/ajustes/ConfiguracaoEmpresa";
 import CertificadoDigital from "@/pages/fiscal/ajustes/CertificadoDigital";
 import ConsultarDocumentos from "@/pages/fiscal/emissor/ConsultarDocumentos";
-// Novos módulos fiscais
-import FiscalDashboard from "@/modules/fiscal/pages/Dashboard";
-import FormasPagamento from "@/modules/fiscal/pages/FormasPagamento";
+import ProdutosCadastro from "@/pages/fiscal/cadastros/Produtos";
+import ClientesCadastro from "@/pages/fiscal/cadastros/Clientes";
+import FornecedoresCadastro from "@/pages/fiscal/cadastros/Fornecedores";
+import TransportadorasCadastro from "@/pages/fiscal/cadastros/Transportadoras";
+import FormasPagamentoCadastro from "@/pages/fiscal/cadastros/FormasPagamento";
+import FiscalWrapper from "@/pages/fiscal/FiscalWrapper";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -144,13 +147,81 @@ function Router() {
       {/* Rotas do Módulo Fiscal */}
       {isAuthenticated && (
         <Route path="/fiscal">
-          <FiscalDashboard />
+          <FiscalWrapper activeSection="dashboard">
+            <FiscalDashboard />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/emissor/nfe">
+          <FiscalWrapper activeSection="emissor">
+            <EmissaoNFe />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/emissor/consultar">
+          <FiscalWrapper activeSection="emissor">
+            <ConsultarDocumentos />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/ajustes/empresa">
+          <FiscalWrapper activeSection="ajustes">
+            <ConfiguracaoEmpresa />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/ajustes/certificado">
+          <FiscalWrapper activeSection="ajustes">
+            <CertificadoDigital />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/produtos">
+          <FiscalWrapper activeSection="cadastros">
+            <ProdutosCadastro />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/clientes">
+          <FiscalWrapper activeSection="cadastros">
+            <ClientesCadastro />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/fornecedores">
+          <FiscalWrapper activeSection="cadastros">
+            <FornecedoresCadastro />
+          </FiscalWrapper>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/fiscal/cadastros/transportadoras">
+          <FiscalWrapper activeSection="cadastros">
+            <TransportadorasCadastro />
+          </FiscalWrapper>
         </Route>
       )}
       
       {isAuthenticated && (
         <Route path="/fiscal/cadastros/formas-pagamento">
-          <FormasPagamento />
+          <FiscalWrapper activeSection="cadastros">
+            <FormasPagamentoCadastro />
+          </FiscalWrapper>
         </Route>
       )}
       

@@ -11,7 +11,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,8 +36,6 @@ import {
   CreditCard as CreditCardIcon,
   Wallet,
   CircleDollarSign,
-  Calendar,
-  Coins
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,7 +45,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import FiscalMenuWrapper from '@/components/fiscal/FiscalMenuWrapper';
 
 type FormaPagamento = {
   id: number;
@@ -264,179 +260,84 @@ const FormasPagamentoCadastro: React.FC = () => {
   };
 
   return (
-    <FiscalMenuWrapper activeSection="cadastros">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Formas de Pagamento</h1>
-            <p className="text-muted-foreground">
-              Gerencie as formas de pagamento disponíveis para documentos fiscais
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Formas de Pagamento</h1>
+          <p className="text-muted-foreground">
+            Gerencie as formas de pagamento disponíveis para documentos fiscais
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
+            Importar
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
+          </Button>
+          <Button size="sm" onClick={handleNovoClick}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Forma
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="todos">
+        <div className="flex justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="todos">Todas</TabsTrigger>
+            <TabsTrigger value="ativos">Ativas</TabsTrigger>
+            <TabsTrigger value="inativos">Inativas</TabsTrigger>
+          </TabsList>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Upload className="h-4 w-4 mr-2" />
-              Importar
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
-            </Button>
-            <Button size="sm" onClick={handleNovoClick}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Forma
+            <Input 
+              placeholder="Buscar por descrição" 
+              className="w-60"
+              value={filtroDescricao}
+              onChange={(e) => setFiltroDescricao(e.target.value)}
+            />
+            <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos os tipos</SelectItem>
+                <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                <SelectItem value="pix">PIX</SelectItem>
+                <SelectItem value="boleto">Boleto</SelectItem>
+                <SelectItem value="cheque">Cheque</SelectItem>
+                <SelectItem value="transferencia">Transferência</SelectItem>
+                <SelectItem value="outro">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="todos">
-          <div className="flex justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="todos">Todas</TabsTrigger>
-              <TabsTrigger value="ativos">Ativas</TabsTrigger>
-              <TabsTrigger value="inativos">Inativas</TabsTrigger>
-            </TabsList>
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Buscar por descrição" 
-                className="w-60"
-                value={filtroDescricao}
-                onChange={(e) => setFiltroDescricao(e.target.value)}
-              />
-              <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
-                  <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                  <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                  <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
-                  <SelectItem value="pix">PIX</SelectItem>
-                  <SelectItem value="boleto">Boleto</SelectItem>
-                  <SelectItem value="cheque">Cheque</SelectItem>
-                  <SelectItem value="transferencia">Transferência</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <TabsContent value="todos" className="mt-0">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Parcelas</TableHead>
-                    <TableHead>Documentos</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Padrão</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFormasPagamento.length > 0 ? (
-                    filteredFormasPagamento.map(formaPagamento => (
-                      <TableRow key={formaPagamento.id}>
-                        <TableCell className="font-mono">{formaPagamento.codigo}</TableCell>
-                        <TableCell className="font-medium">{formaPagamento.descricao}</TableCell>
-                        <TableCell>
-                          {getTipoFormaPagamento(formaPagamento.tipo).badge}
-                        </TableCell>
-                        <TableCell>
-                          {formaPagamento.parcelas > 1 ? 
-                            `Até ${formaPagamento.parcelas}x` : 
-                            'À vista'}
-                        </TableCell>
-                        <TableCell>
-                          {formaPagamento.usadoEm || 'Todos'}
-                        </TableCell>
-                        <TableCell>
-                          {formaPagamento.ativo ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Inativo
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formaPagamento.padrao ? (
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Padrão
-                            </Badge>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Duplicar
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-4">
-                        Nenhuma forma de pagamento encontrada.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ativos" className="mt-0">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Parcelas</TableHead>
-                    <TableHead>Documentos</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Padrão</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formasPagamento.filter(f => f.ativo).map(formaPagamento => (
+        <TabsContent value="todos" className="mt-0">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Parcelas</TableHead>
+                  <TableHead>Documentos</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Padrão</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredFormasPagamento.length > 0 ? (
+                  filteredFormasPagamento.map(formaPagamento => (
                     <TableRow key={formaPagamento.id}>
                       <TableCell className="font-mono">{formaPagamento.codigo}</TableCell>
                       <TableCell className="font-medium">{formaPagamento.descricao}</TableCell>
@@ -452,188 +353,281 @@ const FormasPagamentoCadastro: React.FC = () => {
                         {formaPagamento.usadoEm || 'Todos'}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                        {formaPagamento.ativo ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Ativo
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Inativo
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {formaPagamento.padrao ? (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Padrão
+                          </Badge>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-4">
+                      Nenhuma forma de pagamento encontrada.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ativos" className="mt-0">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Parcelas</TableHead>
+                  <TableHead>Documentos</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Padrão</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {formasPagamento.filter(f => f.ativo).map(formaPagamento => (
+                  <TableRow key={formaPagamento.id}>
+                    <TableCell className="font-mono">{formaPagamento.codigo}</TableCell>
+                    <TableCell className="font-medium">{formaPagamento.descricao}</TableCell>
+                    <TableCell>
+                      {getTipoFormaPagamento(formaPagamento.tipo).badge}
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.parcelas > 1 ? 
+                        `Até ${formaPagamento.parcelas}x` : 
+                        'À vista'}
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.usadoEm || 'Todos'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Ativo
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.padrao ? (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Ativo
+                          Padrão
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {formaPagamento.padrao ? (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Padrão
-                          </Badge>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicar
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="inativos" className="mt-0">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Parcelas</TableHead>
-                    <TableHead>Documentos</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Padrão</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formasPagamento.filter(f => !f.ativo).map(formaPagamento => (
-                    <TableRow key={formaPagamento.id}>
-                      <TableCell className="font-mono">{formaPagamento.codigo}</TableCell>
-                      <TableCell className="font-medium">{formaPagamento.descricao}</TableCell>
-                      <TableCell>
-                        {getTipoFormaPagamento(formaPagamento.tipo).badge}
-                      </TableCell>
-                      <TableCell>
-                        {formaPagamento.parcelas > 1 ? 
-                          `Até ${formaPagamento.parcelas}x` : 
-                          'À vista'}
-                      </TableCell>
-                      <TableCell>
-                        {formaPagamento.usadoEm || 'Todos'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Inativo
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {formaPagamento.padrao ? (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Padrão
-                          </Badge>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicar
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-        </Tabs>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
 
-        {/* Estatísticas básicas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total de Formas de Pagamento</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formasPagamento.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {formasPagamento.filter(f => f.ativo).length} ativas / {formasPagamento.filter(f => !f.ativo).length} inativas
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Forma Mais Usada</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formasPagamento.sort((a, b) => b.percentual - a.percentual)[0]?.descricao || 'Nenhuma'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {formasPagamento.sort((a, b) => b.percentual - a.percentual)[0]?.percentual || 0}% das vendas
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Formas com Parcelamento</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formasPagamento.filter(f => f.parcelas > 1).length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {Math.round((formasPagamento.filter(f => f.parcelas > 1).length / formasPagamento.length) * 100) || 0}% do total
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Por Tipo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formasPagamento.filter(f => f.tipo === 'cartao_credito' || f.tipo === 'cartao_debito').length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Formas de pagamento com cartão
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <TabsContent value="inativos" className="mt-0">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Parcelas</TableHead>
+                  <TableHead>Documentos</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Padrão</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {formasPagamento.filter(f => !f.ativo).map(formaPagamento => (
+                  <TableRow key={formaPagamento.id}>
+                    <TableCell className="font-mono">{formaPagamento.codigo}</TableCell>
+                    <TableCell className="font-medium">{formaPagamento.descricao}</TableCell>
+                    <TableCell>
+                      {getTipoFormaPagamento(formaPagamento.tipo).badge}
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.parcelas > 1 ? 
+                        `Até ${formaPagamento.parcelas}x` : 
+                        'À vista'}
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.usadoEm || 'Todos'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Inativo
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formaPagamento.padrao ? (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Padrão
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleEditClick(formaPagamento)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicarClick(formaPagamento)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleExcluirClick(formaPagamento.id)} className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Estatísticas básicas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Formas de Pagamento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formasPagamento.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {formasPagamento.filter(f => f.ativo).length} ativas / {formasPagamento.filter(f => !f.ativo).length} inativas
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Forma Mais Usada</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formasPagamento.sort((a, b) => b.percentual - a.percentual)[0]?.descricao || 'Nenhuma'}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formasPagamento.sort((a, b) => b.percentual - a.percentual)[0]?.percentual || 0}% das vendas
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Formas com Parcelamento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formasPagamento.filter(f => f.parcelas > 1).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {Math.round((formasPagamento.filter(f => f.parcelas > 1).length / formasPagamento.length) * 100) || 0}% do total
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Por Tipo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formasPagamento.filter(f => f.tipo === 'cartao_credito' || f.tipo === 'cartao_debito').length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Formas de pagamento com cartão
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Modal para adicionar/editar forma de pagamento */}
@@ -788,7 +782,7 @@ const FormasPagamentoCadastro: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </FiscalMenuWrapper>
+    </div>
   );
 };
 
