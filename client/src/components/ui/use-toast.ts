@@ -1,6 +1,6 @@
-// Implementação simplificada do toast
-import { useState } from "react";
+// Sistema simplificado de toast
 
+// Definição do tipo de toast
 export type Toast = {
   id: string;
   title?: string;
@@ -9,56 +9,66 @@ export type Toast = {
   className?: string;
 };
 
-// Armazenamento centralizado das mensagens de toast
-let toastStore: Toast[] = [];
-let toastSetters: any[] = [];
+// Estado global dos toasts
+const globalToasts: Toast[] = [];
+const subscribers: Array<(toasts: Toast[]) => void> = [];
 
-// Função para notificar todos os componentes sobre mudanças nos toasts
-const notifyToastChange = () => {
-  toastSetters.forEach((setter) => setter([...toastStore]));
+// Notificar todos os assinantes
+const notifySubscribers = (): void => {
+  subscribers.forEach(subscriber => subscriber([...globalToasts]));
 };
 
-export function useToast() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+// Funções de gerenciamento
+const addToast = (toast: Omit<Toast, "id">): string => {
+  const id = `toast-${Date.now()}`;
+  const newToast = { ...toast, id };
   
-  // Registra o setter deste componente se ainda não estiver registrado
-  if (!toastSetters.includes(setToasts)) {
-    toastSetters.push(setToasts);
-    // Configurar o estado inicial
-    setToasts([...toastStore]);
-  }
+  globalToasts.push(newToast);
+  notifySubscribers();
   
-  return {
-    toast: {
-      // Método para adicionar um toast
-      toast: (props: Omit<Toast, "id">) => {
-        const id = `toast-${Date.now()}`;
-        const newToast = { ...props, id };
-        
-        toastStore = [...toastStore, newToast];
-        notifyToastChange();
-        
-        // Auto-remove após 3 segundos
-        setTimeout(() => {
-          toastStore = toastStore.filter(t => t.id !== id);
-          notifyToastChange();
-        }, 3000);
-        
-        return id;
-      },
-      
-      // Método para remover um toast específico
-      dismiss: (id?: string) => {
-        if (id) {
-          toastStore = toastStore.filter(t => t.id !== id);
-        } else {
-          toastStore = [];
-        }
-        notifyToastChange();
-      },
-      
-      // Lista atual de toasts
-      toasts: toastStore
+  // Auto-remover após 3 segundos
+  setTimeout(() => {
+    removeToast(id);
+  }, 3000);
+  
+  return id;
+};
+
+const removeToast = (id?: string): void => {
+  if (id) {
+    const index = globalToasts.findIndex(toast => toast.id === id);
+    if (index !== -1) {
+      globalToasts.splice(index, 1);
+      notifySubscribers();
     }
+  } else {
+    globalToasts.length = 0;
+    notifySubscribers();
+  }
+};
+
+// Hook para usar o sistema de toast
+export function useToast() {
+  return {
+    toast: (props: Omit<Toast, "id">) => addToast(props),
+    dismiss: (id?: string) => removeToast(id),
+    toasts: globalToasts
   };
 }
+
+// API global
+export const toast = {
+  show: (props: Omit<Toast, "id">) => addToast(props),
+  dismiss: (id?: string) => removeToast(id),
+  subscribe: (callback: (toasts: Toast[]) => void): (() => void) => {
+    subscribers.push(callback);
+    callback([...globalToasts]);
+    
+    return () => {
+      const index = subscribers.indexOf(callback);
+      if (index !== -1) {
+        subscribers.splice(index, 1);
+      }
+    };
+  }
+};

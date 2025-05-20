@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import { useToast, type Toast } from '@/components/ui/use-toast';
+import { toast, type Toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 /**
@@ -9,19 +9,11 @@ import { cn } from '@/lib/utils';
  */
 export function Toaster() {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const { toast } = useToast();
-
+  
   useEffect(() => {
-    // Forma simplificada - observamos direto os toasts do hook
-    setToasts(toast.toasts || []);
-    
-    // Configurando um timeout para verificar toasts a cada 300ms
-    const interval = setInterval(() => {
-      setToasts(toast.toasts || []);
-    }, 300);
-    
-    return () => clearInterval(interval);
-  }, [toast]);
+    const unsubscribe = toast.subscribe(setToasts);
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="fixed top-0 right-0 z-50 flex flex-col items-end p-4 gap-2 w-full sm:max-w-md">
@@ -40,7 +32,6 @@ export function Toaster() {
             toast.className
           )}
           onClick={() => {
-            // Permite fechar o toast ao clicar nele
             toast.dismiss(toast.id);
           }}
         >
@@ -68,60 +59,3 @@ export function Toaster() {
     </div>
   );
 }
-
-// Extensão do hook de toast global
-toast.subscribe = (listener: (toasts: Toast[]) => void) => {
-  if (typeof window === 'undefined') return () => {};
-  
-  // @ts-ignore - Estendendo a API global do toast
-  if (!toast._listeners) toast._listeners = [];
-  // @ts-ignore
-  toast._listeners.push(listener);
-  
-  return () => {
-    // @ts-ignore
-    toast._listeners = toast._listeners.filter((l: any) => l !== listener);
-  };
-};
-
-toast.unsubscribe = (listener: (toasts: Toast[]) => void) => {
-  if (typeof window === 'undefined') return;
-  // @ts-ignore
-  if (!toast._listeners) return;
-  // @ts-ignore
-  toast._listeners = toast._listeners.filter((l: any) => l !== listener);
-};
-
-// Função interna para notificar alterações
-// @ts-ignore
-toast._notify = () => {
-  // @ts-ignore
-  if (!toast._listeners) return;
-  // @ts-ignore
-  toast._listeners.forEach((listener: (toasts: Toast[]) => void) => {
-    // @ts-ignore
-    listener(toast._toasts || []);
-  });
-};
-
-// Integração com o hook existente
-const originalToast = toast.toast;
-toast.toast = (props: any) => {
-  const id = originalToast(props);
-  // @ts-ignore
-  toast._notify();
-  return id;
-};
-
-const originalDismiss = toast.dismiss;
-toast.dismiss = (toastId?: string) => {
-  originalDismiss(toastId);
-  // @ts-ignore
-  toast._notify();
-};
-
-// Inicialização
-// @ts-ignore
-toast._toasts = toast.toasts || [];
-// @ts-ignore
-toast._listeners = [];
