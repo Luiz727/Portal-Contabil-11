@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
-import EnhancedSidebar from "@/components/EnhancedSidebar";
-import Header from "@/components/Header";
-import NIXCONSidebarResponsivo2 from "@/components/nixcon-ui/NIXCONSidebarResponsivo2";
-import NIXCONHeaderResponsivo from "@/components/nixcon-ui/NIXCONHeaderResponsivo";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import Header from "@/components/Header";
 
 type MainLayoutProps = {
   children: React.ReactNode;
@@ -63,13 +60,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Layout unificado para todas as páginas, incluindo calculadora e módulo fiscal
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Novo sidebar responsivo */}
-      <NIXCONSidebarResponsivo2 onToggle={setIsSidebarOpen} />
+      {/* Sidebar com ícones dourados e texto escuro */}
+      <NIXCONSidebar />
       
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-nixcon-gray/50 md:hidden backdrop-blur-sm" 
+          className="fixed inset-0 z-40 bg-gray-500/50 md:hidden backdrop-blur-sm" 
           onClick={toggleSidebar}
         ></div>
       )}
@@ -89,17 +86,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
           `}
         </style>
         
-        {/* Novo header responsivo com seleção de empresa */}
-        <NIXCONHeaderResponsivo 
-          onMenuToggle={toggleSidebar} 
-          empresas={[
-            { id: '1', nome: 'Comércio Varejista Alfa Ltda' },
-            { id: '2', nome: 'Holding Investimentos XYZ S.A.' },
-            { id: '3', nome: 'Serviços Contábeis NIXCON' }
-          ]}
-          empresaSelecionada={{ id: '1', nome: 'Comércio Varejista Alfa Ltda' }}
-          onChangeEmpresa={(empresa) => console.log('Empresa selecionada:', empresa)}
-        />
+        {/* Header com indicador de visão (escritório/empresa) */}
+        <NIXCONHeader onMenuToggle={toggleSidebar} />
         
         <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8 hide-scrollbar">
           <div className="mx-auto max-w-7xl">
