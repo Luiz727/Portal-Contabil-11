@@ -29,7 +29,7 @@ const NIXCONDashboard = () => {
         </div>
         <div className="nixcon-flex nixcon-flex-col xs:nixcon-flex-row nixcon-gap-2">
           <select 
-            className="nixcon-select"
+            className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d9bb42] focus:border-[#d9bb42]"
             value={selectedCompany}
             onChange={(e) => setSelectedCompany(e.target.value)}
           >
@@ -39,7 +39,7 @@ const NIXCONDashboard = () => {
           </select>
           
           <button 
-            className="nixcon-btn nixcon-btn-primary"
+            className="flex items-center gap-2 bg-[#d9bb42] text-white py-2 px-4 rounded-md text-sm font-medium"
             onClick={handleCreateTask}
           >
             <PlusCircle size={16} />

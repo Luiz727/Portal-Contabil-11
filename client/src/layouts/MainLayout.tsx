@@ -99,15 +99,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </div>
         
         {/* Footer com informações de copyright */}
-        <footer className="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-muted-foreground">
+        <footer className="bg-white border-t border-gray-200 py-2 px-6 text-sm text-gray-500">
           <div className="flex justify-between items-center">
             <div>
               <span className="font-medium">
-                <span className="nixcon-gold">NIX</span>
-                <span className="nixcon-gray">CON</span>
+                <span className="text-[#d9bb42]">NIX</span>
+                <span className="text-[#4a4a4a]">CON</span>
               </span> © {new Date().getFullYear()} Todos os direitos reservados.
             </div>
-            <div className="text-xs hidden md:block">
+            <div className="text-xs">
               v1.0.0
             </div>
           </div>

@@ -95,33 +95,18 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
             {/* Desktop View */}
             <div className="hidden md:flex md:items-center">
               <h1 className="text-2xl font-bold mr-8">
-                <span style={{color: "#d9bb42"}}>NIX</span>
-                <span className="text-gray-600">CON</span>
+                <span className="text-[#d9bb42]">NIX</span>
+                <span className="text-[#4a4a4a]">CON</span>
               </h1>
               
-              <div ref={searchRef} className={cn(
-                "relative transition-all duration-200",
-                isSearchExpanded ? "w-96" : "w-64"
-              )}>
-                <form onSubmit={handleSearch}>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="material-icons text-muted-foreground text-sm">search</span>
-                    </span>
-                    <Input
-                      type="text"
-                      placeholder="Buscar documentos, clientes..."
-                      className={cn(
-                        "pl-10 pr-4 py-2 h-10 border-primary/20 rounded-full transition-all duration-200",
-                        "focus:border-primary focus:ring-1 focus:ring-primary/30",
-                        isSearchExpanded ? "w-full shadow-sm" : "w-full"
-                      )}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onFocus={() => setIsSearchExpanded(true)}
-                    />
-                  </div>
-                </form>
+              <div ref={searchRef} className="relative transition-all duration-200 w-80">
+                <Input
+                  type="text"
+                  placeholder="Buscar documentos, clientes..."
+                  className="pl-3 pr-4 py-2 h-9 rounded-md border-gray-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
           </>
@@ -141,9 +126,12 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Seletor de empresas para usuários do escritório - agora com estilo melhorado */}
-          <div className="hidden sm:block">
-            <EmpresaSelector />
+          {/* Seletor de empresas com estilo conforme a imagem de referência */}
+          <div className="hidden sm:flex sm:items-center sm:border sm:border-gray-200 sm:rounded-md sm:px-3 sm:py-1.5 sm:bg-white">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">CA</span>
+              <span className="text-sm">Comércio ABC</span>
+            </div>
           </div>
 
           {/* Notifications */}
