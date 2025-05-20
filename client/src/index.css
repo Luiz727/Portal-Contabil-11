@@ -1,53 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css');
 
-/* Tailwind base ainda é mantido para compatibilidade com componentes existentes */
+/* Tailwind base é mantido para compatibilidade com componentes existentes */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-      --background: 0 0% 100%;
---foreground: 20 14.3% 4.1%;
---muted: 60 4.8% 95.9%;
---muted-foreground: 25 5.3% 44.7%;
---popover: 0 0% 100%;
---popover-foreground: 20 14.3% 4.1%;
---card: 0 0% 100%;
---card-foreground: 20 14.3% 4.1%;
---border: 20 5.9% 90%;
---input: 20 5.9% 90%;
---primary: 207 90% 54%;
---primary-foreground: 211 100% 99%;
---secondary: 60 4.8% 95.9%;
---secondary-foreground: 24 9.8% 10%;
---accent: 60 4.8% 95.9%;
---accent-foreground: 24 9.8% 10%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 60 9.1% 97.8%;
---ring: 20 14.3% 4.1%;
---radius: 0.5rem;
+/* Estilos globais NIXCON */
+@layer base {
+  html {
+    font-family: 'Roboto', system-ui, sans-serif;
   }
-  .dark {
-      --background: 240 10% 3.9%;
---foreground: 0 0% 98%;
---muted: 240 3.7% 15.9%;
---muted-foreground: 240 5% 64.9%;
---popover: 240 10% 3.9%;
---popover-foreground: 0 0% 98%;
---card: 240 10% 3.9%;
---card-foreground: 0 0% 98%;
---border: 240 3.7% 15.9%;
---input: 240 3.7% 15.9%;
---primary: 207 90% 54%;
---primary-foreground: 211 100% 99%;
---secondary: 240 3.7% 15.9%;
---secondary-foreground: 0 0% 98%;
---accent: 240 3.7% 15.9%;
---accent-foreground: 0 0% 98%;
---destructive: 0 62.8% 30.6%;
---destructive-foreground: 0 0% 98%;
---ring: 240 4.9% 83.9%;
---radius: 0.5rem;
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-weight: 600;
+  }
+  
+  .nixcon-gold {
+    color: hsl(43, 100%, 50%);
+  }
+  
+  .nixcon-gold-bg {
+    background-color: hsl(43, 100%, 50%);
+  }
+  
+  .nixcon-gray {
+    color: hsl(220, 14%, 25%);
+  }
+  
+  .nixcon-gray-bg {
+    background-color: hsl(220, 14%, 25%);
+  }
+}
+
+/* Componentes customizados NIXCON */
+@layer components {
+  .btn-nixcon-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md;
+  }
+  
+  .btn-nixcon-secondary {
+    @apply bg-white border border-primary/50 text-primary hover:bg-primary/5 shadow-sm;
+  }
+  
+  .nixcon-card {
+    @apply bg-white rounded-xl shadow-md border border-gray-100 p-4 transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .nixcon-badge {
+    @apply bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .nixcon-data-display {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm p-3;
+  }
+}
+
+:root {
+  /* Cores da NIXCON - Ouro e Cinza */
+  --background: 0 0% 100%;
+  --foreground: 220 14% 25%;
+  --muted: 220 14% 95%;
+  --muted-foreground: 220 10% 50%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 14% 25%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 14% 25%;
+  --border: 220 13% 90%;
+  --input: 220 13% 90%;
+  
+  /* Cor primária: Ouro NIXCON */
+  --primary: 43 100% 50%;
+  --primary-foreground: 220 20% 25%;
+  
+  /* Cores secundárias */
+  --secondary: 220 14% 95%;
+  --secondary-foreground: 220 20% 30%;
+  --accent: 43 80% 96%;
+  --accent-foreground: 220 20% 25%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 43 100% 50%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 220 35% 15%;
+  --foreground: 0 0% 98%;
+  --muted: 220 25% 25%;
+  --muted-foreground: 220 20% 70%;
+  --popover: 220 35% 15%;
+  --popover-foreground: 0 0% 98%;
+  --card: 220 35% 18%;
+  --card-foreground: 0 0% 98%;
+  --border: 220 25% 25%;
+  --input: 220 25% 25%;
+  
+  /* Cor primária: Ouro NIXCON também no modo escuro */
+  --primary: 43 100% 50%;
+  --primary-foreground: 220 35% 15%;
+  
+  /* Cores secundárias no modo escuro */
+  --secondary: 220 25% 25%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 43 60% 25%;
+  --accent-foreground: 43 100% 60%;
+  --destructive: 0 70% 40%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 100% 50%;
+  --radius: 0.5rem;
   }
 
 @layer base {

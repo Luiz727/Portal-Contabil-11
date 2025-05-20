@@ -72,8 +72,14 @@ const NavSection = ({ title, children, collapsed = false }: NavSectionProps) => 
   );
 };
 
+// Propriedades do componente
+type EnhancedSidebarProps = {
+  isMobile?: boolean;
+  closeSidebar?: () => void;
+};
+
 // Componente principal do Sidebar
-export default function EnhancedSidebar() {
+export default function EnhancedSidebar({ isMobile = false, closeSidebar }: EnhancedSidebarProps) {
   const [location] = useLocation();
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);

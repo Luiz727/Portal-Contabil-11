@@ -10,17 +10,17 @@ const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay, highlig
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
     >
-      <Card className={`h-full ${highlight ? 'border-2 border-primary shadow-md' : ''}`}>
-        <CardHeader className={`pb-2 ${highlight ? 'bg-primary/10' : ''}`}>
+      <Card className={`h-full nixcon-card ${highlight ? 'border-2 border-primary shadow-lg' : ''}`}>
+        <CardHeader className={`pb-2 ${highlight ? 'bg-primary/10 rounded-t-xl' : ''}`}>
           <div className="flex justify-between items-start">
-            <CardTitle className={`text-sm font-medium ${highlight ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
+            <CardTitle className={`text-sm font-semibold ${highlight ? 'nixcon-gold' : 'nixcon-gray'}`}>
               {title}
             </CardTitle>
-            <Icon className={`h-5 w-5 ${color}`} />
+            <Icon className={`h-5 w-5 ${highlight ? 'nixcon-gold' : color}`} />
           </div>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${highlight ? 'text-primary' : ''}`}>
+          <div className={`text-2xl font-bold ${highlight ? 'nixcon-gold' : ''}`}>
             {typeof value === 'number' ? 
               new Intl.NumberFormat('pt-BR', { 
                 style: 'currency', 

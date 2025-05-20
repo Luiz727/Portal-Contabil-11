@@ -51,7 +51,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   // Para o módulo fiscal, usamos o layout normal com a sidebar
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar em desktop ou tablet */}
       <div className="hidden md:block flex-shrink-0">
         <EnhancedSidebar />
@@ -60,18 +60,45 @@ export default function MainLayout({ children }: MainLayoutProps) {
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/50 md:hidden" 
+          className="fixed inset-0 z-40 bg-nixcon-gray/50 md:hidden backdrop-blur-sm" 
           onClick={toggleSidebar}
         ></div>
       )}
       
+      {/* Mobile sidebar */}
+      <div 
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <EnhancedSidebar isMobile={true} closeSidebar={() => setIsSidebarOpen(false)} />
+      </div>
+      
       {/* Main content */}
       <main className="flex-grow flex flex-col overflow-hidden">
-        <Header toggleSidebar={toggleSidebar} />
+        <Header toggleSidebar={toggleSidebar} fiscalModule={isFiscalModule} />
         
-        <div className="flex-grow overflow-auto bg-background/40 p-4 md:p-6">
-          {children}
+        <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
         </div>
+        
+        {/* Footer com informações de copyright */}
+        <footer className="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-muted-foreground">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="font-medium">
+                <span className="nixcon-gold">NIX</span>
+                <span className="nixcon-gray">CON</span>
+              </span> © {new Date().getFullYear()} Todos os direitos reservados.
+            </div>
+            <div className="text-xs hidden md:block">
+              v1.0.0
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );
