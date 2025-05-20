@@ -3,24 +3,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, TrendingUp, DollarSign, Percent, TrendingDown, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay }) => {
+const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay, highlight = false }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
     >
-      <Card className="h-full">
-        <CardHeader className="pb-2">
+      <Card className={`h-full ${highlight ? 'border-2 border-primary shadow-md' : ''}`}>
+        <CardHeader className={`pb-2 ${highlight ? 'bg-primary/10' : ''}`}>
           <div className="flex justify-between items-start">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className={`text-sm font-medium ${highlight ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
               {title}
             </CardTitle>
             <Icon className={`h-5 w-5 ${color}`} />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className={`text-2xl font-bold ${highlight ? 'text-primary' : ''}`}>
             {typeof value === 'number' ? 
               new Intl.NumberFormat('pt-BR', { 
                 style: 'currency', 
@@ -94,6 +94,7 @@ const TaxSummaryDisplay = ({ summary }) => {
               color="text-red-500"
               subtitle="ICMS, PIS, COFINS, etc."
               delay={0.3}
+              highlight={true}
             />
             
             <SummaryCard
@@ -103,6 +104,7 @@ const TaxSummaryDisplay = ({ summary }) => {
               color="text-indigo-500"
               subtitle="Créditos tributários"
               delay={0.4}
+              highlight={true}
             />
             
             <SummaryCard
@@ -124,16 +126,31 @@ const TaxSummaryDisplay = ({ summary }) => {
             />
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mt-6 pt-4 border-t border-border text-sm">
-            <div className="flex items-center text-muted-foreground">
-              <Calculator className="h-4 w-4 mr-1" />
-              Total de Impostos: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalImpostos)}
-              <span className="ml-2 text-xs">({((totalImpostos / faturamentoTotal) * 100).toFixed(2)}% do faturamento)</span>
+          <div className="mt-6 pt-4 border-t border-border">
+            {/* Bloco destacado para total de impostos */}
+            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4 shadow-sm">
+              <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center">
+                <div className="flex items-center font-medium text-primary text-lg">
+                  <Calculator className="h-5 w-5 mr-2" />
+                  Total de Impostos: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalImpostos)}
+                </div>
+                
+                <div className="flex items-center mt-2 md:mt-0 bg-white/60 px-3 py-1 rounded-full text-sm">
+                  <Percent className="h-4 w-4 mr-1 text-primary" />
+                  <span className="font-bold text-primary">
+                    {((totalImpostos / faturamentoTotal) * 100).toFixed(2)}% do faturamento
+                  </span>
+                </div>
+              </div>
             </div>
             
-            <div className={`${lucroBruto >= 0 ? 'text-green-600' : 'text-red-600'} font-medium mt-2 sm:mt-0`}>
-              <TrendingUp className={`h-4 w-4 mr-1 inline ${lucroBruto >= 0 ? '' : 'rotate-180'}`} />
-              Lucro Líquido Estimado: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucroBruto)}
+            {/* Lucro líquido estimado */}
+            <div className={`flex items-center justify-center p-3 rounded-lg ${lucroBruto >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              <TrendingUp className={`h-5 w-5 mr-2 ${lucroBruto >= 0 ? 'text-green-600' : 'text-red-600'} ${lucroBruto >= 0 ? '' : 'rotate-180'}`} />
+              <span className="font-medium mr-2">Lucro Líquido Estimado:</span>
+              <span className={`text-xl font-bold ${lucroBruto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucroBruto)}
+              </span>
             </div>
           </div>
         </CardContent>

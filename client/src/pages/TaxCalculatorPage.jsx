@@ -300,18 +300,64 @@ const TaxCalculatorPage = () => {
   }, [empresaAtual, userTaxConfig, user.type, toast, getTaxRateForCalc]);
   
 
-  // Realizamos o cálculo apenas quando o usuário adicionar, remover ou editar produtos
-  // ou quando alterar o valor de venda total global, não automaticamente
+  // Removemos completamente o useEffect que causava atualização infinita
+  
+  // Realizamos o cálculo apenas quando o usuário clicar no botão "Calcular Impostos"
   const realizarCalculo = () => {
-    const produtosAtualizados = calculateSummary(formData.produtos, formData.valorVendaTotalGlobal);
-    if (JSON.stringify(produtosAtualizados) !== JSON.stringify(formData.produtos)) {
-      setFormData(prev => ({ ...prev, produtos: produtosAtualizados }));
+    // Usar diretamente a função calculateSummary para atualizar o sumário sem ciclo infinito
+    if (formData.produtos.length === 0) {
+      toast({ 
+        variant: "destructive",
+        title: "Sem produtos", 
+        description: "Adicione produtos para realizar o cálculo.",
+        duration: 3000 // Desaparece em 3 segundos
+      });
+      return;
     }
+    
+    // Aplicar o cálculo sem atualizar o estado formData (evita loop infinito)
+    let custoTotalProdutos = 0;
+    let totalImpostosVendas = 0;
+    let faturamentoTotal = 0;
+    
+    // Calcular valores básicos
+    formData.produtos.forEach(p => {
+      const qtd = parseFloat(p.quantidade) || 0;
+      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
+      const vVenda = parseFloat(p.valorVendaUnitario) || 0;
+      
+      custoTotalProdutos += qtd * pCusto;
+      faturamentoTotal += qtd * vVenda;
+    });
+    
+    // Aplicar impostos conforme regime
+    if (empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional') {
+      const aliquota = empresaAtual.config_fiscal_padrao.simplesNacionalAliquota / 100 || 0.06;
+      totalImpostosVendas = faturamentoTotal * aliquota;
+    } else {
+      // Impostos padrão para outros regimes
+      totalImpostosVendas = faturamentoTotal * 0.15; // ICMS + PIS + COFINS estimados
+    }
+    
+    const impostosCompras = custoTotalProdutos * 0.05;
+    const difal = faturamentoTotal * 0.02;
+    const lucroBruto = faturamentoTotal - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
+    
+    // Atualizar sumário diretamente
+    setSummary({
+      faturamentoTotal,
+      custoTotalProdutos,
+      impostosVendas: totalImpostosVendas,
+      impostosCompras,
+      difal,
+      lucroBruto,
+    });
     
     toast({ 
       title: "Cálculos Realizados", 
       description: "Os impostos e margens foram calculados com sucesso.",
-      className: "bg-primary text-primary-foreground"
+      className: "bg-primary text-primary-foreground",
+      duration: 3000 // Desaparece em 3 segundos
     });
   };
   
