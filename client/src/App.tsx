@@ -24,6 +24,9 @@ import { useAuth } from "@/hooks/useAuth";
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
 
+// Páginas administrativas
+import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -140,6 +143,15 @@ function Router() {
         <Route path="/fiscal">
           <MainLayout>
             <FiscalPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {/* Páginas Administrativas */}
+      {isAuthenticated && (
+        <Route path="/admin/configuracoes">
+          <MainLayout>
+            <ConfiguracoesAdminPage />
           </MainLayout>
         </Route>
       )}
