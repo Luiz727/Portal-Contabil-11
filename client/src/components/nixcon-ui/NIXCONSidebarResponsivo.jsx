@@ -307,6 +307,15 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
           />
           
           <SidebarItem 
+            icon={Truck} 
+            label="Importar Produtos" 
+            to="/admin/importar-produtos" 
+            active={location === "/admin/importar-produtos"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+          
+          <SidebarItem 
             icon={CreditCard} 
             label="Planos e Assinaturas" 
             to="/admin/planos" 

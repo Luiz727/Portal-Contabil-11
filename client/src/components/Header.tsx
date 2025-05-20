@@ -25,9 +25,10 @@ import { User2, Building, Check } from "lucide-react";
 type HeaderProps = {
   toggleSidebar: () => void;
   fiscalModule?: boolean;
+  onVisualizationChange?: (type: "escritorio" | "empresa") => void;
 };
 
-export default function Header({ toggleSidebar, fiscalModule = false }: HeaderProps) {
+export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
   const { user } = useAuth();
   const { actingAsEmpresa } = useEmpresas();
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,30 +134,50 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
             <DropdownMenuTrigger asChild>
               <div className="hidden sm:flex sm:items-center sm:border sm:border-gray-200 sm:rounded-md sm:px-3 sm:py-1.5 sm:bg-white cursor-pointer hover:bg-gray-50">
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium px-2 py-0.5 bg-gray-100 rounded text-gray-700">CA</span>
-                  <span className="text-sm text-gray-700">Comércio ABC</span>
+                  <span className="text-sm font-medium px-2 py-0.5 bg-gray-100 rounded text-gray-700">
+                    {fiscalModule ? "NX" : "CA"}
+                  </span>
+                  <span className="text-sm text-gray-700">
+                    {fiscalModule ? "NIXCON" : "Comércio ABC"}
+                  </span>
                 </div>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Alterar Visualização</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (onVisualizationChange) onVisualizationChange("escritorio");
+                window.location.href = "/admin/produtos-universais";
+              }}>
                 <User2 className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Visão do Escritório</span>
+                {fiscalModule && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Empresas</DropdownMenuLabel>
-              <DropdownMenuItem className="bg-gray-50">
+              <DropdownMenuItem 
+                className={!fiscalModule ? "bg-gray-50" : ""}
+                onClick={() => {
+                  if (onVisualizationChange) onVisualizationChange("empresa");
+                  window.location.href = "/";
+                }}
+              >
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Comércio ABC</span>
-                <Check className="ml-auto h-4 w-4" />
+                {!fiscalModule && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (onVisualizationChange) onVisualizationChange("empresa");
+                window.location.href = "/";
+              }}>
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Grupo Aurora</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (onVisualizationChange) onVisualizationChange("empresa");
+                window.location.href = "/";
+              }}>
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Holding XYZ</span>
               </DropdownMenuItem>
