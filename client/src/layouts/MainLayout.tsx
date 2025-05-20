@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
+import EnhancedSidebar from "@/components/EnhancedSidebar";
 
 type MainLayoutProps = {
   children: React.ReactNode;
@@ -60,8 +61,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Layout unificado para todas as páginas, incluindo calculadora e módulo fiscal
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Sidebar com ícones dourados e texto escuro */}
-      <NIXCONSidebar />
+      {/* Sidebar default */}
+      <div className="hidden md:block">
+        <EnhancedSidebar />
+      </div>
       
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
@@ -86,8 +89,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
           `}
         </style>
         
-        {/* Header com indicador de visão (escritório/empresa) */}
-        <NIXCONHeader onMenuToggle={toggleSidebar} />
+        {/* Header padrão */}
+        <Header onMenuToggle={toggleSidebar} />
         
         <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8 hide-scrollbar">
           <div className="mx-auto max-w-7xl">

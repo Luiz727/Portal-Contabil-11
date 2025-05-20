@@ -8,7 +8,9 @@ import {
   ChevronDown,
   LogOut,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Building,
+  UserCircle
 } from 'lucide-react';
 import logoNixcon from '../../assets/logo-nixcon.png';
 
@@ -19,8 +21,10 @@ const NIXCONHeaderResponsivo = ({
   onChangeEmpresa 
 }) => {
   const { user } = useAuth();
+  const [viewMode, setViewMode] = useState('escritorio'); // 'escritorio' ou 'empresa'
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showViewModeSelector, setShowViewModeSelector] = useState(false);
   const [notificacoes] = useState([
     { id: 1, titulo: 'Nova declaração disponível', data: '19/05/2025', lida: false },
     { id: 2, titulo: 'Vencimento de imposto próximo', data: '18/05/2025', lida: true },
