@@ -19,7 +19,7 @@ import Settings from "@/pages/Settings";
 import Integrations from "@/pages/Integrations";
 import WhatsApp from "@/pages/WhatsApp";
 import MainLayout from "@/layouts/MainLayout";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
@@ -35,7 +35,7 @@ import { EmpresasProvider } from "@/contexts/EmpresasContext";
 import { ProdutosProvider } from "@/contexts/ProdutosContext";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth ? useAuth() : { isAuthenticated: false, isLoading: false };
 
   if (isLoading) {
     return (
@@ -180,12 +180,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <EmpresasProvider>
-          <ProdutosProvider>
-            <Toaster />
-            <Router />
-          </ProdutosProvider>
-        </EmpresasProvider>
+        <AuthProvider>
+          <EmpresasProvider>
+            <ProdutosProvider>
+              <Toaster />
+              <Router />
+            </ProdutosProvider>
+          </EmpresasProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
