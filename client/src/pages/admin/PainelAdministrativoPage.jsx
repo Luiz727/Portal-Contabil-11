@@ -25,6 +25,19 @@ import { motion, AnimatePresence } from "framer-motion";
  * organizadas em abas.
  */
 const PainelAdministrativoPage = () => {
+  const [showNotification, setShowNotification] = useState(true);
+  
+  // Fechar a notificação automaticamente após 8 segundos
+  useEffect(() => {
+    if (showNotification) {
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 8000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showNotification]);
+  
   // Opções de configuração administrativa
   const menuOptions = [
     {
@@ -107,6 +120,38 @@ const PainelAdministrativoPage = () => {
           <p className="text-gray-500">Acesso centralizado a todas as ferramentas administrativas</p>
         </div>
       </div>
+      
+      {/* Alerta de notificação que pode ser fechado */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6 relative rounded-md border p-4 shadow-sm bg-green-50 border-green-200"
+          >
+            <button
+              onClick={() => setShowNotification(false)}
+              className="absolute right-2 top-2 rounded-full p-1 text-green-500 hover:bg-green-100 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            
+            <div className="flex">
+              <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-medium text-green-800">
+                  Configurações salvas
+                </h3>
+                <p className="text-sm text-green-700 mt-1">
+                  Suas configurações foram atualizadas com sucesso.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="mb-4">
         <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
