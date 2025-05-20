@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import EmpresaSelector from "@/components/EmpresaSelector";
+import { useEmpresas } from "@/contexts/EmpresasContext";
 
 type HeaderProps = {
   toggleSidebar: () => void;
@@ -11,6 +13,7 @@ type HeaderProps = {
 
 export default function Header({ toggleSidebar, fiscalModule = false }: HeaderProps) {
   const { user } = useAuth();
+  const { actingAsEmpresa } = useEmpresas();
   const [searchQuery, setSearchQuery] = useState("");
   const avatarUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
@@ -75,7 +78,10 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
           </>
         )}
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
+          {/* Seletor de empresas para usuários do escritório */}
+          <EmpresaSelector />
+
           <button 
             type="button"
             className="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none"

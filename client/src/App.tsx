@@ -30,6 +30,10 @@ import TaxCalculatorPage from "@/pages/TaxCalculatorPage";
 // Páginas administrativas
 import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
 
+// Contextos
+import { EmpresasProvider } from "@/contexts/EmpresasContext";
+import { ProdutosProvider } from "@/contexts/ProdutosContext";
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -176,8 +180,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <EmpresasProvider>
+          <ProdutosProvider>
+            <Toaster />
+            <Router />
+          </ProdutosProvider>
+        </EmpresasProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
