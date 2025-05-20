@@ -7,9 +7,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import LoginPage from '@/pages/LoginPage';
 import TaxCalculatorPage from '@/pages/TaxCalculatorPage';
 
-// Componente de rota protegida que verifica autenticação
-import ProtectedRoute from '@/components/ProtectedRoute';
-
 const App: React.FC = () => {
   return (
     <AuthProvider>
