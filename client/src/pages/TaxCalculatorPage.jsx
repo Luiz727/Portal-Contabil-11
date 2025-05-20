@@ -1,277 +1,187 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Calculator, Save, Send, AlertTriangle, Settings, CalculatorIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useToast } from "@/hooks/use-toast";
-import ProductService from '@/services/ProductService';
-import SimulationForm from '@/components/tax-calculator/SimulationForm';
-import TaxSummaryDisplay from '@/components/tax-calculator/TaxSummaryDisplay';
-import SavedSimulationsList from '@/components/tax-calculator/SavedSimulationsList';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from "@/components/ui/use-toast";
+import { Calculator, Save, Send, AlertTriangle, Settings, Eye, Plus, Trash2, ArrowRight } from 'lucide-react';
+import MainLayout from '@/layouts/MainLayout';
 
+/**
+ * Página da Calculadora de Impostos e Custos
+ * Permite simular o impacto fiscal e o lucro de vendas
+ */
 const TaxCalculatorPage = () => {
   const { toast } = useToast();
+  const [universalProducts, setUniversalProducts] = useState([
+    { id: 1, nome: 'Produto 1', preco_custo: 100, categoria: 'Eletrônicos' },
+    { id: 2, nome: 'Produto 2', preco_custo: 200, categoria: 'Móveis' },
+    { id: 3, nome: 'Produto 3', preco_custo: 50, categoria: 'Decoração' },
+    { id: 4, nome: 'Serviço 1', preco_custo: 80, categoria: 'Serviços' },
+  ]);
   
-  // Em um cenário real, esses dados viriam de um contexto de autenticação
-  const user = { id: 1, name: 'Usuário Demonstração', type: 'EmpresaUsuaria' };
-  const empresaAtual = { 
-    id: 1, 
-    nome: 'Empresa Demo Ltda', 
-    regime_tributario: 'Simples Nacional',
-    config_fiscal_padrao: {
-      icms: 18,
-      pis: 1.65,
-      cofins: 7.6,
-      ipi: 5,
-      iss: 5,
-      simplesNacionalAliquota: 6
-    }
-  };
-  
-  const [activeTab, setActiveTab] = useState('form');
+  // Simulações salvas
   const [simulations, setSimulations] = useState([]);
-  const [currentSimulation, setCurrentSimulation] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   
-  const initialFormData = {
+  // Simulação atual
+  const [formData, setFormData] = useState({
     id: null,
     data: new Date().toISOString().split('T')[0],
     clienteNome: '',
-    produtos: [], 
-    valorVendaTotalGlobal: '', 
-    empresaIdContexto: empresaAtual?.id || null,
-  };
-
-  const [formData, setFormData] = useState(initialFormData);
+    produtos: [],
+    valorVendaTotalGlobal: ''
+  });
+  
+  // Resumo fiscal
   const [summary, setSummary] = useState(null);
-  const [universalProducts, setUniversalProducts] = useState([]);
-  const [userTaxConfig, setUserTaxConfig] = useState(null);
-
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Configuração de impostos
+  const [taxConfig] = useState({
+    icms: 18,
+    ipi: 5,
+    pis: 1.65,
+    cofins: 7.60,
+    iss: 5,
+    simplesNacionalAliquota: 6
+  });
+  
+  // Carregar simulações salvas do localStorage
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const products = await ProductService.getUniversalProducts();
-        setUniversalProducts(products);
-      } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        toast({ 
-          variant: "destructive", 
-          title: "Erro ao carregar produtos", 
-          description: "Não foi possível carregar a lista de produtos." 
-        });
-      }
-    }
-    fetchProducts();
-    
-    const storedSimulations = localStorage.getItem('taxSimulations');
+    const storedSimulations = localStorage.getItem('nixconTaxSimulations');
     if (storedSimulations) {
-      try {
-        setSimulations(JSON.parse(storedSimulations));
-      } catch (e) {
-        console.error('Erro ao carregar simulações salvas:', e);
-      }
+      setSimulations(JSON.parse(storedSimulations));
     }
-
-    if (user && user.type === 'UsuarioCalculadora') {
-      const storedConfig = localStorage.getItem(`taxConfig_${user.id}`);
-      if (storedConfig) {
-        try {
-          setUserTaxConfig(JSON.parse(storedConfig));
-        } catch (e) {
-          console.error('Erro ao carregar configuração fiscal do usuário:', e);
-          setUserTaxConfig({ 
-            icms: '18', 
-            ipi: '5', 
-            pis: '1.65', 
-            cofins: '7.60', 
-            iss: '5', 
-            simplesNacionalAliquota: '6' 
-          }); 
-        }
-      } else {
-        setUserTaxConfig({ 
-          icms: '18', 
-          ipi: '5', 
-          pis: '1.65', 
-          cofins: '7.60', 
-          iss: '5', 
-          simplesNacionalAliquota: '6' 
-        }); 
-      }
-    } else {
-      setUserTaxConfig(null); 
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    setFormData(prev => ({ 
-      ...prev, 
-      empresaIdContexto: empresaAtual ? empresaAtual.id : null 
-    }));
-  }, [empresaAtual]);
-
+  }, []);
+  
+  // Salvar simulações no localStorage
   const saveSimulationsToStorage = (updatedSimulations) => {
-    try {
-      localStorage.setItem('taxSimulations', JSON.stringify(updatedSimulations));
-    } catch (e) {
-      console.error('Erro ao salvar simulações:', e);
-      toast({ 
-        variant: "destructive", 
-        title: "Erro ao salvar", 
-        description: "Não foi possível salvar as simulações localmente." 
-      });
-    }
+    localStorage.setItem('nixconTaxSimulations', JSON.stringify(updatedSimulations));
   };
-
+  
+  // Resetar formulário
   const resetForm = () => {
     setFormData({
-      ...initialFormData,
-      empresaIdContexto: empresaAtual ? empresaAtual.id : null,
+      id: null,
+      data: new Date().toISOString().split('T')[0],
+      clienteNome: '',
+      produtos: [],
+      valorVendaTotalGlobal: ''
     });
-    setCurrentSimulation(null);
-    setIsEditing(false);
     setSummary(null);
+    setIsEditing(false);
   };
-
+  
+  // Atualizar campo do formulário
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
+  
+  // Atualizar campo de produto
   const handleProductInputChange = (index, field, value) => {
     const newProdutos = [...formData.produtos];
     newProdutos[index][field] = value;
     
+    // Recalcular valor total
     if (field === 'quantidade' || field === 'valorVendaUnitario') {
       const qtd = parseFloat(newProdutos[index].quantidade) || 0;
       const vVenda = parseFloat(newProdutos[index].valorVendaUnitario) || 0;
-      newProdutos[index].valorVendaTotal = qtd * vVenda;
+      newProdutos[index].valorVendaTotal = (qtd * vVenda).toFixed(2);
     }
     
     setFormData(prev => ({ ...prev, produtos: newProdutos }));
   };
-
+  
+  // Adicionar produto à simulação
   const addProductToSimulation = (product) => {
     const precoCustoDoProduto = product.preco_custo || 0;
-    const markupPadrao = 1.3; // 30% de margem inicial
-    
     const newProductEntry = {
-      ...product, 
-      produtoId: product.id, 
+      ...product,
+      produtoId: product.id,
       quantidade: 1,
-      valorVendaUnitario: precoCustoDoProduto * markupPadrao, 
-      valorVendaTotal: precoCustoDoProduto * markupPadrao,
+      valorVendaUnitario: (precoCustoDoProduto * 1.3).toFixed(2),
+      valorVendaTotal: (precoCustoDoProduto * 1.3).toFixed(2),
       precoCusto: precoCustoDoProduto,
     };
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      produtos: [...prev.produtos, newProductEntry] 
-    }));
+    setFormData(prev => ({ ...prev, produtos: [...prev.produtos, newProductEntry] }));
   };
-
-  const removeProductFromSimulation = (index) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      produtos: prev.produtos.filter((_, i) => i !== index) 
-    }));
-  };
-
-  const getTaxRateForCalc = (product, taxName) => {
-    if (user.type === 'UsuarioCalculadora' && userTaxConfig && userTaxConfig[taxName]) {
-      return parseFloat(userTaxConfig[taxName]) / 100 || 0;
-    }
-    
-    if (product && product.config_fiscal) {
-      const configFiscal = product.config_fiscal;
-      if (taxName === 'icms' && configFiscal.icms !== undefined) return parseFloat(configFiscal.icms);
-      if (taxName === 'pis' && configFiscal.pis !== undefined) return parseFloat(configFiscal.pis);
-      if (taxName === 'cofins' && configFiscal.cofins !== undefined) return parseFloat(configFiscal.cofins);
-      if (taxName === 'ipi' && configFiscal.ipi !== undefined) return parseFloat(configFiscal.ipi); 
-      if (taxName === 'iss' && configFiscal.iss !== undefined) return parseFloat(configFiscal.iss);
-      if (taxName === 'simplesNacionalAliquota' && configFiscal.simplesNacionalAliquota !== undefined) 
-        return parseFloat(configFiscal.simplesNacionalAliquota);
-    }
-
-    if (empresaAtual && empresaAtual.config_fiscal_padrao && empresaAtual.config_fiscal_padrao[taxName]) {
-      return parseFloat(empresaAtual.config_fiscal_padrao[taxName]) / 100;
-    }
-    
-    // Valores padrão caso nenhuma configuração seja encontrada
-    const defaultValues = {
-      icms: 0.18,
-      pis: 0.0165,
-      cofins: 0.076,
-      ipi: 0.05,
-      iss: 0.05,
-      simplesNacionalAliquota: 0.06
-    };
-    
-    return defaultValues[taxName] || 0;
-  };
-
-  const calculateSummary = useCallback((currentProdutos, currentValorVendaTotalGlobal) => {
-    if (!currentProdutos || currentProdutos.length === 0) {
-      setSummary(null);
-      return currentProdutos; 
-    }
   
+  // Remover produto da simulação
+  const removeProductFromSimulation = (index) => {
+    setFormData(prev => ({ ...prev, produtos: prev.produtos.filter((_, i) => i !== index) }));
+  };
+  
+  // Obter alíquota de imposto para cálculo
+  const getTaxRateForCalc = (taxName) => {
+    if (taxConfig && taxConfig[taxName]) {
+      return parseFloat(taxConfig[taxName]) / 100 || 0;
+    }
+    return 0;
+  };
+  
+  // Calcular resumo fiscal
+  const calculateSummary = () => {
+    if (!formData.produtos || formData.produtos.length === 0) {
+      toast({ 
+        variant: "destructive", 
+        title: "Erro", 
+        description: "Adicione produtos à simulação para calcular."
+      });
+      return;
+    }
+    
     let faturamentoTotalItens = 0;
-    currentProdutos.forEach(p => {
+    formData.produtos.forEach(p => {
       const qtd = parseFloat(p.quantidade) || 0;
       const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
       faturamentoTotalItens += qtd * vVendaUnitario;
     });
-  
-    let produtosProcessados = [...currentProdutos];
+    
+    let produtosProcessados = [...formData.produtos];
     let faturamentoFinalCalculo = faturamentoTotalItens;
-  
-    if (currentValorVendaTotalGlobal && parseFloat(currentValorVendaTotalGlobal) > 0 && faturamentoTotalItens > 0) {
-      const valorGlobalNumerico = parseFloat(currentValorVendaTotalGlobal);
+    
+    // Ajustar valores se o valor total global for informado
+    if (formData.valorVendaTotalGlobal && parseFloat(formData.valorVendaTotalGlobal) > 0 && faturamentoTotalItens > 0) {
+      const valorGlobalNumerico = parseFloat(formData.valorVendaTotalGlobal);
       const fatorDistribuicao = valorGlobalNumerico / faturamentoTotalItens;
       faturamentoFinalCalculo = valorGlobalNumerico;
-  
-      produtosProcessados = currentProdutos.map(p => {
+      
+      produtosProcessados = formData.produtos.map(p => {
         const itemFaturamentoOriginal = (parseFloat(p.quantidade) || 0) * (parseFloat(p.valorVendaUnitario) || 0);
         const itemFaturamentoRateado = itemFaturamentoOriginal * fatorDistribuicao;
-        const quantidadeValida = parseFloat(p.quantidade) || 1; 
+        const quantidadeValida = parseFloat(p.quantidade) || 1;
         return {
           ...p,
-          valorVendaUnitario: itemFaturamentoRateado / quantidadeValida,
-          valorVendaTotal: itemFaturamentoRateado
+          valorVendaUnitario: (itemFaturamentoRateado / quantidadeValida).toFixed(2),
+          valorVendaTotal: itemFaturamentoRateado.toFixed(2)
         };
       });
-    } else {
-       produtosProcessados = currentProdutos.map(p => {
-          const qtd = parseFloat(p.quantidade) || 0;
-          const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
-          return {
-            ...p, 
-            valorVendaTotal: qtd * vVendaUnitario 
-          };
-      });
     }
-  
+    
     let custoTotalProdutos = 0;
     let totalImpostosVendas = 0;
-  
+    
     produtosProcessados.forEach(p => {
       const qtd = parseFloat(p.quantidade) || 0;
-      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0; 
-      const itemFaturamento = parseFloat(p.valorVendaTotal) || 0; 
+      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
+      const itemFaturamento = parseFloat(p.valorVendaTotal) || 0;
       
       custoTotalProdutos += qtd * pCusto;
-  
+      
       let itemImpostosVendas = 0;
-      const icmsRate = getTaxRateForCalc(p, 'icms');
-      const pisRate = getTaxRateForCalc(p, 'pis');
-      const cofinsRate = getTaxRateForCalc(p, 'cofins');
-      const ipiRate = getTaxRateForCalc(p, 'ipi'); 
-      const issRate = getTaxRateForCalc(p, 'iss');
-      const simplesRate = getTaxRateForCalc(p, 'simplesNacionalAliquota');
-  
-      if (user.type === 'EmpresaUsuaria' && empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional' && simplesRate > 0) {
+      
+      // Cálculo simplificado de impostos
+      const icmsRate = getTaxRateForCalc('icms');
+      const pisRate = getTaxRateForCalc('pis');
+      const cofinsRate = getTaxRateForCalc('cofins');
+      const ipiRate = getTaxRateForCalc('ipi');
+      const issRate = getTaxRateForCalc('iss');
+      const simplesRate = getTaxRateForCalc('simplesNacionalAliquota');
+      
+      // Simular cálculo de regime tributário
+      const regimeTributario = 'Simples Nacional';
+      
+      if (regimeTributario === 'Simples Nacional' && simplesRate > 0) {
         itemImpostosVendas = itemFaturamento * simplesRate;
       } else {
         itemImpostosVendas = itemFaturamento * (icmsRate + pisRate + cofinsRate + issRate) + ((qtd * pCusto) * ipiRate);
@@ -279,89 +189,33 @@ const TaxCalculatorPage = () => {
       
       totalImpostosVendas += itemImpostosVendas;
     });
-  
-    const impostosCompras = custoTotalProdutos * 0.05; // Créditos tributários estimados em 5% do custo
-    const difal = faturamentoFinalCalculo * 0.02; // Estimativa de DIFAL em 2% do faturamento
-    const lucroBruto = faturamentoFinalCalculo - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
-  
-    setSummary({
-      faturamentoTotal: faturamentoFinalCalculo,
-      custoTotalProdutos,
-      impostosVendas: totalImpostosVendas,
-      impostosCompras,
-      difal,
-      lucroBruto,
-    });
     
-    // Removido toast automático durante o cálculo
-    // Só exibiremos toast ao clicar no botão de simulação
-    
-    return produtosProcessados; 
-  }, [empresaAtual, userTaxConfig, user.type, toast, getTaxRateForCalc]);
-  
-
-  // Removemos completamente o useEffect que causava atualização infinita
-  
-  // Realizamos o cálculo apenas quando o usuário clicar no botão "Calcular Impostos"
-  const realizarCalculo = () => {
-    // Usar diretamente a função calculateSummary para atualizar o sumário sem ciclo infinito
-    if (formData.produtos.length === 0) {
-      toast({ 
-        variant: "destructive",
-        title: "Sem produtos", 
-        description: "Adicione produtos para realizar o cálculo.",
-        duration: 3000 // Desaparece em 3 segundos
-      });
-      return;
-    }
-    
-    // Aplicar o cálculo sem atualizar o estado formData (evita loop infinito)
-    let custoTotalProdutos = 0;
-    let totalImpostosVendas = 0;
-    let faturamentoTotal = 0;
-    
-    // Calcular valores básicos
-    formData.produtos.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
-      const vVenda = parseFloat(p.valorVendaUnitario) || 0;
-      
-      custoTotalProdutos += qtd * pCusto;
-      faturamentoTotal += qtd * vVenda;
-    });
-    
-    // Aplicar impostos conforme regime
-    if (empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional') {
-      const aliquota = empresaAtual.config_fiscal_padrao.simplesNacionalAliquota / 100 || 0.06;
-      totalImpostosVendas = faturamentoTotal * aliquota;
-    } else {
-      // Impostos padrão para outros regimes
-      totalImpostosVendas = faturamentoTotal * 0.15; // ICMS + PIS + COFINS estimados
-    }
-    
+    // Valores adicionais
     const impostosCompras = custoTotalProdutos * 0.05;
-    const difal = faturamentoTotal * 0.02;
-    const lucroBruto = faturamentoTotal - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
+    const difal = faturamentoFinalCalculo * 0.02;
     
-    // Atualizar sumário diretamente
+    // Cálculo do lucro bruto
+    const lucroBruto = faturamentoFinalCalculo - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
+    
+    // Atualizar resumo
     setSummary({
-      faturamentoTotal,
-      custoTotalProdutos,
-      impostosVendas: totalImpostosVendas,
-      impostosCompras,
-      difal,
-      lucroBruto,
+      faturamentoTotal: faturamentoFinalCalculo.toFixed(2),
+      custoTotalProdutos: custoTotalProdutos.toFixed(2),
+      impostosVendas: totalImpostosVendas.toFixed(2),
+      impostosCompras: impostosCompras.toFixed(2),
+      difal: difal.toFixed(2),
+      lucroBruto: lucroBruto.toFixed(2),
+      margemLucro: ((lucroBruto / faturamentoFinalCalculo) * 100).toFixed(2)
     });
     
     toast({ 
-      title: "Cálculos Realizados", 
-      description: "Os impostos e margens foram calculados com sucesso.",
-      className: "bg-primary text-primary-foreground",
-      duration: 3000 // Desaparece em 3 segundos
+      title: "Cálculo Realizado", 
+      description: "Os valores foram calculados com sucesso.", 
+      className: "bg-green-600 text-white" 
     });
   };
   
-
+  // Salvar simulação
   const handleSaveSimulation = () => {
     if (formData.produtos.length === 0) {
       toast({ 
@@ -372,21 +226,26 @@ const TaxCalculatorPage = () => {
       return;
     }
     
+    if (!summary) {
+      toast({ 
+        variant: "destructive", 
+        title: "Erro", 
+        description: "Calcule os valores antes de salvar a simulação." 
+      });
+      return;
+    }
+    
     let updatedSimulations;
-    const simulationDataToSave = { 
-      ...formData, 
-      summary, 
-      empresaIdContexto: empresaAtual ? empresaAtual.id : null 
-    };
-
+    const simulationDataToSave = { ...formData, summary };
+    
     if (isEditing && formData.id) {
       updatedSimulations = simulations.map(sim => 
         sim.id === formData.id ? simulationDataToSave : sim
       );
       toast({ 
-        title: "Simulação Atualizada!", 
-        description: "As alterações foram salvas.", 
-        className: "bg-blue-500 text-white" 
+        title: "Simulação Atualizada", 
+        description: "As alterações foram salvas com sucesso.", 
+        className: "bg-blue-600 text-white" 
       });
     } else {
       const newSimulation = { 
@@ -395,185 +254,326 @@ const TaxCalculatorPage = () => {
       };
       updatedSimulations = [newSimulation, ...simulations];
       toast({ 
-        title: "Simulação Salva!", 
+        title: "Simulação Salva", 
         description: "Sua simulação foi salva com sucesso.", 
-        className: "bg-green-500 text-white" 
+        className: "bg-green-600 text-white" 
       });
     }
     
     setSimulations(updatedSimulations);
     saveSimulationsToStorage(updatedSimulations);
     resetForm();
-    setActiveTab('saved');
   };
-
+  
+  // Editar simulação
   const handleEditSimulation = (simulation) => {
-    setCurrentSimulation(simulation);
     setFormData({
       id: simulation.id,
       data: simulation.data,
       clienteNome: simulation.clienteNome,
-      produtos: simulation.produtos.map(p => ({...p})), 
-      valorVendaTotalGlobal: simulation.valorVendaTotalGlobal || '',
-      empresaIdContexto: simulation.empresaIdContexto || (empresaAtual ? empresaAtual.id : null),
+      produtos: simulation.produtos.map(p => ({...p})),
+      valorVendaTotalGlobal: simulation.valorVendaTotalGlobal || ''
     });
     setSummary(simulation.summary);
     setIsEditing(true);
-    setActiveTab('form');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
+  
+  // Excluir simulação
   const handleDeleteSimulation = (simulationId) => {
     const updatedSimulations = simulations.filter(sim => sim.id !== simulationId);
     setSimulations(updatedSimulations);
     saveSimulationsToStorage(updatedSimulations);
     toast({ 
       title: "Simulação Excluída", 
+      description: "A simulação foi removida com sucesso.", 
       variant: "destructive" 
     });
     
-    if (currentSimulation && currentSimulation.id === simulationId) {
+    if (formData.id === simulationId) {
       resetForm();
     }
   };
 
-  const handleSendOrder = (simulationId = null) => {
-    let simulationToSend;
-    
-    if (simulationId) {
-      simulationToSend = simulations.find(sim => sim.id === simulationId);
-    } else if (summary) {
-      simulationToSend = { ...formData, summary };
-    } else {
-      toast({ 
-        variant: "destructive", 
-        title: "Erro", 
-        description: "Calcule uma simulação antes de enviar." 
-      });
-      return;
-    }
-    
-    // Em um cenário real, enviaria para API
-    toast({ 
-      title: "Pedido Enviado!", 
-      description: `A simulação para ${empresaAtual?.nome || 'sua empresa'} foi encaminhada ao escritório de contabilidade.`, 
-      className: "bg-primary text-primary-foreground" 
-    });
-  };
-
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <MainLayout>
+      <div className="space-y-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
-            <CalculatorIcon className="mr-2 h-6 w-6 text-primary" />
-            Calculadora de Impostos
+          <h1 className="text-3xl font-bold tracking-tight flex items-center">
+            <Calculator className="mr-2 h-8 w-8 text-primary" /> 
+            Calculadora de Impostos e Custos
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Simule os impostos e o lucro sobre suas vendas
+          <p className="text-muted-foreground">
+            Simule o impacto fiscal e o lucro de suas vendas.
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm bg-primary/5 border-primary/20">
-            Empresa: {empresaAtual?.nome || 'Não selecionada'}
-          </Badge>
-          
-          <Badge variant="outline" className="text-sm bg-primary/5 border-primary/20">
-            Regime: {empresaAtual?.regime_tributario || 'N/D'}
-          </Badge>
-        </div>
-      </div>
-      
-      <div className="mt-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="form" className="flex items-center gap-2">
-              <Calculator className="h-4 w-4" />
-              Nova Simulação
-            </TabsTrigger>
-            <TabsTrigger value="saved" className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Simulações Salvas {simulations.length > 0 && `(${simulations.length})`}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="form">
-            <div className="space-y-6">
-              <SimulationForm
-                formData={formData}
-                handleInputChange={handleInputChange}
-                handleProductInputChange={handleProductInputChange}
-                addProductToSimulation={addProductToSimulation}
-                removeProductFromSimulation={removeProductFromSimulation}
-                calculateSummary={realizarCalculo}
-                universalProducts={universalProducts}
-                isEditing={isEditing}
+        {/* Formulário de Simulação */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {isEditing ? "Editar Simulação" : "Nova Simulação"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="clienteNome">Nome do Cliente</Label>
+                <Input
+                  id="clienteNome"
+                  value={formData.clienteNome}
+                  onChange={(e) => handleInputChange('clienteNome', e.target.value)}
+                  placeholder="Nome do cliente"
+                />
+              </div>
+              <div>
+                <Label htmlFor="data">Data</Label>
+                <Input
+                  id="data"
+                  type="date"
+                  value={formData.data}
+                  onChange={(e) => handleInputChange('data', e.target.value)}
+                />
+              </div>
+            </div>
+            
+            {/* Valor de Venda Global */}
+            <div>
+              <Label htmlFor="valorVendaTotalGlobal">Valor de Venda Total (opcional)</Label>
+              <Input
+                id="valorVendaTotalGlobal"
+                type="number"
+                value={formData.valorVendaTotalGlobal}
+                onChange={(e) => handleInputChange('valorVendaTotalGlobal', e.target.value)}
+                placeholder="Valor total da venda (opcional)"
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Ao definir este valor, os preços dos produtos serão ajustados proporcionalmente.
+              </p>
+            </div>
+            
+            {/* Lista de Produtos */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium">Produtos na Simulação</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={calculateSummary}
+                  >
+                    <Calculator className="h-4 w-4 mr-1" />
+                    Calcular
+                  </Button>
+                </div>
+              </div>
               
-              {summary && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <TaxSummaryDisplay summary={summary} />
-                  
-                  <Card>
-                    <CardContent className="pt-6 flex flex-col sm:flex-row gap-3 justify-end">
-                      <Button 
-                        variant="outline" 
-                        className="w-full sm:w-auto"
-                        onClick={resetForm}
-                      >
-                        Limpar
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full sm:w-auto text-primary hover:text-primary-foreground hover:bg-primary"
-                        onClick={handleSaveSimulation}
-                      >
-                        <Save className="mr-2 h-4 w-4" />
-                        {isEditing ? 'Atualizar Simulação' : 'Salvar Simulação'}
-                      </Button>
-                      <Button
-                        className="w-full sm:w-auto"
-                        onClick={() => handleSendOrder()}
-                      >
-                        <Send className="mr-2 h-4 w-4" />
-                        Enviar ao Escritório
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-              
-              {!summary && formData.produtos.length > 0 && (
-                <div className="flex justify-center my-8">
-                  <Card className="max-w-md w-full bg-accent/50 border-accent">
-                    <CardContent className="pt-6 pb-4 flex items-center">
-                      <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
-                      <p className="text-sm">
-                        Simule os impostos e lucro da venda preenchendo os valores e clicando em "Calcular Impostos".
-                      </p>
-                    </CardContent>
-                  </Card>
+              {formData.produtos.length > 0 ? (
+                <div className="space-y-4">
+                  {formData.produtos.map((produto, index) => (
+                    <Card key={index} className="p-2">
+                      <div className="flex flex-col md:flex-row gap-2">
+                        <div className="grow">
+                          <p className="font-medium">{produto.nome}</p>
+                          <p className="text-sm text-muted-foreground">Custo: R$ {produto.precoCusto || produto.preco_custo}</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label htmlFor={`qtd-${index}`} className="text-xs">Qtd</Label>
+                            <Input
+                              id={`qtd-${index}`}
+                              type="number"
+                              value={produto.quantidade}
+                              onChange={(e) => handleProductInputChange(index, 'quantidade', e.target.value)}
+                              className="h-8"
+                              min="1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`unit-${index}`} className="text-xs">Preço Unit.</Label>
+                            <Input
+                              id={`unit-${index}`}
+                              type="number"
+                              value={produto.valorVendaUnitario}
+                              onChange={(e) => handleProductInputChange(index, 'valorVendaUnitario', e.target.value)}
+                              className="h-8"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`total-${index}`} className="text-xs">Total</Label>
+                            <div className="flex items-center">
+                              <Input
+                                id={`total-${index}`}
+                                value={produto.valorVendaTotal}
+                                readOnly
+                                className="h-8 bg-muted"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 ml-1 text-destructive"
+                                onClick={() => removeProductFromSimulation(index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center border border-dashed rounded-md">
+                  <p className="text-muted-foreground">Nenhum produto adicionado à simulação.</p>
                 </div>
               )}
+              
+              {/* Produtos Disponíveis */}
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2">Adicionar Produtos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {universalProducts.map((product) => (
+                    <Button
+                      key={product.id}
+                      variant="outline"
+                      className="flex justify-between items-center h-auto py-2 px-3"
+                      onClick={() => addProductToSimulation(product)}
+                    >
+                      <div className="text-left">
+                        <p className="font-medium text-sm">{product.nome}</p>
+                        <p className="text-xs text-muted-foreground">R$ {product.preco_custo}</p>
+                      </div>
+                      <Plus className="h-4 w-4 ml-2" />
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="saved">
-            <SavedSimulationsList
-              simulations={simulations}
-              handleEditSimulation={handleEditSimulation}
-              handleDeleteSimulation={handleDeleteSimulation}
-              handleSendOrder={handleSendOrder}
-            />
-          </TabsContent>
-        </Tabs>
+            
+            {/* Resumo da Simulação */}
+            {summary && (
+              <Card className="mt-6 bg-primary/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <ArrowRight className="mr-2 h-5 w-5 text-primary" />
+                    Resumo da Simulação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Faturamento</p>
+                      <p className="text-xl font-bold">R$ {summary.faturamentoTotal}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Custo Produtos</p>
+                      <p className="text-xl font-bold">R$ {summary.custoTotalProdutos}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Impostos Vendas</p>
+                      <p className="text-xl font-bold">R$ {summary.impostosVendas}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Impostos Compras</p>
+                      <p className="text-xl font-bold">R$ {summary.impostosCompras}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">DIFAL</p>
+                        <p className="text-lg font-medium">R$ {summary.difal}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <p className="text-sm text-muted-foreground">Lucro Bruto</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-2xl font-bold text-primary">
+                            R$ {summary.lucroBruto}
+                          </p>
+                          <p className="text-lg font-medium">
+                            ({summary.margemLucro}%)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            {isEditing && (
+              <Button
+                variant="outline"
+                onClick={resetForm}
+              >
+                Cancelar
+              </Button>
+            )}
+            <Button
+              onClick={handleSaveSimulation}
+              className="bg-primary text-primary-foreground"
+              disabled={!summary}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isEditing ? 'Atualizar Simulação' : 'Salvar Simulação'}
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        {/* Simulações Salvas */}
+        {simulations.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Simulações Salvas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {simulations.map((simulation) => (
+                  <Card key={simulation.id} className="p-4">
+                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                      <div>
+                        <h3 className="font-medium">
+                          {simulation.clienteNome || 'Simulação sem cliente'}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Data: {new Date(simulation.data).toLocaleDateString('pt-BR')}
+                        </p>
+                        <p className="text-sm">
+                          {simulation.produtos.length} produtos | 
+                          Faturamento: R$ {simulation.summary.faturamentoTotal} |
+                          Lucro: R$ {simulation.summary.lucroBruto}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 self-end md:self-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditSimulation(simulation)}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteSimulation(simulation.id)}
+                        >
+                          Excluir
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

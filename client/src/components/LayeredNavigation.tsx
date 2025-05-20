@@ -1,25 +1,57 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import useLayeredAccess from '@/hooks/useLayeredAccess';
-
-import { UserRole, SystemModule } from '../../shared/auth/permissions';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   BarChart3,
   FileText,
-  Calculator,
+  CreditCard,
   Users,
-  Building2,
+  Building,
+  UserCog,
+  CalendarDays,
   Settings,
-  FileArchive,
-  Calendar,
-  MessageSquare,
-  DollarSign,
   Package,
+  LineChart,
+  MessageSquare,
+  Calculator,
+  ServerCog,
+  Clipboard,
   LogOut
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Interface para os itens do menu
+// Definições das camadas de acesso
+enum UserRole {
+  SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
+  ESCRITORIO = 'escritorio',
+  EMPRESA = 'empresa',
+  CLIENTE = 'cliente'
+}
+
+// Módulos do sistema
+enum SystemModule {
+  DASHBOARD = 'dashboard',
+  FISCAL = 'fiscal',
+  FINANCEIRO = 'financeiro',
+  DOCUMENTOS = 'documentos',
+  CLIENTES = 'clientes',
+  EMPRESAS = 'empresas',
+  USUARIOS = 'usuarios',
+  TAREFAS = 'tarefas',
+  CALENDARIO = 'calendario',
+  HONORARIOS = 'honorarios',
+  INVENTARIO = 'inventario',
+  CONFIGURACOES = 'configuracoes',
+  XML_VAULT = 'xmlVault',
+  WHATSAPP = 'whatsapp',
+  TAX_CALCULATOR = 'taxCalculator',
+  BACKUP = 'backup',
+  AUDIT = 'audit'
+}
+
+// Estrutura do item de menu
 interface MenuItem {
   label: string;
   path: string;
@@ -30,170 +62,185 @@ interface MenuItem {
 
 /**
  * Componente de navegação que se adapta ao nível de acesso do usuário
+ * Exibe apenas os itens de menu permitidos para o papel do usuário
  */
 const LayeredNavigation = () => {
+  const { user } = useAuth();
   const [location, navigate] = useLocation();
-  const { userRole, canView, isSuperAdmin } = useLayeredAccess();
   
-  // Lista completa de itens do menu
+  // Determinação do papel do usuário (simplificado para desenvolvimento)
+  const userRole = user?.role as UserRole || UserRole.SUPERADMIN;
+  
+  // Definição dos itens de menu com controle de acesso por papel
   const menuItems: MenuItem[] = [
     {
       label: 'Dashboard',
-      path: '/dashboard',
-      icon: <BarChart3 className="w-5 h-5" />,
+      path: '/',
+      icon: <BarChart3 className="h-5 w-5" />,
       module: SystemModule.DASHBOARD,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA, UserRole.CLIENTE]
     },
     {
-      label: 'Fiscal',
+      label: 'Módulo Fiscal',
       path: '/fiscal',
-      icon: <FileText className="w-5 h-5" />,
+      icon: <FileText className="h-5 w-5" />,
       module: SystemModule.FISCAL,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
-      label: 'Calculadora de Impostos',
-      path: '/tax-calculator',
-      icon: <Calculator className="w-5 h-5" />,
-      module: SystemModule.TAX_CALCULATOR,
+      label: 'Financeiro',
+      path: '/financeiro',
+      icon: <CreditCard className="h-5 w-5" />,
+      module: SystemModule.FINANCEIRO,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
+    },
+    {
+      label: 'Documentos',
+      path: '/documentos',
+      icon: <Clipboard className="h-5 w-5" />,
+      module: SystemModule.DOCUMENTOS,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA, UserRole.CLIENTE]
     },
     {
       label: 'Clientes',
-      path: '/clients',
-      icon: <Users className="w-5 h-5" />,
+      path: '/clientes',
+      icon: <Users className="h-5 w-5" />,
       module: SystemModule.CLIENTES,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
       label: 'Empresas',
       path: '/empresas',
-      icon: <Building2 className="w-5 h-5" />,
+      icon: <Building className="h-5 w-5" />,
       module: SystemModule.EMPRESAS,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN]
-    },
-    {
-      label: 'Documentos',
-      path: '/documents',
-      icon: <FileText className="w-5 h-5" />,
-      module: SystemModule.DOCUMENTOS,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA, UserRole.CLIENTE]
-    },
-    {
-      label: 'Honorários',
-      path: '/honorarios',
-      icon: <DollarSign className="w-5 h-5" />,
-      module: SystemModule.HONORARIOS,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO]
     },
     {
+      label: 'Usuários',
+      path: '/usuarios',
+      icon: <UserCog className="h-5 w-5" />,
+      module: SystemModule.USUARIOS,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN]
+    },
+    {
       label: 'Tarefas',
-      path: '/tasks',
-      icon: <FileText className="w-5 h-5" />,
+      path: '/tarefas',
+      icon: <Clipboard className="h-5 w-5" />,
       module: SystemModule.TAREFAS,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
       label: 'Calendário',
-      path: '/calendar',
-      icon: <Calendar className="w-5 h-5" />,
+      path: '/calendario',
+      icon: <CalendarDays className="h-5 w-5" />,
       module: SystemModule.CALENDARIO,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
+    },
+    {
+      label: 'Honorários',
+      path: '/honorarios',
+      icon: <CreditCard className="h-5 w-5" />,
+      module: SystemModule.HONORARIOS,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO]
+    },
+    {
+      label: 'Inventário',
+      path: '/inventario',
+      icon: <Package className="h-5 w-5" />,
+      module: SystemModule.INVENTARIO,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
       label: 'XML Vault',
       path: '/xml-vault',
-      icon: <FileArchive className="w-5 h-5" />,
+      icon: <ServerCog className="h-5 w-5" />,
       module: SystemModule.XML_VAULT,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
-      label: 'WhatsApp',
+      label: 'WhatsApp Connect',
       path: '/whatsapp',
-      icon: <MessageSquare className="w-5 h-5" />,
+      icon: <MessageSquare className="h-5 w-5" />,
       module: SystemModule.WHATSAPP,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO]
-    },
-    {
-      label: 'Financeiro',
-      path: '/financial',
-      icon: <DollarSign className="w-5 h-5" />,
-      module: SystemModule.FINANCEIRO,
       roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
     },
     {
-      label: 'Inventário',
-      path: '/inventory',
-      icon: <Package className="w-5 h-5" />,
-      module: SystemModule.INVENTARIO,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
+      label: 'Calculadora Fiscal',
+      path: '/tax-calculator',
+      icon: <Calculator className="h-5 w-5" />,
+      module: SystemModule.TAX_CALCULATOR,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA, UserRole.CLIENTE]
+    },
+    {
+      label: 'Backup & Restore',
+      path: '/backup',
+      icon: <ServerCog className="h-5 w-5" />,
+      module: SystemModule.BACKUP,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN]
+    },
+    {
+      label: 'Auditoria',
+      path: '/audit',
+      icon: <LineChart className="h-5 w-5" />,
+      module: SystemModule.AUDIT,
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN]
     },
     {
       label: 'Configurações',
-      path: '/settings',
-      icon: <Settings className="w-5 h-5" />,
+      path: '/configuracoes',
+      icon: <Settings className="h-5 w-5" />,
       module: SystemModule.CONFIGURACOES,
-      roles: [UserRole.SUPERADMIN, UserRole.ADMIN]
-    },
+      roles: [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ESCRITORIO, UserRole.EMPRESA]
+    }
   ];
 
-  // Filtra os itens de menu com base no papel e permissões do usuário
-  const filteredMenuItems = menuItems.filter(item => {
-    // Superadmin vê tudo
-    if (isSuperAdmin) {
-      return true;
-    }
-    
-    // Para outros usuários, verifica o papel e a permissão
-    return item.roles.includes(userRole) && canView(item.module);
-  });
-
-  // Função para fazer logout
-  const handleLogout = () => {
-    window.location.href = '/api/logout';
-  };
+  // Filtrar itens de menu com base no papel do usuário
+  const filteredMenuItems = menuItems.filter(item => 
+    item.roles.includes(userRole)
+  );
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 border-r">
-      <div className="p-4">
-        <h2 className="text-2xl font-bold text-primary">NIXCON</h2>
-        <p className="text-sm text-gray-500">Sistema de Contabilidade</p>
+    <div className="h-full flex flex-col bg-white border-r p-4">
+      {/* Logo da NIXCON */}
+      <div className="flex items-center justify-center py-6 mb-6">
+        <h1 className="text-xl font-bold text-primary">NIXCON</h1>
       </div>
       
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-2">
-          {filteredMenuItems.map((item) => (
-            <li key={item.path}>
-              <Button
-                variant={location === item.path ? 'default' : 'ghost'}
-                className={`w-full justify-start ${location === item.path ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary'}`}
-                onClick={() => navigate(item.path)}
-              >
-                {item.icon}
-                <span className="ml-3">{item.label}</span>
-              </Button>
-            </li>
-          ))}
-        </ul>
+      {/* Menu de navegação */}
+      <nav className="space-y-1 flex-grow">
+        {filteredMenuItems.map((item) => (
+          <Button
+            key={item.path}
+            variant="ghost"
+            className={cn(
+              "w-full justify-start px-3 py-2 h-10 text-sm font-medium",
+              location === item.path 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+            onClick={() => navigate(item.path)}
+          >
+            <span className="mr-3">{item.icon}</span>
+            {item.label}
+          </Button>
+        ))}
       </nav>
       
-      {/* Área do usuário */}
-      <div className="p-4 border-t">
-        <div className="flex items-center justify-between">
-          <div>
-            {isSuperAdmin && (
-              <div className="text-xs font-semibold text-primary mb-1">
-                SUPERADMIN
-              </div>
-            )}
-            <div className="text-sm font-medium">
-              {isSuperAdmin ? 'Administrador NIXCON' : 'Usuário'}
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4" />
-          </Button>
+      {/* Informações do usuário e logout */}
+      <div className="pt-6 mt-6 border-t">
+        <div className="px-3 py-2">
+          <p className="text-sm font-medium">{user?.name || 'Usuário'}</p>
+          <p className="text-xs text-muted-foreground">{user?.email || 'usuário@exemplo.com'}</p>
+          <p className="text-xs text-primary mt-1">{userRole}</p>
         </div>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start px-3 py-2 mt-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          onClick={() => navigate('/logout')}
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          Sair
+        </Button>
       </div>
     </div>
   );

@@ -37,9 +37,8 @@ import { EmpresasProvider } from "@/contexts/EmpresasContext";
 import { ProdutosProvider } from "@/contexts/ProdutosContext";
 
 function Router() {
-  // Vamos utilizar uma versão simplificada para evitar erros sem o contexto completo
-  // Em produção, isso será substituído pelo contexto real de autenticação
-  const { isAuthenticated, isLoading } = { isAuthenticated: false, isLoading: false };
+  // Para desenvolvimento, sempre logado como superadmin
+  const { isAuthenticated, isLoading } = { isAuthenticated: true, isLoading: false };
 
   if (isLoading) {
     return (
@@ -55,6 +54,14 @@ function Router() {
       
       {isAuthenticated && (
         <Route path="/">
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/dashboard">
           <MainLayout>
             <Dashboard />
           </MainLayout>
