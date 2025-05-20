@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 10% 15%; /* Dark Gray-Blue for text */
+
+    --card: 0 0% 98%; /* Very light gray, almost white */
+    --card-foreground: 220 10% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 10% 15%;
+
+    --primary: 45 65% 63%; /* nixcon-gold: #dbbd67 */
+    --primary-foreground: 220 10% 15%; /* Dark text on gold */
+    
+    --secondary: 60 1% 25%; /* nixcon-gray: #424240 */
+    --secondary-foreground: 0 0% 98%; /* Light text on gray */
+
+    --muted: 210 10% 75%; /* Light gray for muted text/elements */
+    --muted-foreground: 210 10% 45%; /* Darker gray for text on muted */
+
+    --accent: 60 1% 30%; /* Slightly lighter nixcon-gray for accents */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%; /* Red */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 10% 88%; /* Light gray border */
+    --input: 0 0% 96%; /* Slightly off-white for input backgrounds */
+    --ring: 45 65% 63%; /* nixcon-gold for focus rings */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 60 1% 15%; /* Darker nixcon-gray as base background */
+    --foreground: 0 0% 95%; /* Light text */
+
+    --card: 60 1% 20%; /* Slightly lighter nixcon-gray for cards */
+    --card-foreground: 0 0% 95%;
+
+    --popover: 60 1% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 45 65% 63%; /* nixcon-gold */
+    --primary-foreground: 60 1% 10%; /* Very dark text on gold */
+
+    --secondary: 45 65% 70%; /* Lighter gold for secondary elements */
+    --secondary-foreground: 60 1% 10%;
+
+    --muted: 60 1% 30%;
+    --muted-foreground: 60 1% 65%;
+
+    --accent: 45 65% 55%; /* Darker gold for accents */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 63% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 60 1% 25%;
+    --input: 60 1% 18%;
+    --ring: 45 65% 63%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-nixcon-gold via-nixcon-gold-light to-nixcon-gray-light;
+  }
+   .glass-card {
+    @apply bg-nixcon-gray/20 backdrop-blur-lg border border-nixcon-gold/30 rounded-xl shadow-lg;
+  }
+}
+
+@layer components {
+  .h1-landing {
+    @apply text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl;
+  }
+  .h2-landing {
+    @apply text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl;
+  }
+  .p-landing {
+    @apply mt-3 text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0;
+  }
+  .btn-landing-primary {
+    @apply px-8 py-3 border border-transparent text-base font-medium rounded-md text-background bg-nixcon-gold hover:bg-nixcon-gold-dark md:py-4 md:text-lg md:px-10 transition-all duration-300 shadow-lg hover:shadow-nixcon-gold/40 transform hover:scale-105;
+  }
+  .btn-landing-secondary {
+     @apply px-8 py-3 border border-nixcon-gold text-base font-medium rounded-md text-nixcon-gold bg-transparent hover:bg-nixcon-gold/10 md:py-4 md:text-lg md:px-10 transition-all duration-300 hover:shadow-nixcon-gold/20 transform hover:scale-105;
+  }
+}
