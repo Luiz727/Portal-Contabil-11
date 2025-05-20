@@ -1,28 +1,48 @@
 /* Estilos globais para ocultar barras de rolagem */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE e Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none !important;  /* IE e Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Para garantir que a barra de rolagem esteja oculta em todos os navegadores */
 html {
-  overflow: -moz-scrollbars-none;
-  scrollbar-width: none;
+  overflow: -moz-scrollbars-none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 html::-webkit-scrollbar { 
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 body {
-  overflow: -moz-scrollbars-none;
-  scrollbar-width: none;
+  overflow: -moz-scrollbars-none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 body::-webkit-scrollbar { 
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Aplicar em todos os elementos */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
