@@ -11,7 +11,10 @@ export default function Login() {
               <span className="material-icons text-white">account_balance</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">ContaSmart</CardTitle>
+          <div className="flex flex-col items-center space-y-3">
+            <img src="/src/assets/logo-nixcon.png" alt="NIXCON" className="h-16" />
+            <CardTitle className="text-2xl font-bold">NIXCON</CardTitle>
+          </div>
           <CardDescription>
             Sistema completo para escritórios de contabilidade
           </CardDescription>
@@ -34,7 +37,7 @@ export default function Login() {
         </CardContent>
         <CardFooter className="border-t pt-4">
           <div className="w-full text-center text-xs text-neutral-500">
-            <p>© 2023 ContaSmart. Todos os direitos reservados.</p>
+            <p>© 2023-2025 NIXCON. Todos os direitos reservados.</p>
           </div>
         </CardFooter>
       </Card>

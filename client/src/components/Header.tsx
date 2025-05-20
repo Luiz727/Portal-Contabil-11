@@ -53,7 +53,10 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
                 <span className="ml-2 text-sm">Menu</span>
               </button>
               <div className="ml-3">
-                <h1 className="text-lg font-medium">ContaSmart</h1>
+                <div className="flex items-center">
+                  <img src="/src/assets/icon-nixcon.png" alt="NIXCON" className="h-6 mr-2" />
+                  <h1 className="text-lg font-medium">NIXCON</h1>
+                </div>
               </div>
             </div>
 

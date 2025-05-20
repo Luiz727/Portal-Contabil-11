@@ -94,7 +94,7 @@ export default function Settings() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="company-name">Nome da Empresa</Label>
-                      <Input id="company-name" defaultValue="ContaSmart Contabilidade" />
+                      <Input id="company-name" defaultValue="NIXCON Contabilidade" />
                     </div>
                     
                     <div className="space-y-2">
