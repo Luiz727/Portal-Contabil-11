@@ -229,7 +229,7 @@ const LayeredNavigation = () => {
       {/* Informações do usuário e logout */}
       <div className="pt-6 mt-6 border-t">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium">{user?.name || 'Usuário'}</p>
+          <p className="text-sm font-medium">{user?.nome || 'Usuário'}</p>
           <p className="text-xs text-muted-foreground">{user?.email || 'usuário@exemplo.com'}</p>
           <p className="text-xs text-primary mt-1">{userRole}</p>
         </div>
