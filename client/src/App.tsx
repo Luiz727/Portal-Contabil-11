@@ -51,7 +51,7 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated && <Route path="/" component={Login} />}
-      
+
       {isAuthenticated && (
         <Route path="/">
           <MainLayout>
@@ -59,7 +59,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/tasks">
           <MainLayout>
@@ -67,7 +67,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/clients">
           <MainLayout>
@@ -75,7 +75,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/documents">
           <MainLayout>
@@ -83,9 +83,9 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {/* Página de invoices foi removida conforme solicitado */}
-      
+
       {/* A calculadora agora só é acessível com autenticação */}
       {isAuthenticated && (
         <Route path="/tax-calculator">
@@ -94,14 +94,14 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {/* Nova rota NIXCON da calculadora com autenticação */}
       {isAuthenticated && (
         <Route path="/calculadora-nixcon">
           <TaxCalculatorNIXCONPage />
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/financial">
           <MainLayout>
@@ -109,7 +109,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/inventory">
           <MainLayout>
@@ -117,7 +117,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/reconciliation">
           <MainLayout>
@@ -125,7 +125,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/reports">
           <MainLayout>
@@ -133,7 +133,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/settings">
           <MainLayout>
@@ -141,7 +141,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/integrations">
           <MainLayout>
@@ -149,7 +149,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {isAuthenticated && (
         <Route path="/whatsapp">
           <MainLayout>
@@ -157,7 +157,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {/* Módulo Fiscal Integrado - Versão Responsiva */}
       {isAuthenticated && (
         <Route path="/fiscal">
@@ -166,7 +166,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       {/* Páginas Administrativas */}
       {isAuthenticated && (
         <Route path="/admin/configuracoes">
@@ -175,7 +175,7 @@ function Router() {
           </MainLayout>
         </Route>
       )}
-      
+
       <Route component={NotFound} />
     </Switch>
   );
