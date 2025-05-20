@@ -231,6 +231,15 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
           />
           
           <SidebarItem 
+            icon={CreditCard} 
+            label="Impostômetro" 
+            to="/impostometro" 
+            active={location === "/impostometro"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+          
+          <SidebarItem 
             icon={LineChart} 
             label="Financeiro" 
             to="/financial" 
