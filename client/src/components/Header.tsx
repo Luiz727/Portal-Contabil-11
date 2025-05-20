@@ -83,7 +83,7 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
               </Button>
             </Link>
             <div className="flex items-center">
-              <h2 className="text-lg font-semibold text-gray-800">{(fiscalModule || isEscritorioView) ? "Módulo Fiscal" : "Dashboard"}</h2>
+              <h2 className="text-lg font-semibold text-gray-800">{isEscritorioView ? "Escritório Contábil" : "Empresa Usuária"}</h2>
               <Badge variant="default" className="ml-2 bg-primary text-primary-foreground">v1.0</Badge>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
                 if (onVisualizationChange) onVisualizationChange("escritorio");
                 setIsEscritorioView(true);
                 localStorage.setItem('visualizationMode', 'escritorio');
-                window.location.href = "/admin/painel";
+                // Permanecer na mesma página
               }}>
                 <User2 className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Visão do Escritório</span>
@@ -178,7 +178,12 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
                   if (onVisualizationChange) onVisualizationChange("empresa");
                   setIsEscritorioView(false);
                   localStorage.setItem('visualizationMode', 'empresa');
-                  window.location.href = "/";
+                  // Verificar se está em uma página exclusiva do escritório
+                  const currentPath = window.location.pathname;
+                  if (currentPath.startsWith('/admin/')) {
+                    window.location.href = "/";
+                  }
+                  // Caso contrário, permanecer na mesma página
                 }}
               >
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
