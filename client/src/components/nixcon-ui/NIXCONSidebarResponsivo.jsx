@@ -85,8 +85,19 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
     window.addEventListener('resize', handleResize);
     handleResize();
     
+    // Monitorar mudanças na rota para recolher o menu automaticamente em dispositivos móveis
+    const handleRouteChange = () => {
+      if (window.innerWidth < 768 && !keepCollapsed) {
+        setCollapsed(true);
+        if (onToggle) onToggle(true);
+      }
+    };
+    
+    // Recolher no início
+    handleRouteChange();
+    
     return () => window.removeEventListener('resize', handleResize);
-  }, [keepCollapsed, onToggle]);
+  }, [keepCollapsed, onToggle, location]);
   
   // Fechar o menu automaticamente quando clicar em um item (em telas pequenas)
   const handleItemClick = () => {
