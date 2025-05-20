@@ -6,6 +6,14 @@ import { AuthProvider } from '@/contexts/AuthContext';
 // Páginas
 import LoginPage from '@/pages/LoginPage';
 import TaxCalculatorPage from '@/pages/TaxCalculatorPage';
+import DashboardPage from '@/pages/DashboardPage';
+import DocumentsPage from '@/pages/DocumentsPage';
+import FinancialPage from '@/pages/FinancialPage';
+import FiscalPage from '@/pages/FiscalPage';
+import InvoicesPage from '@/pages/InvoicesPage';
+
+// Componente de navegação em camadas
+import LayeredNavigation from '@/components/LayeredNavigation';
 
 const App: React.FC = () => {
   return (
@@ -16,9 +24,72 @@ const App: React.FC = () => {
           <Route path="/login" component={LoginPage} />
           <Route path="/tax-calculator" component={TaxCalculatorPage} />
           
-          {/* Rota padrão - redireciona para calculadora */}
+          {/* Rotas protegidas com navegação em camadas */}
+          <Route path="/dashboard">
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <DashboardPage />
+              </main>
+            </div>
+          </Route>
+          
+          <Route path="/fiscal">
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <FiscalPage />
+              </main>
+            </div>
+          </Route>
+
+          <Route path="/financeiro">
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <FinancialPage />
+              </main>
+            </div>
+          </Route>
+          
+          <Route path="/documentos">
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <DocumentsPage />
+              </main>
+            </div>
+          </Route>
+
+          <Route path="/invoices">
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <InvoicesPage />
+              </main>
+            </div>
+          </Route>
+          
+          {/* Rota padrão - redireciona para dashboard quando autenticado ou calculadora */}
           <Route path="/">
-            <TaxCalculatorPage />
+            <div className="flex h-screen overflow-hidden">
+              <div className="w-64 h-full">
+                <LayeredNavigation />
+              </div>
+              <main className="flex-1 overflow-auto p-4">
+                <DashboardPage />
+              </main>
+            </div>
           </Route>
           
           {/* Rota para qualquer caminho desconhecido */}
