@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./bootstrap"; // Importa o JavaScript do Bootstrap
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
-import Login from "@/pages/Login";
 import LoginPage from "@/pages/LoginPage";
 import Tasks from "@/pages/Tasks";
 import Clients from "@/pages/Clients";
@@ -20,8 +19,7 @@ import Settings from "@/pages/Settings";
 import Integrations from "@/pages/Integrations";
 import WhatsApp from "@/pages/WhatsApp";
 import MainLayout from "@/layouts/MainLayout";
-// Vamos temporariamente remover a importação que está causando problemas
-// import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
@@ -37,8 +35,8 @@ import { EmpresasProvider } from "@/contexts/EmpresasContext";
 import { ProdutosProvider } from "@/contexts/ProdutosContext";
 
 function Router() {
-  // Para desenvolvimento, sempre logado como superadmin
-  const { isAuthenticated, isLoading } = { isAuthenticated: true, isLoading: false };
+  // Usando hook simplificado de autenticação durante o desenvolvimento
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (

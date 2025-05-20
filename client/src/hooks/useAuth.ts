@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface User {
   email: string;
@@ -6,23 +6,34 @@ interface User {
   name?: string;
 }
 
-// Hook simplificado para autenticação durante o desenvolvimento
+/**
+ * Hook para autenticação que utiliza localStorage para persistir a sessão
+ * Permite testar o sistema com diferentes papéis de usuário
+ */
 export function useAuth() {
-  // Usuário fictício para desenvolvimento - será substituído pelo sistema real
-  const superAdmin: User = {
-    email: 'adm@nixcon.com.br',
-    role: 'superadmin',
-    name: 'Administrador NIXCON'
-  };
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Simula um usuário autenticado para teste do sistema
-  const [user] = useState<User | null>(superAdmin);
-  const [isLoading] = useState(false);
+  // Carrega usuário do localStorage ao iniciar
+  useEffect(() => {
+    const storedUser = localStorage.getItem('nixcon_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
+  }, []);
+  
+  // Função para logout
+  const logout = () => {
+    localStorage.removeItem('nixcon_user');
+    setUser(null);
+  };
   
   return {
     user,
     isLoading,
-    isAuthenticated: true, // Definido como true para testar a interface
+    isAuthenticated: !!user,
+    logout
   };
 }
 
