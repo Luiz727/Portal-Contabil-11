@@ -293,11 +293,8 @@ const TaxCalculatorPage = () => {
       lucroBruto,
     });
     
-    toast({ 
-      title: "Cálculos Realizados", 
-      description: "Os impostos e margens foram calculados com sucesso.", 
-      className: "bg-primary text-primary-foreground"
-    });
+    // Removido toast automático durante o cálculo
+    // Só exibiremos toast ao clicar no botão de simulação
     
     return produtosProcessados; 
   }, [empresaAtual, userTaxConfig, user.type, toast, getTaxRateForCalc]);
