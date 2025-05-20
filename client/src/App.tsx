@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
+import FiscalPageResponsivo from "./pages/FiscalPageResponsivo";
 
 // Calculadora de impostos
 import TaxCalculatorPage from "@/pages/TaxCalculatorPage";
@@ -83,13 +84,7 @@ function Router() {
         </Route>
       )}
       
-      {isAuthenticated && (
-        <Route path="/invoices">
-          <MainLayout>
-            <Invoices />
-          </MainLayout>
-        </Route>
-      )}
+      {/* Página de invoices foi removida conforme solicitado */}
       
       {/* A calculadora agora só é acessível com autenticação */}
       {isAuthenticated && (
@@ -163,11 +158,11 @@ function Router() {
         </Route>
       )}
       
-      {/* Módulo Fiscal Integrado */}
+      {/* Módulo Fiscal Integrado - Versão Responsiva */}
       {isAuthenticated && (
         <Route path="/fiscal">
           <MainLayout>
-            <FiscalPage />
+            <FiscalPageResponsivo />
           </MainLayout>
         </Route>
       )}

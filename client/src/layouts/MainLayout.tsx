@@ -44,52 +44,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Verifica se é a página da calculadora
-  if (isCalculatorPage) {
-    // Layout simplificado para a calculadora, sem depender de autenticação
-    return (
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        <main className="flex-grow flex flex-col overflow-hidden">
-          <header className="bg-white border-b border-gray-200 py-3 px-6 shadow-sm">
-            <div className="flex justify-between items-center max-w-7xl mx-auto">
-              <div className="flex items-center">
-                <span className="nixcon-logo text-xl">
-                  <span className="nixcon-logo-nix">NIX</span>
-                  <span className="nixcon-logo-con">CON</span>
-                </span>
-                <span className="text-gray-400 text-sm ml-2 hidden md:inline-block">
-                  | Sistema Integrado de Contabilidade
-                </span>
-              </div>
-              <a href="/" className="btn btn-sm btn-outline">
-                Login
-              </a>
-            </div>
-          </header>
-          
-          <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8">
-            <div className="mx-auto max-w-7xl">
-              {children}
-            </div>
-          </div>
-          
-          <footer className="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-muted-foreground">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="font-medium">
-                  <span className="nixcon-gold">NIX</span>
-                  <span className="nixcon-gray">CON</span>
-                </span> © {new Date().getFullYear()} Todos os direitos reservados.
-              </div>
-              <div className="text-xs hidden md:block">
-                v1.0.0
-              </div>
-            </div>
-          </footer>
-        </main>
-      </div>
-    );
-  }
+  // Mantemos o mesmo layout para todas as páginas, incluindo a calculadora
+  // Não precisamos mais de um layout especial para a calculadora
 
   if (isLoading) {
     return (

@@ -29,8 +29,8 @@ import { useAuth } from '@/hooks/useAuth';
 const SidebarItem = ({ icon: Icon, label, to, active, hasSubmenu, collapsed, onClick }) => {
   return (
     <div onClick={onClick}>
-      <Link href={to} className={`flex items-center px-4 py-2.5 text-sm ${active ? 'bg-primary/10 text-primary font-medium' : 'text-secondary hover:bg-gray-100'} rounded-md transition-colors`}>
-        <Icon size={18} className={collapsed ? "mx-auto" : "mr-3"} />
+      <Link href={to} className={`flex items-center px-4 py-2.5 text-sm ${active ? 'bg-primary/10 text-primary font-medium' : 'text-[rgb(55,65,81)] hover:bg-gray-100'} rounded-md transition-colors`}>
+        <Icon size={18} className={`${collapsed ? "mx-auto" : "mr-3"} ${active ? 'text-primary' : 'text-[rgb(55,65,81)]'}`} />
         {!collapsed && (
           <>
             <span>{label}</span>
