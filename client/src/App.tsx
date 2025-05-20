@@ -24,6 +24,9 @@ import { useAuth } from "@/hooks/useAuth";
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
 
+// Calculadora de impostos
+import TaxCalculatorPage from "@/pages/TaxCalculatorPage";
+
 // Páginas administrativas
 import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
 
@@ -78,6 +81,14 @@ function Router() {
         <Route path="/invoices">
           <MainLayout>
             <Invoices />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/tax-calculator">
+          <MainLayout>
+            <TaxCalculatorPage />
           </MainLayout>
         </Route>
       )}
