@@ -247,11 +247,13 @@ const SimulationForm = ({
               <p className="text-muted-foreground max-w-md mx-auto">
                 Adicione produtos à sua simulação para calcular os impostos e estimar o lucro da operação.
               </p>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="mt-2" onClick={() => setDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" /> Adicionar Primeiro Produto
-                </Button>
-              </DialogTrigger>
+              <Button 
+                variant="outline" 
+                className="mt-2" 
+                onClick={() => setDialogOpen(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Adicionar Primeiro Produto
+              </Button>
             </div>
           )}
         </div>
