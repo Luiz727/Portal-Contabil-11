@@ -301,18 +301,19 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
 
   // Renderiza o menu lateral
   return (
-    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-gray-900 text-white transform transition-all duration-300 ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
-      <div className="flex justify-between p-3 border-b border-gray-800">
-        <div className={collapsed ? "hidden" : "flex items-center text-sm font-medium text-gray-100"}>
+    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-card border-r border-border shadow text-foreground transform transition-all duration-300 ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
+      <div className="flex justify-between p-3 border-b border-border">
+        <div className={collapsed ? "hidden" : "flex items-center text-sm font-medium"}>
           Módulo Fiscal
         </div>
         <button 
           onClick={toggleMenu} 
-          className="text-gray-400 hover:text-white p-1 rounded focus:outline-none"
+          className="text-muted-foreground hover:text-foreground p-1 rounded focus:outline-none"
         >
-          <span className="material-icons text-sm">
-            {collapsed ? 'chevron_right' : 'chevron_left'}
-          </span>
+          {collapsed ? 
+            <ChevronRight className="h-4 w-4" /> : 
+            <ChevronLeft className="h-4 w-4" />
+          }
         </button>
       </div>
       
@@ -327,15 +328,15 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
                       <div
                         className={`flex items-center justify-center p-2 h-10 rounded-md cursor-pointer transition-colors ${
                           currentActiveSection === section.id 
-                            ? 'bg-primary-600 text-white' 
-                            : 'text-gray-300 hover:bg-primary-700/50 hover:text-white'
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         }`}
                       >
                         {section.icon}
                       </div>
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium bg-gray-800 text-white border-gray-700">
+                  <TooltipContent side="right" className="font-medium">
                     {section.label}
                   </TooltipContent>
                 </Tooltip>
@@ -345,8 +346,8 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
                 <div
                   className={`flex items-center px-3 py-2 rounded-md mb-1 cursor-pointer transition-colors ${
                     currentActiveSection === section.id 
-                      ? 'bg-primary-600 text-white' 
-                      : 'text-gray-300 hover:bg-primary-700/50 hover:text-white'
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
                   <span className="flex items-center">
@@ -359,7 +360,7 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
 
             {/* Submenu */}
             {!collapsed && section.submenu && currentActiveSection === section.id && (
-              <div className="ml-4 mt-1 space-y-1 pl-2 border-l border-gray-700">
+              <div className="ml-4 mt-1 space-y-1 pl-2 border-l border-border">
                 {section.submenu.map(item => {
                   const isActive = location === item.path;
                   return (
@@ -367,8 +368,8 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
                       <div
                         className={`flex items-center px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
                           isActive 
-                            ? 'bg-gray-800 text-white' 
-                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                            ? 'bg-accent text-accent-foreground' 
+                            : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                         }`}
                       >
                         {item.icon}
@@ -393,15 +394,15 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
                             <div
                               className={`flex items-center justify-center p-2 h-8 rounded-md cursor-pointer transition-colors ${
                                 isActive 
-                                  ? 'bg-gray-800 text-white' 
-                                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                  ? 'bg-accent text-accent-foreground' 
+                                  : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                               }`}
                             >
                               {item.icon}
                             </div>
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-gray-800 text-white border-gray-700">
+                        <TooltipContent side="right">
                           {item.label}
                         </TooltipContent>
                       </Tooltip>
@@ -415,8 +416,8 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
       </div>
       
       {!collapsed && (
-        <div className="p-2 border-t border-gray-800 mt-auto">
-          <div className="text-xs text-gray-500 flex items-center justify-center">
+        <div className="p-2 border-t border-border mt-auto">
+          <div className="text-xs text-muted-foreground flex items-center justify-center">
             Módulo Fiscal v1.0
           </div>
         </div>
