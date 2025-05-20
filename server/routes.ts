@@ -78,20 +78,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerIntegraNfRoutes(app);
   registerHonorariosRoutes(app);
   registerTaxCalculatorRoutes(app);
-  
-  // Registrar rotas administrativas com sistema de camadas
-  try {
-    import('./routes/adminRoutes.js').then(module => {
-      const { registerAdminRoutes } = module;
-      registerAdminRoutes(app);
-      console.log("Rotas administrativas com controle de acesso registradas");
-    }).catch(error => {
-      console.error("Erro ao importar rotas administrativas:", error);
-    });
-  } catch (error) {
-    console.error("Erro ao registrar rotas administrativas:", error);
-  }
-  
   try {
     registerXmlVaultRoutes(app);
   } catch (error) {

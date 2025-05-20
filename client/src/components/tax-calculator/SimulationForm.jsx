@@ -1,202 +1,300 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash2, Calculator } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { Plus, Trash2, Package, Search, XCircle, Info } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { motion } from 'framer-motion';
 
-/**
- * Componente de formulário para simulação de impostos
- * Permite que o usuário insira os dados necessários para calcular impostos e lucro
- */
-const SimulationForm = ({ 
-  formData, 
-  onInputChange, 
-  onProductInputChange, 
-  onAddProduct, 
-  onRemoveProduct, 
-  universalProducts, 
-  isEditing,
-  calculateTaxes
+const SimulationForm = ({
+  formData,
+  handleInputChange,
+  handleProductInputChange,
+  addProductToSimulation,
+  removeProductFromSimulation,
+  calculateSummary,
+  universalProducts,
+  isEditing
 }) => {
-  const [selectedProductId, setSelectedProductId] = useState('');
-
-  const handleAddProduct = () => {
-    if (selectedProductId) {
-      const productToAdd = universalProducts.find(p => p.id === selectedProductId || p.id === parseInt(selectedProductId));
-      if (productToAdd) {
-        onAddProduct(productToAdd);
-        setSelectedProductId('');
-      }
-    }
-  };
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  const filteredProducts = universalProducts.filter(product => 
+    product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.referencia?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.ncm?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const { data, clienteNome, produtos, valorVendaTotalGlobal } = formData;
+  
   return (
-    <Card className="w-full">
+    <Card className="mb-6">
       <CardHeader>
-        <CardTitle className="text-xl">Nova Simulação de Impostos</CardTitle>
+        <CardTitle className="text-xl flex items-center">
+          <Package className="mr-2 h-5 w-5 text-primary" />
+          {isEditing ? 'Editar Simulação' : 'Nova Simulação de Impostos'}
+        </CardTitle>
         <CardDescription>
-          Informe os produtos, valores e quantidades para cálculo
+          Simule a tributação e lucro sobre vendas para auxiliar em estratégias de precificação
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="space-y-2">
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             <Label htmlFor="data">Data da Simulação</Label>
             <Input
               id="data"
               type="date"
-              value={formData.data}
-              onChange={(e) => onInputChange('data', e.target.value)}
-              required
+              value={data}
+              onChange={(e) => handleInputChange('data', e.target.value)}
+              className="mt-1"
             />
           </div>
           
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="clienteNome">Nome do Cliente</Label>
             <Input
               id="clienteNome"
-              placeholder="Cliente para quem a venda será realizada"
-              value={formData.clienteNome}
-              onChange={(e) => onInputChange('clienteNome', e.target.value)}
+              value={clienteNome}
+              onChange={(e) => handleInputChange('clienteNome', e.target.value)}
+              placeholder="Nome do cliente ou identificação"
+              className="mt-1"
             />
           </div>
         </div>
         
-        <div className="space-y-6">
-          <div className="border rounded-md p-4">
-            <h3 className="font-medium text-lg mb-4">Produtos</h3>
-            
-            <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div className="md:col-span-3">
-                <Label htmlFor="product-select">Selecionar Produto</Label>
-                <Select
-                  value={selectedProductId}
-                  onValueChange={setSelectedProductId}
-                >
-                  <SelectTrigger id="product-select" className="w-full">
-                    <SelectValue placeholder="Selecione um produto..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {universalProducts.map(product => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.nome || product.name} - {formatCurrency(product.preco_custo || product.precoCusto || 0)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Produtos</h3>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center">
+                  <Plus className="mr-2 h-4 w-4" /> Adicionar Produto
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Selecionar Produto</DialogTitle>
+                  <DialogDescription>
+                    Busque e adicione produtos à sua simulação de impostos
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="mt-4 mb-4 relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar produtos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                  {searchTerm && (
+                    <button 
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      <XCircle className="h-4 w-4 text-gray-400" />
+                    </button>
+                  )}
+                </div>
+                
+                <ScrollArea className="h-[300px] border rounded-md p-2">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Referência</TableHead>
+                        <TableHead>Preço Custo</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.nome}</TableCell>
+                            <TableCell>{product.referencia || '-'}</TableCell>
+                            <TableCell>
+                              {product.preco_custo ? 
+                                new Intl.NumberFormat('pt-BR', { 
+                                  style: 'currency', 
+                                  currency: 'BRL' 
+                                }).format(product.preco_custo) 
+                                : 'R$ 0,00'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  addProductToSimulation(product);
+                                  setDialogOpen(false);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 mr-1" /> Adicionar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                            {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto disponível'}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+                
+                <DialogFooter className="mt-4">
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Fechar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          
+          {produtos.length > 0 ? (
+            <div className="border rounded-md overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">Nome</TableHead>
+                    <TableHead>Qtd.</TableHead>
+                    <TableHead>Preço Custo</TableHead>
+                    <TableHead>Preço Venda</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {produtos.map((produto, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{produto.nome}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={produto.quantidade || ''}
+                          onChange={(e) => handleProductInputChange(index, 'quantidade', e.target.value)}
+                          className="w-16 h-8 text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(produto.precoCusto || 0)}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={produto.valorVendaUnitario || ''}
+                          onChange={(e) => handleProductInputChange(index, 'valorVendaUnitario', e.target.value)}
+                          className="w-28 h-8 text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(produto.valorVendaTotal || 0)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeProductFromSimulation(index)}
+                          className="h-8 w-8 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="border border-dashed rounded-lg p-8 text-center space-y-4 bg-muted/40">
+              <div className="flex justify-center">
+                <Package className="h-12 w-12 text-muted-foreground opacity-40" />
+              </div>
+              <h3 className="text-lg font-medium">Nenhum produto adicionado</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Adicione produtos à sua simulação para calcular os impostos e estimar o lucro da operação.
+              </p>
+              <Button 
+                variant="outline" 
+                className="mt-2" 
+                onClick={() => setDialogOpen(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Adicionar Primeiro Produto
+              </Button>
+            </div>
+          )}
+        </div>
+        
+        {produtos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-6"
+          >
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-1 w-full">
+                <Label htmlFor="valorVendaTotal" className="flex items-center">
+                  Valor Total da Venda (opcional)
+                  <Info 
+                    className="h-4 w-4 ml-1 text-muted-foreground cursor-help" 
+                    title="Se preenchido, a calculadora distribuirá este valor entre os produtos proporcionalmente"
+                  />
+                </Label>
+                <Input
+                  id="valorVendaTotal"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={valorVendaTotalGlobal || ''}
+                  onChange={(e) => handleInputChange('valorVendaTotalGlobal', e.target.value)}
+                  placeholder="Valor personalizado para toda a venda"
+                  className="mt-1"
+                />
               </div>
               
-              <div className="flex items-end">
-                <Button 
-                  type="button" 
-                  onClick={handleAddProduct}
-                  className="w-full"
-                  disabled={!selectedProductId}
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Adicionar
-                </Button>
-              </div>
+              <Button
+                className="mt-5 w-full md:w-auto"
+                onClick={() => calculateSummary(produtos, valorVendaTotalGlobal)}
+              >
+                Calcular Impostos
+              </Button>
             </div>
-            
-            {formData.produtos.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Produto</TableHead>
-                      <TableHead>Custo (R$)</TableHead>
-                      <TableHead>Quant.</TableHead>
-                      <TableHead>Venda Unit. (R$)</TableHead>
-                      <TableHead>Total (R$)</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {formData.produtos.map((produto, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{produto.nome || produto.name}</TableCell>
-                        <TableCell>
-                          {formatCurrency(produto.precoCusto || produto.preco_custo || 0)}
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={produto.quantidade}
-                            onChange={(e) => onProductInputChange(index, 'quantidade', e.target.value)}
-                            className="w-16 text-center"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={produto.valorVendaUnitario}
-                            onChange={(e) => onProductInputChange(index, 'valorVendaUnitario', e.target.value)}
-                            className="w-24"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(produto.valorVendaTotal || 0)}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => onRemoveProduct(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center p-6 border border-dashed rounded-md bg-gray-50">
-                <p className="text-gray-500">Nenhum produto adicionado à simulação</p>
-              </div>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="valorVendaTotalGlobal">
-              Valor Total da Venda (opcional - sobreescreve o somatório dos produtos)
-            </Label>
-            <Input
-              id="valorVendaTotalGlobal"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="Deixe em branco para usar a soma automática"
-              value={formData.valorVendaTotalGlobal}
-              onChange={(e) => onInputChange('valorVendaTotalGlobal', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Se informado, o sistema distribuirá este valor proporcionalmente entre os produtos.
-            </p>
-          </div>
-          
-          <div className="pt-4 flex justify-center">
-            <Button 
-              type="button" 
-              onClick={calculateTaxes}
-              className="bg-amber-600 hover:bg-amber-700 text-white w-full md:w-auto"
-              disabled={formData.produtos.length === 0}
-              size="lg"
-            >
-              <Calculator className="mr-2 h-5 w-5" /> Calcular Impostos e Lucro
-            </Button>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </CardContent>
     </Card>
   );
