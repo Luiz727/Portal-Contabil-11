@@ -1,18 +1,18 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { Eye } from 'lucide-react';
+import logoNixcon from '../../assets/logo-nixcon.png';
 
 export default function NIXCONHeader({ title, subtitle, showBackLink = false }) {
   return (
     <header className="bg-white py-4 px-0 border-b border-gray-200">
       <div className="container mx-auto flex justify-between items-center">
         <div>
-          {/* Logo da NIXCON - Use o logo real da empresa na produção */}
+          {/* Logo da NIXCON */}
           <div className="flex items-center">
             <Link href="/">
               <a className="flex items-center">
-                <div className="mr-1.5 text-primary text-2xl font-semibold">NIX</div>
-                <div className="text-secondary text-2xl font-semibold">con</div>
+                <img src={logoNixcon} alt="NIXCON Logo" className="h-8" />
               </a>
             </Link>
           </div>

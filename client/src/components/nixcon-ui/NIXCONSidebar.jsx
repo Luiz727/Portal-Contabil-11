@@ -5,6 +5,7 @@ import {
   PackageOpen, Truck, Tags, Calculator, 
   CreditCard, BarChart3, Wrench, ChevronDown
 } from 'lucide-react';
+import logoNixcon from '../../assets/logo-nixcon.png';
 
 const SidebarItem = ({ icon: Icon, label, to, active, hasSubmenu }) => {
   return (
@@ -41,7 +42,7 @@ export default function NIXCONSidebar() {
       <div className="p-4 border-b border-gray-200 mb-2">
         <div className="flex items-center justify-center">
           <img 
-            src="https://via.placeholder.com/120x40?text=NIXCON" 
+            src={logoNixcon} 
             alt="NIXCON Logo" 
             className="h-10" 
           />

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Calculator, FileText, Plus, Calendar, DollarSign, ArrowRight } from 'lucide-react';
-import { NIXCONHeader, CompanyContext, InfoBanner } from './NIXCONHeader';
+import NIXCONHeader, { CompanyContext, InfoBanner } from './NIXCONHeader';
 import NIXCONSidebar from './NIXCONSidebar';
+import logoNixcon from '../../assets/logo-nixcon.png';
 
 // Componente para input padrão NIXCON
 const NIXCONInput = ({ label, placeholder, type = 'text', icon, value, onChange, className = '' }) => {
