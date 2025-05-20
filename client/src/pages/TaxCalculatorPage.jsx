@@ -30,6 +30,16 @@ const TaxCalculatorPage = () => {
     }
   };
   
+  // Função para mostrar notificações que desaparecem automaticamente
+  const showAutoToast = (title, description, variant = "default") => {
+    toast({ 
+      title,
+      description,
+      variant,
+      duration: 3000, // Desaparece após 3 segundos
+    });
+  };
+  
   const [activeTab, setActiveTab] = useState('form');
   const [simulations, setSimulations] = useState([]);
   const [currentSimulation, setCurrentSimulation] = useState(null);
@@ -395,38 +405,54 @@ const TaxCalculatorPage = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
-            <CalculatorIcon className="mr-2 h-6 w-6 text-primary" />
-            Calculadora de Impostos
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Simule os impostos e o lucro sobre suas vendas
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm bg-primary/5 border-primary/20">
-            Empresa: {empresaAtual?.nome || 'Não selecionada'}
-          </Badge>
+      {/* Cabeçalho estilizado com as cores NIXCON */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/20 rounded-xl p-4 md:p-6 shadow-md mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold nixcon-gray flex items-center">
+              <CalculatorIcon className="mr-2 h-7 w-7 nixcon-gold" />
+              Calculadora de Impostos
+            </h1>
+            <p className="text-muted-foreground mt-2 max-w-xl">
+              Simule os impostos e o lucro sobre suas vendas com base na legislação tributária atual
+            </p>
+          </div>
           
-          <Badge variant="outline" className="text-sm bg-primary/5 border-primary/20">
-            Regime: {empresaAtual?.regime_tributario || 'N/D'}
-          </Badge>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Badge variant="outline" className="text-sm bg-white shadow-sm border border-primary/30 py-1.5 px-3">
+              <span className="nixcon-gray font-medium mr-1">Empresa:</span>
+              <span className="nixcon-gold font-semibold">{empresaAtual?.nome || 'Não selecionada'}</span>
+            </Badge>
+            
+            <Badge variant="outline" className="text-sm bg-white shadow-sm border border-primary/30 py-1.5 px-3">
+              <span className="nixcon-gray font-medium mr-1">Regime:</span>
+              <span className="nixcon-gold font-semibold">{empresaAtual?.regime_tributario || 'N/D'}</span>
+            </Badge>
+          </div>
         </div>
       </div>
       
-      <div className="mt-6">
+      <div className="mt-0">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="form" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-100 p-1.5 rounded-xl shadow-sm">
+            <TabsTrigger 
+              value="form" 
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
               <Calculator className="h-4 w-4" />
               Nova Simulação
             </TabsTrigger>
-            <TabsTrigger value="saved" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="saved" 
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
               <Save className="h-4 w-4" />
-              Simulações Salvas {simulations.length > 0 && `(${simulations.length})`}
+              Simulações Salvas 
+              {simulations.length > 0 && (
+                <span className="ml-2 nixcon-badge bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium">
+                  {simulations.length}
+                </span>
+              )}
             </TabsTrigger>
           </TabsList>
           
