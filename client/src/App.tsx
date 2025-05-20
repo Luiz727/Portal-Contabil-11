@@ -26,6 +26,7 @@ import FiscalPage from "@/pages/FiscalPage";
 
 // Calculadora de impostos
 import TaxCalculatorPage from "@/pages/TaxCalculatorPage";
+import TaxCalculatorNIXCONPage from "./pages/TaxCalculatorNIXCONPage";
 
 // Páginas administrativas
 import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
@@ -94,6 +95,11 @@ function Router() {
         <MainLayout>
           <TaxCalculatorPage />
         </MainLayout>
+      </Route>
+      
+      {/* Nova rota para o estilo NIXCON da calculadora */}
+      <Route path="/calculadora-nixcon">
+        <TaxCalculatorNIXCONPage />
       </Route>
       
       {isAuthenticated && (
