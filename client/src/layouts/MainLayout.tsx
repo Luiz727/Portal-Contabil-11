@@ -15,11 +15,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [location, navigate] = useLocation();
   const isFiscalModule = location.startsWith('/fiscal');
 
+  // Verifica a rota atual para determinar se precisa de autenticação
+  const isCalculatorPage = location === '/tax-calculator';
+  
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Não redireciona se for a página da calculadora de impostos
+    if (!isLoading && !isAuthenticated && !isCalculatorPage) {
       navigate("/");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, isCalculatorPage]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -45,7 +49,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  // Se não estiver autenticado, verifica se é a página da calculadora
+  if (!isAuthenticated && !isCalculatorPage) {
     return null;
   }
 

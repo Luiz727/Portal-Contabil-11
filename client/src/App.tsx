@@ -89,13 +89,12 @@ function Router() {
         </Route>
       )}
       
-      {isAuthenticated && (
-        <Route path="/tax-calculator">
-          <MainLayout>
-            <TaxCalculatorPage />
-          </MainLayout>
-        </Route>
-      )}
+      {/* A calculadora é acessível mesmo sem autenticação */}
+      <Route path="/tax-calculator">
+        <MainLayout>
+          <TaxCalculatorPage />
+        </MainLayout>
+      </Route>
       
       {isAuthenticated && (
         <Route path="/financial">
