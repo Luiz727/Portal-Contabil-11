@@ -33,6 +33,9 @@ import TaxCalculatorNIXCONPage from "./pages/TaxCalculatorNIXCONPage";
 
 // Páginas administrativas
 import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
+import ProdutosUniversaisPage from "./pages/admin/ProdutosUniversaisPage";
+import ImportacaoProdutosPage from "./pages/admin/ImportacaoProdutosPage";
+import PlanosAssinaturasPage from "./pages/admin/PlanosAssinaturasPage";
 
 // Contextos
 import { EmpresasProvider } from "@/contexts/EmpresasContext";
@@ -182,6 +185,30 @@ function Router() {
         <Route path="/admin/configuracoes">
           <MainLayout>
             <ConfiguracoesAdminPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/produtos-universais">
+          <MainLayout>
+            <ProdutosUniversaisPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/importar-produtos">
+          <MainLayout>
+            <ImportacaoProdutosPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/planos">
+          <MainLayout>
+            <PlanosAssinaturasPage />
           </MainLayout>
         </Route>
       )}

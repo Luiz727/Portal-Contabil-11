@@ -296,6 +296,26 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
           />
         </SidebarSection>
         
+        <SidebarSection title="Administração" collapsed={collapsed}>
+          <SidebarItem 
+            icon={PackageOpen} 
+            label="Produtos Universais" 
+            to="/admin/produtos-universais" 
+            active={location === "/admin/produtos-universais"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+          
+          <SidebarItem 
+            icon={CreditCard} 
+            label="Planos e Assinaturas" 
+            to="/admin/planos" 
+            active={location === "/admin/planos"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+        </SidebarSection>
+        
         <SidebarSection title="Sistema" collapsed={collapsed}>
           <SidebarItem 
             icon={Settings} 
