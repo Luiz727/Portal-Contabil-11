@@ -113,8 +113,10 @@ interface User {
   email?: string;
   role: UserRole;
   empresaId?: string;
+  escritorioId?: string;
   profileImageUrl?: string;
   customPermissions?: Record<SystemModule, AccessLevel>;
+  isSuperAdmin?: boolean;
 }
 
 interface AuthContextType {
