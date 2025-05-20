@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   User, 
@@ -7,12 +7,15 @@ import {
   CreditCard, 
   Lock, 
   Layers,
-  LayoutDashboard
+  LayoutDashboard,
+  CheckCircle,
+  X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from 'wouter';
+import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * Painel Administrativo Central
