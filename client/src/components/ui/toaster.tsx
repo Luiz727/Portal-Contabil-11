@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import { toast, type Toast } from '@/components/ui/use-toast';
+import { useToast, type Toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 /**
@@ -9,19 +9,19 @@ import { cn } from '@/lib/utils';
  */
 export function Toaster() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Hook para ouvir as mudanças nos toasts
-    const handleChange = (updatedToasts: Toast[]) => {
-      setToasts(updatedToasts);
-    };
-
-    // Registra o listener e o limpa na desmontagem
-    toast.subscribe(handleChange);
-    return () => {
-      toast.unsubscribe(handleChange);
-    };
-  }, []);
+    // Forma simplificada - observamos direto os toasts do hook
+    setToasts(toast.toasts || []);
+    
+    // Configurando um timeout para verificar toasts a cada 300ms
+    const interval = setInterval(() => {
+      setToasts(toast.toasts || []);
+    }, 300);
+    
+    return () => clearInterval(interval);
+  }, [toast]);
 
   return (
     <div className="fixed top-0 right-0 z-50 flex flex-col items-end p-4 gap-2 w-full sm:max-w-md">

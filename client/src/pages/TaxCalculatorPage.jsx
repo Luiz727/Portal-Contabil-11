@@ -1,439 +1,369 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CardFooter } from '@/components/ui/card';
-import { Calculator, Save, Send, AlertTriangle, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import SimulationForm from '@/components/tax-calculator/SimulationForm';
-import TaxSummaryDisplay from '@/components/tax-calculator/TaxSummaryDisplay';
-import SavedSimulationsList from '@/components/tax-calculator/SavedSimulationsList';
 
-/**
- * Página da calculadora de impostos do sistema NIXCON
- * Permite simular cálculos de impostos e lucro para vendas
- * Destaca valores de impostos para usuários empresariais
- */
+// Configuração padrão dos regimes tributários
+const REGIMES_TRIBUTARIOS = {
+  SIMPLES_NACIONAL: {
+    nome: 'Simples Nacional',
+    aliquotas: {
+      icms: 0,
+      pis: 0,
+      cofins: 0,
+      ipi: 0,
+      simples: 0.04, // 4% por padrão (será ajustado com base no faturamento)
+    },
+    faixas: [
+      { limite: 180000, aliquota: 0.04 }, // Até 180.000 - 4%
+      { limite: 360000, aliquota: 0.073 }, // Até 360.000 - 7,3%
+      { limite: 720000, aliquota: 0.095 }, // Até 720.000 - 9,5%
+      { limite: 1800000, aliquota: 0.107 }, // Até 1.800.000 - 10,7%
+      { limite: 3600000, aliquota: 0.143 }, // Até 3.600.000 - 14,3%
+      { limite: 4800000, aliquota: 0.19 }, // Até 4.800.000 - 19%
+    ],
+    calculaAliquota: (faturamentoAnual) => {
+      const faixa = REGIMES_TRIBUTARIOS.SIMPLES_NACIONAL.faixas.find(
+        f => faturamentoAnual <= f.limite
+      ) || REGIMES_TRIBUTARIOS.SIMPLES_NACIONAL.faixas[5];
+      return faixa.aliquota;
+    }
+  },
+  LUCRO_PRESUMIDO: {
+    nome: 'Lucro Presumido',
+    aliquotas: {
+      icms: 0.18, // 18%
+      pis: 0.0065, // 0,65%
+      cofins: 0.03, // 3%
+      ipi: 0.05, // 5%
+      irpj: 0.048, // 4,8% (base presumida 32% * 15%)
+      csll: 0.0288, // 2,88% (base presumida 32% * 9%)
+    }
+  },
+  LUCRO_REAL: {
+    nome: 'Lucro Real',
+    aliquotas: {
+      icms: 0.18, // 18%
+      pis: 0.0165, // 1,65% (não-cumulativo)
+      cofins: 0.076, // 7,6% (não-cumulativo)
+      ipi: 0.05, // 5%
+      irpj: 0.15, // 15% (sobre o lucro)
+      csll: 0.09, // 9% (sobre o lucro)
+    }
+  }
+};
+
+// Componente de formulário para simulação
+const SimulationForm = ({ onSubmit, isLoading }) => {
+  const [valorProduto, setValorProduto] = useState('');
+  const [regimeTributario, setRegimeTributario] = useState('SIMPLES_NACIONAL');
+  const [faturamentoAnual, setFaturamentoAnual] = useState('');
+  const [margemLucro, setMargemLucro] = useState('');
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    onSubmit({
+      valorProduto: parseFloat(valorProduto),
+      regimeTributario,
+      faturamentoAnual: parseFloat(faturamentoAnual),
+      margemLucro: parseFloat(margemLucro),
+    });
+  };
+  
+  return (
+    <Card className="shadow-md">
+      <CardHeader className="bg-gray-50 border-b">
+        <CardTitle className="text-lg text-gray-800">
+          Simulação de Impostos
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="valor-produto" className="block text-sm font-medium text-gray-700 mb-1">
+                Valor do Produto (R$)
+              </label>
+              <input
+                id="valor-produto"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                placeholder="0,00"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+                value={valorProduto}
+                onChange={(e) => setValorProduto(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="regime" className="block text-sm font-medium text-gray-700 mb-1">
+                Regime Tributário
+              </label>
+              <select
+                id="regime"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+                value={regimeTributario}
+                onChange={(e) => setRegimeTributario(e.target.value)}
+              >
+                <option value="SIMPLES_NACIONAL">Simples Nacional</option>
+                <option value="LUCRO_PRESUMIDO">Lucro Presumido</option>
+                <option value="LUCRO_REAL">Lucro Real</option>
+              </select>
+            </div>
+            
+            {regimeTributario === 'SIMPLES_NACIONAL' && (
+              <div>
+                <label htmlFor="faturamento" className="block text-sm font-medium text-gray-700 mb-1">
+                  Faturamento Anual (R$)
+                </label>
+                <input
+                  id="faturamento"
+                  type="number"
+                  step="1000"
+                  min="0"
+                  required
+                  placeholder="0,00"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  value={faturamentoAnual}
+                  onChange={(e) => setFaturamentoAnual(e.target.value)}
+                />
+              </div>
+            )}
+            
+            {regimeTributario === 'LUCRO_REAL' && (
+              <div>
+                <label htmlFor="margem" className="block text-sm font-medium text-gray-700 mb-1">
+                  Margem de Lucro (%)
+                </label>
+                <input
+                  id="margem"
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  required
+                  placeholder="0"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  value={margemLucro}
+                  onChange={(e) => setMargemLucro(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-6">
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Calculando...' : 'Calcular Impostos'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Componente de exibição dos resultados
+const TaxSummaryDisplay = ({ resultados }) => {
+  if (!resultados) return null;
+
+  const { regime, impostos, totais } = resultados;
+  
+  return (
+    <Card className="shadow-md">
+      <CardHeader className="bg-gray-50 border-b">
+        <CardTitle className="text-lg text-gray-800">
+          Resumo de Impostos - {regime}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-medium text-gray-700 mb-2">Impostos Aplicados</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(impostos).map(([imposto, valor]) => (
+                <div key={imposto} className="flex justify-between p-2 border-b">
+                  <span className="text-gray-600 uppercase">{imposto}</span>
+                  <span className="font-medium">{formatPercent(valor * 100)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="pt-3 border-t">
+            <h4 className="font-medium text-gray-700 mb-2">Valores Calculados</h4>
+            <div className="space-y-2">
+              <div className="flex justify-between p-2 bg-gray-50">
+                <span className="text-gray-600">Valor do Produto</span>
+                <span className="font-medium">{formatCurrency(totais.valorProduto)}</span>
+              </div>
+              <div className="flex justify-between p-2">
+                <span className="text-gray-600">Total de Impostos</span>
+                <span className="font-medium text-red-600">{formatCurrency(totais.totalImpostos)}</span>
+              </div>
+              <div className="flex justify-between p-2 bg-gray-50">
+                <span className="text-gray-600">Valor Final</span>
+                <span className="font-medium text-green-600">{formatCurrency(totais.valorFinal)}</span>
+              </div>
+              <div className="flex justify-between p-2">
+                <span className="text-gray-600">Carga Tributária</span>
+                <span className="font-medium">{formatPercent(totais.cargaTributaria * 100)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Componente principal da página
 const TaxCalculatorPage = () => {
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [resultados, setResultados] = useState(null);
+  const [historico, setHistorico] = useState([]);
   const { toast } = useToast();
   const { user } = useAuth();
-  const userRole = user?.role || 'cliente';
 
-  // Estado para as simulações salvas
-  const [simulations, setSimulations] = useState([]);
-  const [currentSimulation, setCurrentSimulation] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  
-  // Configuração inicial do formulário
-  const initialFormData = {
-    id: null,
-    data: new Date().toISOString().split('T')[0],
-    clienteNome: '',
-    produtos: [], 
-    valorVendaTotalGlobal: '', 
-    empresaIdContexto: null,
-  };
-
-  // Estados para controle do formulário e resultados
-  const [formData, setFormData] = useState(initialFormData);
-  const [summary, setSummary] = useState(null);
-  const [showSummary, setShowSummary] = useState(false);
-  
-  // Produtos iniciais para teste
-  const [universalProducts, setUniversalProducts] = useState([
-    { 
-      id: 1, 
-      nome: 'Notebook Dell XPS', 
-      preco_custo: 4500, 
-      config_fiscal: { icms: 0.18, pis: 0.0165, cofins: 0.076, ipi: 0.15 } 
-    },
-    { 
-      id: 2, 
-      nome: 'Monitor LG 27"', 
-      preco_custo: 1200, 
-      config_fiscal: { icms: 0.18, pis: 0.0165, cofins: 0.076, ipi: 0.10 } 
-    },
-    { 
-      id: 3, 
-      nome: 'Mouse Logitech MX', 
-      preco_custo: 250, 
-      config_fiscal: { icms: 0.18, pis: 0.0165, cofins: 0.076, ipi: 0.05 } 
-    },
-    { 
-      id: 4, 
-      nome: 'Teclado Mecânico Keychron', 
-      preco_custo: 450, 
-      config_fiscal: { icms: 0.18, pis: 0.0165, cofins: 0.076, ipi: 0.05 } 
-    },
-    { 
-      id: 5, 
-      nome: 'Smartphone Samsung S22', 
-      preco_custo: 3800, 
-      config_fiscal: { icms: 0.18, pis: 0.0165, cofins: 0.076, ipi: 0.15 } 
-    },
-  ]);
-
-  // Carrega simulações salvas do localStorage quando a página é carregada
-  useEffect(() => {
-    const storedSimulations = localStorage.getItem('nixcon_tax_simulations');
-    if (storedSimulations) {
-      setSimulations(JSON.parse(storedSimulations));
-    }
-  }, []);
-
-  // Salva simulações no localStorage quando mudam
-  const saveSimulationsToStorage = (updatedSimulations) => {
-    localStorage.setItem('nixcon_tax_simulations', JSON.stringify(updatedSimulations));
-  };
-
-  // Função para limpar o formulário
-  const resetForm = () => {
-    setFormData(initialFormData);
-    setCurrentSimulation(null);
-    setIsEditing(false);
-    setSummary(null);
-    setShowSummary(false);
-  };
-
-  // Manipuladores de mudança nos campos do formulário
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleProductInputChange = (index, field, value) => {
-    const newProdutos = [...formData.produtos];
-    newProdutos[index][field] = value;
+  // Função para calcular os impostos
+  const calcularImpostos = (dados) => {
+    setIsCalculating(true);
     
-    // Atualiza o valor total automaticamente quando quantidade ou valor unitário mudam
-    if (field === 'quantidade' || field === 'valorVendaUnitario') {
-      const qtd = parseFloat(newProdutos[index].quantidade) || 0;
-      const vVenda = parseFloat(newProdutos[index].valorVendaUnitario) || 0;
-      newProdutos[index].valorVendaTotal = qtd * vVenda;
-    }
-    
-    setFormData(prev => ({ ...prev, produtos: newProdutos }));
-  };
-
-  // Adiciona um produto à simulação
-  const addProductToSimulation = (product) => {
-    const precoCustoDoProduto = product.preco_custo || 0;
-    const newProductEntry = {
-      ...product, 
-      produtoId: product.id, 
-      quantidade: 1,
-      valorVendaUnitario: precoCustoDoProduto * 1.3, // Markup padrão de 30%
-      valorVendaTotal: precoCustoDoProduto * 1.3,
-      precoCusto: precoCustoDoProduto,
-    };
-    setFormData(prev => ({ ...prev, produtos: [...prev.produtos, newProductEntry] }));
-  };
-
-  // Remove um produto da simulação
-  const removeProductFromSimulation = (index) => {
-    setFormData(prev => ({ ...prev, produtos: prev.produtos.filter((_, i) => i !== index) }));
-  };
-
-  // Obtém a alíquota do imposto para um produto
-  const getTaxRateForCalc = (product, taxName) => {
-    if (product && product.config_fiscal) {
-      const configFiscal = product.config_fiscal;
-      switch(taxName) {
-        case 'icms': return configFiscal.icms || 0.18;
-        case 'pis': return configFiscal.pis || 0.0165;
-        case 'cofins': return configFiscal.cofins || 0.076;
-        case 'ipi': return configFiscal.ipi || 0.05;
-        case 'iss': return configFiscal.iss || 0.05;
-        case 'simplesNacionalAliquota': return configFiscal.simplesNacionalAliquota || 0.06;
-        default: return 0;
-      }
-    }
-    
-    // Valores padrão se não houver configuração
-    switch(taxName) {
-      case 'icms': return 0.18;
-      case 'pis': return 0.0165;
-      case 'cofins': return 0.076;
-      case 'ipi': return 0.05;
-      case 'iss': return 0.05;
-      case 'simplesNacionalAliquota': return 0.06;
-      default: return 0;
-    }
-  };
-
-  // Função de cálculo dos impostos e lucro
-  const calculateTaxes = useCallback(() => {
-    if (!formData.produtos || formData.produtos.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Erro no cálculo",
-        description: "Adicione pelo menos um produto à simulação.",
-      });
-      return;
-    }
-
-    const currentProdutos = [...formData.produtos];
-    const currentValorVendaTotalGlobal = formData.valorVendaTotalGlobal;
-    
-    let faturamentoTotalItens = 0;
-    currentProdutos.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
-      faturamentoTotalItens += qtd * vVendaUnitario;
-    });
-  
-    let produtosProcessados = currentProdutos;
-    let faturamentoFinalCalculo = faturamentoTotalItens;
-  
-    // Se o usuário informou um valor total específico, rateamos proporcionalmente
-    if (currentValorVendaTotalGlobal && parseFloat(currentValorVendaTotalGlobal) > 0 && faturamentoTotalItens > 0) {
-      const valorGlobalNumerico = parseFloat(currentValorVendaTotalGlobal);
-      const fatorDistribuicao = valorGlobalNumerico / faturamentoTotalItens;
-      faturamentoFinalCalculo = valorGlobalNumerico;
-  
-      produtosProcessados = currentProdutos.map(p => {
-        const itemFaturamentoOriginal = (parseFloat(p.quantidade) || 0) * (parseFloat(p.valorVendaUnitario) || 0);
-        const itemFaturamentoRateado = itemFaturamentoOriginal * fatorDistribuicao;
-        const quantidadeValida = parseFloat(p.quantidade) || 1; 
-        return {
-          ...p,
-          valorVendaUnitario: itemFaturamentoRateado / quantidadeValida,
-          valorVendaTotal: itemFaturamentoRateado
+    // Simulando um processo assíncrono (API call)
+    setTimeout(() => {
+      try {
+        const { valorProduto, regimeTributario, faturamentoAnual, margemLucro } = dados;
+        const regime = REGIMES_TRIBUTARIOS[regimeTributario];
+        
+        let aliquotas = { ...regime.aliquotas };
+        
+        // Ajustes específicos por regime
+        if (regimeTributario === 'SIMPLES_NACIONAL') {
+          aliquotas.simples = regime.calculaAliquota(faturamentoAnual);
+        } else if (regimeTributario === 'LUCRO_REAL') {
+          const lucro = valorProduto * (margemLucro / 100);
+          aliquotas.irpj_valor = lucro * aliquotas.irpj;
+          aliquotas.csll_valor = lucro * aliquotas.csll;
+        }
+        
+        // Cálculo do total de impostos
+        let totalImpostos = 0;
+        Object.entries(aliquotas).forEach(([imposto, aliquota]) => {
+          if (!imposto.includes('_valor')) {
+            totalImpostos += valorProduto * aliquota;
+          }
+        });
+        
+        // Adicionar valores específicos do Lucro Real se existirem
+        if (aliquotas.irpj_valor && aliquotas.csll_valor) {
+          totalImpostos += aliquotas.irpj_valor + aliquotas.csll_valor;
+        }
+        
+        const valorFinal = valorProduto + totalImpostos;
+        const cargaTributaria = totalImpostos / valorProduto;
+        
+        // Resultados finais
+        const resultado = {
+          regime: regime.nome,
+          impostos: aliquotas,
+          totais: {
+            valorProduto,
+            totalImpostos,
+            valorFinal,
+            cargaTributaria,
+            data: new Date().toISOString(),
+          }
         };
-      });
-    } else {
-      produtosProcessados = currentProdutos.map(p => {
-        const qtd = parseFloat(p.quantidade) || 0;
-        const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
-        return {...p, valorVendaTotal: qtd * vVendaUnitario };
-      });
-    }
-  
-    let custoTotalProdutos = 0;
-    let totalImpostosVendas = 0;
-  
-    produtosProcessados.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
-      const itemFaturamento = parseFloat(p.valorVendaTotal) || 0; 
-      
-      custoTotalProdutos += qtd * pCusto;
-  
-      // Cálculo dos impostos baseado no regime (simplificado para exemplo)
-      let itemImpostosVendas = 0;
-      const icmsRate = getTaxRateForCalc(p, 'icms');
-      const pisRate = getTaxRateForCalc(p, 'pis');
-      const cofinsRate = getTaxRateForCalc(p, 'cofins');
-      const ipiRate = getTaxRateForCalc(p, 'ipi'); 
-      const issRate = getTaxRateForCalc(p, 'iss');
-      const simplesRate = getTaxRateForCalc(p, 'simplesNacionalAliquota');
-  
-      // Para este exemplo, usamos impostos de regime normal (não-Simples)
-      itemImpostosVendas = itemFaturamento * (icmsRate + pisRate + cofinsRate + issRate) + ((qtd * pCusto) * ipiRate);
-      
-      totalImpostosVendas += itemImpostosVendas;
-    });
-  
-    // Impostos sobre compras (estimativa simples de 5% sobre o custo total)
-    const impostosCompras = custoTotalProdutos * 0.05; 
-    
-    // DIFAL - Diferencial de alíquotas (estimativa de 2% do faturamento)
-    const difal = faturamentoFinalCalculo * 0.02; 
-    
-    // Lucro bruto = faturamento - custos - impostos
-    const lucroBruto = faturamentoFinalCalculo - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
-  
-    // Atualiza o estado com o cálculo
-    setSummary({
-      faturamentoTotal: faturamentoFinalCalculo,
-      custoTotalProdutos,
-      impostosVendas: totalImpostosVendas,
-      impostosCompras,
-      difal,
-      lucroBruto,
-    });
-    
-    // Mostra o resumo (atendendo à especificação de não mostrar cálculos automaticamente)
-    setShowSummary(true);
-    
-    // Notificação de cálculo concluído
-    toast({
-      title: "Cálculo realizado!",
-      description: "Os valores foram calculados com sucesso.",
-      className: "bg-green-600 text-white",
-      // A notificação desaparece automaticamente após 3 segundos
-      duration: 3000,
-    });
-    
-    return produtosProcessados;
-  }, [formData.produtos, formData.valorVendaTotalGlobal, toast]);
-
-  // Função para salvar uma simulação
-  const handleSaveSimulation = () => {
-    if (formData.produtos.length === 0) {
-      toast({ 
-        variant: "destructive", 
-        title: "Erro", 
-        description: "Adicione produtos à simulação antes de salvar." 
-      });
-      return;
-    }
-    
-    if (!summary) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Calcule os valores antes de salvar a simulação."
-      });
-      return;
-    }
-    
-    let updatedSimulations;
-    const simulationDataToSave = { 
-      ...formData, 
-      summary, 
-      id: isEditing ? formData.id : `sim-${Date.now()}`
-    };
-
-    if (isEditing && formData.id) {
-      updatedSimulations = simulations.map(sim => 
-        sim.id === formData.id ? simulationDataToSave : sim
-      );
-      toast({ 
-        title: "Simulação Atualizada!", 
-        description: "As alterações foram salvas com sucesso.",
-        className: "bg-blue-500 text-white",
-        duration: 3000
-      });
-    } else {
-      updatedSimulations = [simulationDataToSave, ...simulations];
-      toast({ 
-        title: "Simulação Salva!", 
-        description: "Sua nova simulação foi salva com sucesso.",
-        className: "bg-green-500 text-white",
-        duration: 3000
-      });
-    }
-    
-    setSimulations(updatedSimulations);
-    saveSimulationsToStorage(updatedSimulations);
-    resetForm();
-  };
-
-  // Função para editar uma simulação existente
-  const handleEditSimulation = (simulation) => {
-    setCurrentSimulation(simulation);
-    setFormData({
-      id: simulation.id,
-      data: simulation.data,
-      clienteNome: simulation.clienteNome,
-      produtos: simulation.produtos.map(p => ({...p})), 
-      valorVendaTotalGlobal: simulation.valorVendaTotalGlobal || '',
-      empresaIdContexto: simulation.empresaIdContexto || null,
-    });
-    setSummary(simulation.summary);
-    setShowSummary(true);
-    setIsEditing(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Função para excluir uma simulação
-  const handleDeleteSimulation = (simulationId) => {
-    const updatedSimulations = simulations.filter(sim => sim.id !== simulationId);
-    setSimulations(updatedSimulations);
-    saveSimulationsToStorage(updatedSimulations);
-    toast({ 
-      title: "Simulação Excluída", 
-      description: "A simulação foi removida com sucesso.",
-      variant: "destructive",
-      duration: 3000
-    });
-    
-    if (currentSimulation && currentSimulation.id === simulationId) {
-      resetForm();
-    }
+        
+        setResultados(resultado);
+        
+        // Adicionar ao histórico
+        setHistorico(prev => [resultado, ...prev.slice(0, 4)]); // Mantém os últimos 5 cálculos
+        
+        // Mostrar notificação de sucesso
+        toast({
+          title: "Cálculo realizado com sucesso!",
+          variant: "success",
+        });
+      } catch (error) {
+        console.error("Erro ao calcular impostos:", error);
+        toast({
+          title: "Erro ao calcular impostos",
+          description: "Verifique os dados e tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsCalculating(false);
+      }
+    }, 800); // simula um pouco de tempo para o cálculo (remove em produção)
   };
 
   return (
-    <div className="space-y-8 p-4 md:p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center">
-              <Calculator className="mr-3 h-8 w-8 text-primary" /> Calculadora de Impostos e Custos
-            </h1>
-            <p className="text-muted-foreground mt-1">Simule o impacto fiscal e o lucro de suas vendas.</p>
-          </div>
+    <div className="container mx-auto py-6 px-4">
+      <div className="flex flex-col gap-2 mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Calculadora de Impostos
+        </h1>
+        <p className="text-gray-600">
+          Simule os impostos para diferentes regimes tributários e compare os resultados.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <SimulationForm onSubmit={calcularImpostos} isLoading={isCalculating} />
           
-          <div className="flex gap-2">
-            {isEditing && (
-              <Button 
-                onClick={resetForm} 
-                variant="outline" 
-                className="border-destructive text-destructive hover:bg-destructive/10"
-              >
-                Cancelar Edição
-              </Button>
-            )}
-          </div>
+          {/* Histórico somente para usuários logados */}
+          {user && historico.length > 0 && (
+            <Card className="mt-6 shadow-md">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="text-lg text-gray-800">
+                  Simulações Recentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="divide-y">
+                {historico.map((item, index) => (
+                  <div key={index} className="py-3 px-1 flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">{item.regime}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(item.totais.data).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{formatCurrency(item.totais.valorFinal)}</p>
+                      <p className="text-sm text-red-600">
+                        Impostos: {formatCurrency(item.totais.totalImpostos)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </div>
         
-        {userRole === 'empresa' && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700 flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2 text-blue-600" />
-            As alíquotas de impostos para esta empresa são configuradas pelo escritório contábil.
-          </div>
-        )}
-      </motion.div>
-
-      {/* Formulário de Simulação */}
-      <SimulationForm 
-        formData={formData}
-        onInputChange={handleInputChange}
-        onProductInputChange={handleProductInputChange}
-        onAddProduct={addProductToSimulation}
-        onRemoveProduct={removeProductFromSimulation}
-        universalProducts={universalProducts}
-        isEditing={isEditing}
-        calculateTaxes={calculateTaxes}
-      />
-      
-      {/* Exibição do Resumo dos Cálculos */}
-      <TaxSummaryDisplay 
-        summary={summary} 
-        isVisible={showSummary} 
-      />
-      
-      {/* Ações do Formulário */}
-      {summary && showSummary && (
-        <CardFooter className="flex flex-col md:flex-row justify-end gap-3 pt-6 border-t border-border mt-6">
-          <Button 
-            onClick={handleSaveSimulation} 
-            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Save className="mr-2 h-4 w-4" /> {isEditing ? 'Atualizar Simulação' : 'Salvar Simulação'}
-          </Button>
-          
-          {userRole === 'escritorio' && (
-            <Button 
-              className="w-full md:w-auto"
-              variant="outline"
-            >
-              <Send className="mr-2 h-4 w-4" /> Enviar para Cliente
-            </Button>
+        <div>
+          {resultados ? (
+            <TaxSummaryDisplay resultados={resultados} />
+          ) : (
+            <div className="flex items-center justify-center h-full min-h-[300px] bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+              <div className="text-center text-gray-500">
+                <p>Preencha o formulário e clique em "Calcular Impostos"</p>
+                <p className="text-sm mt-1">Os resultados aparecerão aqui</p>
+              </div>
+            </div>
           )}
-        </CardFooter>
-      )}
-      
-      {/* Lista de Simulações Salvas */}
-      <SavedSimulationsList 
-        simulations={simulations}
-        onEditSimulation={handleEditSimulation}
-        onDeleteSimulation={handleDeleteSimulation}
-      />
+        </div>
+      </div>
     </div>
   );
 };

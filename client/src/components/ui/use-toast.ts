@@ -1,96 +1,64 @@
-// Adaptado de https://ui.shadcn.com
-import { useEffect, useState } from "react";
+// Implementação simplificada do toast
+import { useState } from "react";
 
-const TOAST_TIMEOUT = 3000;
-
-type ToastProps = {
-  id?: string;
+export type Toast = {
+  id: string;
   title?: string;
   description?: string;
-  duration?: number;
   variant?: "default" | "destructive" | "success";
   className?: string;
 };
 
-type ToastActionElement = React.ReactElement;
+// Armazenamento centralizado das mensagens de toast
+let toastStore: Toast[] = [];
+let toastSetters: any[] = [];
 
-export type Toast = ToastProps & {
-  id: string;
-  action?: ToastActionElement;
-};
-
-type ToasterToast = Toast & {
-  timestamp: number;
-};
-
-const toasts: ToasterToast[] = [];
-let listeners: ((toasts: ToasterToast[]) => void)[] = [];
-
-const addToast = (toast: Toast): string => {
-  const id = toast.id || `toast-${Date.now()}`;
-  const newToast: ToasterToast = {
-    ...toast,
-    id,
-    timestamp: Date.now(),
-  };
-  
-  toasts.push(newToast);
-  emitChange();
-  
-  // Auto-remove if duration is set
-  if (newToast.duration !== 0) {
-    setTimeout(() => {
-      removeToast(id);
-    }, newToast.duration || TOAST_TIMEOUT);
-  }
-
-  return id;
-};
-
-const removeToast = (id: string): void => {
-  const index = toasts.findIndex((toast) => toast.id === id);
-  if (index !== -1) {
-    toasts.splice(index, 1);
-    emitChange();
-  }
-};
-
-const emitChange = (): void => {
-  listeners.forEach((listener) => {
-    listener([...toasts]);
-  });
+// Função para notificar todos os componentes sobre mudanças nos toasts
+const notifyToastChange = () => {
+  toastSetters.forEach((setter) => setter([...toastStore]));
 };
 
 export function useToast() {
-  const [localToasts, setLocalToasts] = useState<ToasterToast[]>([]);
-
-  useEffect(() => {
-    const handleChange = (updatedToasts: ToasterToast[]) => {
-      setLocalToasts(updatedToasts);
-    };
-
-    listeners.push(handleChange);
-    return () => {
-      listeners = listeners.filter((listener) => listener !== handleChange);
-    };
-  }, []);
-
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  
+  // Registra o setter deste componente se ainda não estiver registrado
+  if (!toastSetters.includes(setToasts)) {
+    toastSetters.push(setToasts);
+    // Configurar o estado inicial
+    setToasts([...toastStore]);
+  }
+  
   return {
-    toast: (props: ToastProps) => {
-      return addToast(props);
-    },
-    dismiss: (toastId?: string) => {
-      if (toastId) {
-        removeToast(toastId);
-      } else {
-        // Remove all toasts if no id is provided
-        [...toasts].forEach((toast) => {
-          removeToast(toast.id);
-        });
-      }
-    },
-    toasts: localToasts,
+    toast: {
+      // Método para adicionar um toast
+      toast: (props: Omit<Toast, "id">) => {
+        const id = `toast-${Date.now()}`;
+        const newToast = { ...props, id };
+        
+        toastStore = [...toastStore, newToast];
+        notifyToastChange();
+        
+        // Auto-remove após 3 segundos
+        setTimeout(() => {
+          toastStore = toastStore.filter(t => t.id !== id);
+          notifyToastChange();
+        }, 3000);
+        
+        return id;
+      },
+      
+      // Método para remover um toast específico
+      dismiss: (id?: string) => {
+        if (id) {
+          toastStore = toastStore.filter(t => t.id !== id);
+        } else {
+          toastStore = [];
+        }
+        notifyToastChange();
+      },
+      
+      // Lista atual de toasts
+      toasts: toastStore
+    }
   };
 }
-
-export type { ToastProps };

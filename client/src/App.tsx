@@ -1,203 +1,46 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import "./bootstrap"; // Importa o JavaScript do Bootstrap
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/Dashboard";
-import LoginPage from "@/pages/LoginPage";
-import Tasks from "@/pages/Tasks";
-import Clients from "@/pages/Clients";
-import Documents from "@/pages/Documents";
-import Invoices from "@/pages/Invoices";
-import Financial from "@/pages/Financial";
-import Inventory from "@/pages/Inventory";
-import Reconciliation from "@/pages/Reconciliation";
-import Reports from "@/pages/Reports";
-import Settings from "@/pages/Settings";
-import Integrations from "@/pages/Integrations";
-import WhatsApp from "@/pages/WhatsApp";
-import MainLayout from "@/layouts/MainLayout";
-import { useAuth } from "@/hooks/useAuth";
+import React from 'react';
+import { Switch, Route, Router } from 'wouter';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/contexts/AuthContext';
 
-// Novo módulo fiscal integrado
-import FiscalPage from "@/pages/FiscalPage";
+// Páginas
+import LoginPage from '@/pages/LoginPage';
+import TaxCalculatorPage from '@/pages/TaxCalculatorPage';
 
-// Calculadora de impostos
-import TaxCalculatorPage from "@/pages/TaxCalculatorPage";
+// Componente de rota protegida que verifica autenticação
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-// Páginas administrativas
-import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
-
-// Contextos
-import { EmpresasProvider } from "@/contexts/EmpresasContext";
-import { ProdutosProvider } from "@/contexts/ProdutosContext";
-
-function Router() {
-  // Usando hook simplificado de autenticação durante o desenvolvimento
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen w-screen bg-neutral-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
-
+const App: React.FC = () => {
   return (
-    <Switch>
-      {!isAuthenticated && <Route path="/" component={LoginPage} />}
-      
-      {isAuthenticated && (
-        <Route path="/">
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/dashboard">
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/tasks">
-          <MainLayout>
-            <Tasks />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/clients">
-          <MainLayout>
-            <Clients />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/documents">
-          <MainLayout>
-            <Documents />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/invoices">
-          <MainLayout>
-            <Invoices />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/tax-calculator">
-          <MainLayout>
+    <AuthProvider>
+      <Router>
+        <Switch>
+          {/* Rotas públicas */}
+          <Route path="/login" component={LoginPage} />
+          <Route path="/tax-calculator" component={TaxCalculatorPage} />
+          
+          {/* Rota padrão - redireciona para calculadora */}
+          <Route path="/">
             <TaxCalculatorPage />
-          </MainLayout>
-        </Route>
-      )}
+          </Route>
+          
+          {/* Rota para qualquer caminho desconhecido */}
+          <Route>
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-gray-800 mb-4">Página não encontrada</h1>
+                <p className="text-gray-600 mb-6">O caminho que você está procurando não existe.</p>
+                <a href="/" className="text-primary hover:underline">Voltar para a página inicial</a>
+              </div>
+            </div>
+          </Route>
+        </Switch>
+      </Router>
       
-      {isAuthenticated && (
-        <Route path="/financial">
-          <MainLayout>
-            <Financial />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/inventory">
-          <MainLayout>
-            <Inventory />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/reconciliation">
-          <MainLayout>
-            <Reconciliation />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/reports">
-          <MainLayout>
-            <Reports />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/settings">
-          <MainLayout>
-            <Settings />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/integrations">
-          <MainLayout>
-            <Integrations />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/whatsapp">
-          <MainLayout>
-            <WhatsApp />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {/* Módulo Fiscal Integrado */}
-      {isAuthenticated && (
-        <Route path="/fiscal">
-          <MainLayout>
-            <FiscalPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {/* Páginas Administrativas */}
-      {isAuthenticated && (
-        <Route path="/admin/configuracoes">
-          <MainLayout>
-            <ConfiguracoesAdminPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      <Route component={NotFound} />
-    </Switch>
+      {/* Sistema de notificações */}
+      <Toaster />
+    </AuthProvider>
   );
-}
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <EmpresasProvider>
-          <ProdutosProvider>
-            <Toaster />
-            <Router />
-          </ProdutosProvider>
-        </EmpresasProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-}
+};
 
 export default App;

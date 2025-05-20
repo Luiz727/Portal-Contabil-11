@@ -1,40 +1,16 @@
-import { useState, useEffect } from 'react';
-
-interface User {
-  email: string;
-  role?: string;
-  name?: string;
-}
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 /**
- * Hook para autenticação que utiliza localStorage para persistir a sessão
- * Permite testar o sistema com diferentes papéis de usuário
+ * Hook para acessar o contexto de autenticação
+ * Fornece dados do usuário e funções de login/logout
  */
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const context = useContext(AuthContext);
   
-  // Carrega usuário do localStorage ao iniciar
-  useEffect(() => {
-    const storedUser = localStorage.getItem('nixcon_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
+  if (!context) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
   
-  // Função para logout
-  const logout = () => {
-    localStorage.removeItem('nixcon_user');
-    setUser(null);
-  };
-  
-  return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    logout
-  };
+  return context;
 }
-
-export default useAuth;

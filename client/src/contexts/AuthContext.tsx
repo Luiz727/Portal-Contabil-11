@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 
 interface User {
   id: string;
@@ -32,7 +32,7 @@ export const AuthContext = createContext<AuthContextType>(initialAuthContext);
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   // Verifica se existe um usuário autenticado no localStorage ao iniciar
   useEffect(() => {
@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/login');
+    setLocation('/login');
   };
 
   // Verifica se o usuário tem a permissão necessária para acessar um recurso
