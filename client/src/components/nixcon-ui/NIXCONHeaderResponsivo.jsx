@@ -12,7 +12,7 @@ import {
   Building,
   UserCircle
 } from 'lucide-react';
-import logoNixcon from '../../assets/logo-nixcon.png';
+import logoNixconFull from '../../assets/logo-nixcon-full.png';
 
 const NIXCONHeaderResponsivo = ({ 
   onMenuToggle, 
@@ -63,7 +63,7 @@ const NIXCONHeaderResponsivo = ({
             <div className="md:hidden flex-shrink-0 flex items-center ml-2">
               <img
                 className="h-8 w-auto"
-                src={logoNixcon}
+                src={logoNixconFull}
                 alt="NIXCON"
               />
             </div>
@@ -92,57 +92,20 @@ const NIXCONHeaderResponsivo = ({
                   </div>
                 </div>
               )}
-              
-              {/* Indicador de Visão (Escritório/Empresa) */}
-              <div className="ml-4">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  viewMode === 'escritorio' 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {viewMode === 'escritorio' ? (
-                    <>
-                      <Building className="inline-block w-3 h-3 mr-1" />
-                      Visão Escritório
-                    </>
-                  ) : (
-                    <>
-                      <UserCircle className="inline-block w-3 h-3 mr-1" />
-                      Visão Empresa
-                    </>
-                  )}
-                </div>
-                
-                {viewMode === 'empresa' && (
-                  <button 
-                    onClick={() => setViewMode('escritorio')}
-                    className="ml-2 text-xs text-primary hover:underline"
-                  >
-                    Alternar para Escritório
-                  </button>
-                )}
-              </div>
+
             </div>
           </div>
           
           <div className="flex items-center">
-            {/* Barra de Pesquisa */}
-            <div className="hidden md:ml-4 md:flex-1 md:flex md:max-w-xs">
-              <div className="w-full">
-                <label htmlFor="search" className="sr-only">Buscar</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={18} className="text-gray-400" />
-                  </div>
-                  <input
-                    id="search"
-                    name="search"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-100 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
-                    placeholder="Buscar documentos, clientes..."
-                    type="search"
-                  />
-                </div>
-              </div>
+            {/* Ícone de Filtro */}
+            <div className="hidden md:ml-4 md:flex md:items-center">
+              <button
+                type="button"
+                className="p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none"
+                aria-label="Filtrar"
+              >
+                <Search size={20} />
+              </button>
             </div>
             
             {/* Notificações */}
@@ -290,35 +253,7 @@ const NIXCONHeaderResponsivo = ({
             ))}
           </select>
 
-          {/* Indicador de Visão Mobile */}
-          <div className="mt-2 flex flex-col items-center">
-            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-              viewMode === 'escritorio' 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-blue-100 text-blue-800'
-            }`}>
-              {viewMode === 'escritorio' ? (
-                <>
-                  <Building className="inline-block w-3 h-3 mr-1" />
-                  Visão Escritório
-                </>
-              ) : (
-                <>
-                  <UserCircle className="inline-block w-3 h-3 mr-1" />
-                  Visão Empresa: {empresaSelecionada?.nome}
-                </>
-              )}
-            </div>
-            
-            {viewMode === 'empresa' && (
-              <button 
-                onClick={() => setViewMode('escritorio')}
-                className="mt-1 text-xs text-primary hover:underline"
-              >
-                Alternar para Visão Escritório
-              </button>
-            )}
-          </div>
+
         </div>
       )}
     </header>

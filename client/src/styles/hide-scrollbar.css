@@ -1,0 +1,28 @@
+/* Estilos globais para ocultar barras de rolagem */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE e Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Para garantir que a barra de rolagem esteja oculta em todos os navegadores */
+html {
+  overflow: -moz-scrollbars-none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar { 
+  display: none;
+}
+
+body {
+  overflow: -moz-scrollbars-none;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar { 
+  display: none;
+}
