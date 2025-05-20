@@ -19,6 +19,27 @@ export default function TaskItem({ id, title, priority, dueDate, status }: TaskI
   const priorityClass = getPriorityClass(priority);
   const isCompleted = status === "completed";
 
+  // Mapeamento de cores para prioridades
+  const priorityClasses = {
+    high: {
+      bg: "bg-red-100",
+      text: "text-red-800",
+      border: "border-red-400"
+    },
+    medium: {
+      bg: "bg-yellow-100",
+      text: "text-yellow-800",
+      border: "border-yellow-400"
+    },
+    low: {
+      bg: "bg-green-100",
+      text: "text-green-800",
+      border: "border-green-400"
+    }
+  };
+
+  const priorityClass2 = priorityClasses[priority as keyof typeof priorityClasses] || priorityClasses.medium;
+
   const handleStatusChange = async (checked: boolean) => {
     if (isCompleting) return;
 
@@ -53,13 +74,15 @@ export default function TaskItem({ id, title, priority, dueDate, status }: TaskI
   };
 
   return (
-    <li className="py-4 flex items-start">
+    <li className="py-4 flex items-start group hover:bg-gray-50 px-2 rounded-md -mx-2 transition-colors duration-200">
       <Checkbox
         checked={isCompleted}
         onCheckedChange={handleStatusChange}
         className={cn(
           "flex-shrink-0 h-5 w-5 rounded-full border-2 mt-0.5",
-          isCompleted ? `${priorityClass.bgColor} border-transparent` : `border-${priorityClass.borderColor} bg-white`
+          isCompleted 
+            ? priorityClass2.bg + " border-transparent" 
+            : "bg-white " + priorityClass2.border
         )}
       />
       <div className="ml-3 flex-1">
@@ -67,19 +90,28 @@ export default function TaskItem({ id, title, priority, dueDate, status }: TaskI
           <p 
             className={cn(
               "text-sm font-medium",
-              isCompleted ? "text-neutral-500 line-through" : "text-neutral-800"
+              isCompleted ? "text-gray-400 line-through" : "text-gray-800"
             )}
           >
             {title}
           </p>
-          <span className={`${priorityClass.bgColor} ${priorityClass.textColor} text-xs font-medium px-2.5 py-0.5 rounded-full`}>
+          <span className={cn(
+            "text-xs font-medium px-2.5 py-0.5 rounded-full",
+            priorityClass2.bg,
+            priorityClass2.text
+          )}>
             {priority.charAt(0).toUpperCase() + priority.slice(1)}
           </span>
         </div>
-        <div className="mt-1 flex items-center text-sm text-neutral-500">
+        <div className="mt-1 flex items-center text-sm text-gray-500">
           <span className="material-icons text-sm mr-1">calendar_today</span>
           <span>{formatDaysRemaining(dueDate)}</span>
         </div>
+      </div>
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-2 flex items-center">
+        <button className="text-gray-400 hover:text-gray-600">
+          <span className="material-icons text-sm">edit</span>
+        </button>
       </div>
     </li>
   );

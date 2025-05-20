@@ -217,11 +217,11 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8 mt-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8 mt-6">
         <StatCard
           icon="assignment"
-          iconBgColor="bg-primary-50"
-          iconColor="text-primary-600"
+          iconBgColor="bg-blue-50"
+          iconColor="text-blue-600"
           title="Tarefas Pendentes"
           value={isLoadingStats ? "..." : dashboardStats?.pendingTasks}
           change={{
@@ -234,8 +234,8 @@ export default function Dashboard() {
         
         <StatCard
           icon="description"
-          iconBgColor="bg-secondary-50"
-          iconColor="text-secondary-500"
+          iconBgColor="bg-purple-50"
+          iconColor="text-purple-600"
           title="Documentos Novos"
           value={isLoadingStats ? "..." : dashboardStats?.newDocuments}
           change={{
@@ -248,8 +248,8 @@ export default function Dashboard() {
         
         <StatCard
           icon="event"
-          iconBgColor="bg-yellow-50"
-          iconColor="text-amber-500"
+          iconBgColor="bg-amber-50"
+          iconColor="text-amber-600"
           title="Obrigações Próximas"
           value={isLoadingStats ? "..." : dashboardStats?.upcomingEvents}
           change={{
@@ -262,8 +262,8 @@ export default function Dashboard() {
         
         <StatCard
           icon="attach_money"
-          iconBgColor="bg-red-50"
-          iconColor="text-red-500"
+          iconBgColor="bg-green-50"
+          iconColor="text-green-600"
           title="Contas a Receber"
           value={isLoadingStats ? "..." : formatCurrency(dashboardStats?.accountsReceivable)}
           change={{
@@ -276,12 +276,12 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Tasks */}
-        <div className="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-5 border-b border-neutral-200 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-neutral-800">Tarefas Recentes</h3>
-            <a href="/tasks" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+        <div className="lg:col-span-2 bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-lg font-medium text-gray-800">Tarefas Recentes</h3>
+            <a href="/tasks" className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors">
               Ver todas
             </a>
           </div>
@@ -289,10 +289,10 @@ export default function Dashboard() {
           <div className="p-6">
             {isLoadingTasks ? (
               <div className="py-20 flex justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
             ) : pendingTasks && pendingTasks.length > 0 ? (
-              <ul className="divide-y divide-neutral-200">
+              <ul className="divide-y divide-gray-200">
                 {pendingTasks.slice(0, 4).map((task: any) => (
                   <TaskItem
                     key={task.id}
@@ -305,17 +305,18 @@ export default function Dashboard() {
                 ))}
               </ul>
             ) : (
-              <div className="py-10 text-center text-neutral-500">
-                <span className="material-icons text-neutral-400 text-3xl mb-2">assignment_turned_in</span>
+              <div className="py-10 text-center text-gray-500">
+                <span className="material-icons text-gray-400 text-3xl mb-2">assignment_turned_in</span>
                 <p>Nenhuma tarefa pendente encontrada</p>
               </div>
             )}
 
             <div className="mt-5">
               <Button
-                className="w-full justify-center"
+                className="w-full justify-center bg-primary-600 hover:bg-primary-700 text-white transition-colors"
                 onClick={handleCreateTask}
               >
+                <span className="material-icons mr-2 text-sm">add</span>
                 Adicionar Nova Tarefa
               </Button>
             </div>
@@ -327,12 +328,12 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Documents & Financial Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         {/* Recent Documents */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-5 border-b border-neutral-200 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-neutral-800">Documentos Recentes</h3>
-            <a href="/documents" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-lg font-medium text-gray-800">Documentos Recentes</h3>
+            <a href="/documents" className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors">
               Ver todos
             </a>
           </div>
@@ -340,10 +341,10 @@ export default function Dashboard() {
           <div className="p-6">
             {isLoadingDocuments ? (
               <div className="py-10 flex justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
             ) : recentDocuments && recentDocuments.length > 0 ? (
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {recentDocuments.slice(0, 4).map((doc: any) => (
                   <DocumentItem
                     key={doc.id}
@@ -357,8 +358,8 @@ export default function Dashboard() {
                 ))}
               </ul>
             ) : (
-              <div className="py-8 text-center text-neutral-500">
-                <span className="material-icons text-neutral-400 text-3xl mb-2">folder_open</span>
+              <div className="py-8 text-center text-gray-500">
+                <span className="material-icons text-gray-400 text-3xl mb-2">folder_open</span>
                 <p>Nenhum documento encontrado</p>
               </div>
             )}
