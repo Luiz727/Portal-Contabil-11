@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
+import EnhancedSidebar from "@/components/EnhancedSidebar";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -77,14 +78,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
             onClick={toggleSidebar}
           ></div>
           <div className="position-relative z-index-1050">
-            <Sidebar />
+            <EnhancedSidebar />
           </div>
         </div>
       )}
       
       {/* Desktop sidebar */}
       <div className="d-none d-md-block">
-        <Sidebar />
+        <EnhancedSidebar />
       </div>
       
       {/* Main content */}

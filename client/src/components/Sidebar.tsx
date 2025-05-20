@@ -12,13 +12,13 @@ type NavItemProps = {
 const NavItem = ({ icon, label, href, active }: NavItemProps) => {
   return (
     <Link href={href}>
-      <a 
+      <div 
         className={`nav-link d-flex align-items-center px-3 py-2 rounded-2 mb-1 ${active ? 'active bg-primary text-white' : 'text-white-50'}`}
-        style={{ textDecoration: 'none' }}
+        style={{ textDecoration: 'none', cursor: 'pointer' }}
       >
         <span className="material-icons me-2 small">{icon}</span>
         <span>{label}</span>
-      </a>
+      </div>
     </Link>
   );
 };

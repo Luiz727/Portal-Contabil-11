@@ -1,0 +1,181 @@
+O Portal de Contabilidade é uma aplicação web construída com React, Vite e React Router, organizada em módulos funcionais, conforme detalhado a seguir:
+
+Autenticação
+
+Login (/login)
+
+Cadastro de Usuário (/register)
+
+Recuperação de Senha (/forgot-password)
+
+Landing Page
+
+Página inicial pública de apresentação
+
+Dashboard & Gestão
+
+Dashboard com KPIs e visão geral (/dashboard)
+
+Gerenciamento de Usuários (/user-management)
+
+Logs de Auditoria (/audit-log)
+
+Backup (/backup)
+
+Assinaturas Eletrônicas (/signatures)
+
+Documentos
+
+Gerenciador de Documentos (/documents-manager)
+
+Assinaturas Eletrônicas (/electronic-signature)
+
+Calendário
+
+Visualização principal (/calendar)
+
+Calendário Integrado (/integrated-calendar)
+
+Time Tracking (/time-tracking)
+
+Produtividade (/productivity-control)
+
+Tarefas
+
+Visão Geral (/tasks-management)
+
+Minhas Tarefas (/tasks-management/my-tasks)
+
+Todas as Tarefas (/tasks-management/all-tasks)
+
+Criar Nova Tarefa (/tasks-management/new-task)
+
+Portal do Cliente
+
+Visão Geral (/client-portal)
+
+Documentos do Cliente (/client-portal/documents)
+
+Relatórios do Cliente (/client-portal/reports)
+
+Obrigações do Cliente (/client-portal/obligations)
+
+Módulo Fiscal
+
+Acesso rápido ao módulo de notas fiscais (/fiscal-module)
+
+Emissor de Documentos Fiscais
+
+NF-e (/issuer/nfe e /issuer/nfe-issuer)
+
+NFS-e (/issuer/nfse e /issuer/nfse-issuer)
+
+NFC-e (/issuer/nfce)
+
+CT-e (/issuer/cte)
+
+MDF-e (/issuer/mdfe)
+
+Consulta de Documentos (/issuer/consult)
+
+Notas Recebidas (/issuer/received-notes)
+
+Organizador de XML (/issuer/xml-organizer)
+
+Submódulos de NFe
+
+Emissão (/modules/nfe/emitir)
+
+Configurações (/modules/nfe/configuracoes)
+
+Estorno (/modules/nfe/estorno)
+
+Cofre de XML (/modules/nfe/cofre-xml)
+
+Financeiro
+
+Contas a Pagar (/financial/payable)
+
+Contas a Receber (/financial/receivable)
+
+Fluxo de Caixa (/financial/cash-flow)
+
+Conciliação Bancária (/financial/bank-reconciliation)
+
+Taxas (/financial/fees)
+
+Controle Financeiro (/financial/control)
+
+Inventário
+
+Controle de Estoque (/inventory/stock-control)
+
+Comunicação
+
+E-mail (/communication/email)
+
+WhatsApp (/communication/whatsapp)
+
+Parâmetros Gerais (/communication/params)
+
+Chat Interno (/communication/internal-chat)
+
+Integração WhatsApp (/communication/whatsapp-integration)
+
+Cadastros (Registros)
+
+Produtos (/registrations/products)
+
+Importação de Produtos (/registrations/products/import)
+
+Serviços (/registrations/services)
+
+Marcas (/registrations/brands)
+
+Categorias (/registrations/categories)
+
+Unidades de Medida (/registrations/units)
+
+Clientes (/registrations/clients)
+
+Fornecedores (/registrations/suppliers)
+
+Transportadoras (/registrations/carriers)
+
+Plano de Contas (/registrations/chart-of-accounts)
+
+Kits (/registrations/kits)
+
+Planos (/registrations/plans)
+
+Relatórios
+
+Relatórios Gerais (/reports)
+
+Vendas (/reports/sales)
+
+Financeiro (/reports/financial)
+
+Estoque (/reports/stock)
+
+Fiscal (/reports/fiscal)
+
+Consolidado (/reports/consolidated)
+
+KPIs (/reports/kpi)
+
+Exportação PDF (/reports/pdf-export)
+
+Ferramentas
+
+Importação/Exportação de Dados (/tools/data-import-export)
+
+Leitor de Documentos (/tools/doc-reader)
+
+Calculadora de Impostos (/tools/tax-calculator)
+
+Cofre de XML (/tools/xml-vault)
+
+Configurações Avançadas
+
+A estrutura de rotas de configurações (SettingsRoutes.jsx) inclui perfis, dados da empresa, controle de acesso, configurações fiscais, calculadora, integrações, help center e rotas administrativas específicas para o escritório (CFOP, matriz fiscal, obrigações automatizadas etc.).
