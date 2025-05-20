@@ -301,73 +301,79 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
 
   // Renderiza o menu lateral
   return (
-    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-white border-r transform transition-all ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
-      <div className="flex justify-between p-2 border-b">
-        <div className={collapsed ? "hidden" : "flex items-center text-sm font-medium text-primary"}>
+    <div className={`fixed left-0 top-[64px] bottom-0 z-20 flex flex-col bg-gray-900 text-white transform transition-all duration-300 ${collapsed ? 'w-[64px]' : 'w-[250px]'}`}>
+      <div className="flex justify-between p-3 border-b border-gray-800">
+        <div className={collapsed ? "hidden" : "flex items-center text-sm font-medium text-gray-100"}>
           Módulo Fiscal
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <button 
           onClick={toggleMenu} 
-          className="w-8 h-8 p-0"
+          className="text-gray-400 hover:text-white p-1 rounded focus:outline-none"
         >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
+          <span className="material-icons text-sm">
+            {collapsed ? 'chevron_right' : 'chevron_left'}
+          </span>
+        </button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-2">
         {menuSections.map(section => (
-          <div key={section.id} className="mb-2">
+          <div key={section.id} className="mb-3">
             {collapsed ? (
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href={section.path}>
-                      <Button
-                        variant={currentActiveSection === section.id ? "default" : "ghost"}
-                        size="sm"
-                        className={`w-full justify-center p-2 h-10 ${currentActiveSection === section.id ? 'bg-primary text-primary-foreground' : ''}`}
+                      <div
+                        className={`flex items-center justify-center p-2 h-10 rounded-md cursor-pointer transition-colors ${
+                          currentActiveSection === section.id 
+                            ? 'bg-primary-600 text-white' 
+                            : 'text-gray-300 hover:bg-primary-700/50 hover:text-white'
+                        }`}
                       >
                         {section.icon}
-                      </Button>
+                      </div>
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
+                  <TooltipContent side="right" className="font-medium bg-gray-800 text-white border-gray-700">
                     {section.label}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : (
               <Link href={section.path}>
-                <Button
-                  variant={currentActiveSection === section.id ? "default" : "ghost"}
-                  size="sm"
-                  className={`w-full justify-start text-left ${currentActiveSection === section.id ? 'bg-primary text-primary-foreground' : ''}`}
+                <div
+                  className={`flex items-center px-3 py-2 rounded-md mb-1 cursor-pointer transition-colors ${
+                    currentActiveSection === section.id 
+                      ? 'bg-primary-600 text-white' 
+                      : 'text-gray-300 hover:bg-primary-700/50 hover:text-white'
+                  }`}
                 >
                   <span className="flex items-center">
                     {section.icon}
                     <span className="ml-2">{section.label}</span>
                   </span>
-                </Button>
+                </div>
               </Link>
             )}
 
             {/* Submenu */}
             {!collapsed && section.submenu && currentActiveSection === section.id && (
-              <div className="ml-4 mt-1 space-y-1 border-l-2 pl-2 border-muted">
+              <div className="ml-4 mt-1 space-y-1 pl-2 border-l border-gray-700">
                 {section.submenu.map(item => {
                   const isActive = location === item.path;
                   return (
                     <Link key={item.id} href={item.path}>
-                      <Button
-                        variant={isActive ? "secondary" : "ghost"}
-                        size="sm"
-                        className={`w-full justify-start text-left h-8 ${isActive ? 'font-medium' : 'font-normal'}`}
+                      <div
+                        className={`flex items-center px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
+                          isActive 
+                            ? 'bg-gray-800 text-white' 
+                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                        }`}
                       >
                         {item.icon}
                         <span className="ml-2 text-sm">{item.label}</span>
-                      </Button>
+                      </div>
                     </Link>
                   );
                 })}
@@ -384,16 +390,18 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link href={item.path}>
-                            <Button
-                              variant={isActive ? "secondary" : "ghost"}
-                              size="sm"
-                              className={`w-full justify-center h-8 ${isActive ? 'bg-muted' : ''}`}
+                            <div
+                              className={`flex items-center justify-center p-2 h-8 rounded-md cursor-pointer transition-colors ${
+                                isActive 
+                                  ? 'bg-gray-800 text-white' 
+                                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              }`}
                             >
                               {item.icon}
-                            </Button>
+                            </div>
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-800 text-white border-gray-700">
                           {item.label}
                         </TooltipContent>
                       </Tooltip>
@@ -407,8 +415,8 @@ const FiscalSidebar: React.FC<FiscalSidebarProps> = ({ activeSection = 'dashboar
       </div>
       
       {!collapsed && (
-        <div className="p-2 border-t mt-auto">
-          <div className="text-xs text-muted-foreground flex items-center justify-center">
+        <div className="p-2 border-t border-gray-800 mt-auto">
+          <div className="text-xs text-gray-500 flex items-center justify-center">
             Módulo Fiscal v1.0
           </div>
         </div>

@@ -21,10 +21,13 @@ const FiscalMenuWrapper: React.FC<FiscalMenuProps> = ({ activeSection = 'dashboa
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-gray-100">
       <FiscalSidebar activeSection={activeSection} />
-      <div className="flex-1 pt-[64px] transition-all" style={{ marginLeft: 'var(--sidebar-width, 250px)' }}>
-        <div className="container mx-auto py-6 px-4">
+      <div 
+        className="flex-1 pt-[64px] transition-all duration-300 overflow-auto" 
+        style={{ marginLeft: 'var(--sidebar-width, 250px)' }}
+      >
+        <div className="py-6 px-4 md:px-6 lg:px-8">
           {children}
         </div>
       </div>
