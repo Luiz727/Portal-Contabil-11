@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
 import EnhancedSidebar from "@/components/EnhancedSidebar";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { cn } from "@/lib/utils";
 
 type MainLayoutProps = {
   children: React.ReactNode;
@@ -39,10 +39,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando...</span>
-        </div>
+      <div className="flex items-center justify-center h-screen w-screen bg-gray-100">
+        <div className="animate-spin h-10 w-10 border-4 border-primary-500 rounded-full border-t-transparent"></div>
       </div>
     );
   }
@@ -54,12 +52,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Para o módulo fiscal, usamos apenas o header, sem o sidebar principal
   if (isFiscalModule) {
     return (
-      <div className="d-flex h-100 overflow-hidden">
+      <div className="flex h-screen overflow-hidden">
         {/* Main content */}
-        <main className="flex-grow-1 d-flex flex-column overflow-hidden">
+        <main className="flex-grow flex flex-col overflow-hidden">
           <Header toggleSidebar={toggleSidebar} fiscalModule={true} />
           
-          <div className="flex-grow-1 overflow-auto bg-light">
+          <div className="flex-grow overflow-auto bg-gray-100">
             {children}
           </div>
         </main>
@@ -67,32 +65,30 @@ export default function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // Para os outros módulos, mantemos o layout original com Bootstrap 5
+  // Layout principal com Tailwind
   return (
-    <div className="d-flex h-100 overflow-hidden">
-      {/* Mobile sidebar */}
+    <div className="flex h-screen overflow-hidden">
+      {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
-        <div className="position-fixed top-0 start-0 bottom-0 end-0 z-index-1040 d-md-none">
-          <div 
-            className="position-fixed top-0 start-0 bottom-0 end-0 bg-dark opacity-50"
-            onClick={toggleSidebar}
-          ></div>
-          <div className="position-relative z-index-1050">
-            <EnhancedSidebar />
-          </div>
-        </div>
+        <div className="fixed inset-0 z-20 bg-black bg-opacity-50 md:hidden" onClick={toggleSidebar}></div>
       )}
       
-      {/* Desktop sidebar */}
-      <div className="d-none d-md-block">
+      {/* Mobile sidebar */}
+      <div 
+        className={cn(
+          "fixed inset-y-0 left-0 z-30 transform md:relative md:translate-x-0 transition duration-300 ease-in-out",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "md:block"
+        )}
+      >
         <EnhancedSidebar />
       </div>
       
       {/* Main content */}
-      <main className="flex-grow-1 d-flex flex-column overflow-hidden">
+      <main className="flex-grow flex flex-col overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
         
-        <div className="flex-grow-1 overflow-auto bg-light p-3 p-sm-4 p-lg-5">
+        <div className="flex-grow overflow-auto bg-gray-100 p-4 md:p-6 lg:p-8">
           {children}
         </div>
       </main>

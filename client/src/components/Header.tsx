@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { cn } from "@/lib/utils";
 
 type HeaderProps = {
   toggleSidebar: () => void;
@@ -21,51 +21,50 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
   };
 
   return (
-    <header className="bg-white shadow-sm z-index-1">
-      <div className="px-3 px-sm-4 px-lg-5 py-3 d-flex align-items-center justify-content-between">
+    <header className="bg-white shadow-sm z-10">
+      <div className="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {fiscalModule ? (
-          <div className="d-flex align-items-center">
+          <div className="flex items-center">
             <Link href="/">
               <button
                 type="button"
-                className="btn btn-link d-flex align-items-center text-primary me-2 p-1"
+                className="flex items-center text-primary mr-2 p-1 hover:bg-gray-100 rounded-full"
               >
                 <span className="material-icons">arrow_back</span>
               </button>
             </Link>
-            <span className="d-flex align-items-center">
-              <span className="fs-5 fw-medium">Módulo Fiscal</span>
-              <span className="ms-2 badge bg-primary rounded-pill">v1.0</span>
+            <span className="flex items-center">
+              <span className="text-lg font-medium">Módulo Fiscal</span>
+              <span className="ml-2 px-2 py-1 text-xs font-medium bg-primary-500 text-white rounded-full">v1.0</span>
             </span>
           </div>
         ) : (
           <>
-            <div className="d-flex align-items-center d-md-none">
+            <div className="flex items-center md:hidden">
               <button
                 type="button"
-                className="btn btn-outline-primary d-flex align-items-center gap-2"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:bg-gray-100 focus:outline-none"
                 onClick={toggleSidebar}
               >
                 <span className="material-icons">menu</span>
-                <span>Menu</span>
+                <span className="ml-2 text-sm">Menu</span>
               </button>
-              <div className="ms-3">
-                <h1 className="fs-5 fw-medium mb-0">ContaSmart</h1>
+              <div className="ml-3">
+                <h1 className="text-lg font-medium">ContaSmart</h1>
               </div>
             </div>
 
-            <div className="d-none d-md-flex align-items-center">
-              <div className="position-relative">
+            <div className="hidden md:flex md:items-center">
+              <div className="relative">
                 <form onSubmit={handleSearch}>
-                  <div className="position-relative">
-                    <span className="position-absolute top-50 start-0 translate-middle-y ms-3">
-                      <span className="material-icons text-muted small">search</span>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="material-icons text-gray-400 text-sm">search</span>
                     </span>
-                    <input
+                    <Input
                       type="text"
                       placeholder="Buscar..."
-                      className="form-control ps-5 pe-3"
-                      style={{ width: '260px' }}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -76,33 +75,51 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
           </>
         )}
 
-        <div className="d-flex align-items-center gap-3">
+        <div className="flex items-center space-x-4">
           <button 
             type="button"
-            className="btn btn-link position-relative p-1 text-body"
+            className="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none"
           >
             <span className="material-icons">notifications</span>
-            <span className="position-absolute top-0 end-0 badge rounded-pill bg-danger">3</span>
+            <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs font-bold leading-4 text-center">3</span>
           </button>
 
           <button 
             type="button"
-            className="btn btn-link position-relative p-1 text-body"
+            className="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none"
             onClick={() => window.location.href = "/whatsapp"}
           >
             <span className="material-icons">chat</span>
-            <span className="position-absolute top-0 end-0 badge rounded-pill bg-primary">5</span>
+            <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-primary-500 text-white text-xs font-bold leading-4 text-center">5</span>
           </button>
 
-          <div className="border-start border-light d-none d-md-block h-75 mx-2"></div>
+          <div className="hidden md:block border-l border-gray-200 h-6 mx-2"></div>
 
-          <div className="d-flex align-items-center d-md-none">
-            <img 
-              className="rounded-circle object-fit-cover"
-              style={{ width: '32px', height: '32px' }}
-              src={avatarUrl} 
-              alt="Foto de perfil do usuário" 
-            />
+          <div className="flex items-center relative group">
+            <button className="focus:outline-none">
+              <img 
+                className="h-8 w-8 rounded-full object-cover"
+                src={avatarUrl} 
+                alt="Foto de perfil do usuário" 
+              />
+            </button>
+            
+            <div className="hidden group-hover:block absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+              <Link href="/settings/profile">
+                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Perfil
+                </a>
+              </Link>
+              <Link href="/settings">
+                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Configurações
+                </a>
+              </Link>
+              <div className="border-t border-gray-100 my-1"></div>
+              <a href="/api/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Sair
+              </a>
+            </div>
           </div>
         </div>
       </div>
