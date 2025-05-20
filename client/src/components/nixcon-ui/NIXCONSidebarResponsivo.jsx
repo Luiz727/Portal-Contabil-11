@@ -101,7 +101,9 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
   
   // Fechar o menu automaticamente quando clicar em um item (em telas pequenas)
   const handleItemClick = () => {
-    if (window.innerWidth < 768 && !keepCollapsed) {
+    // Sempre colapsar o menu ao clicar em qualquer item, independente do tamanho da tela
+    // a menos que keepCollapsed esteja ativado
+    if (!keepCollapsed) {
       setCollapsed(true);
       if (onToggle) onToggle(true);
     }
