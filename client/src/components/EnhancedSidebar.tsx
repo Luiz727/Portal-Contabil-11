@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -251,6 +252,14 @@ export default function EnhancedSidebar() {
             active={location === "/settings"} 
             collapsed={collapsed}
           />
+          
+          <NavItem 
+            href="/admin/configuracoes" 
+            icon={<ShieldCheck size={20} />}
+            label="Administração" 
+            active={location.startsWith("/admin")} 
+            collapsed={collapsed}
+          />
         </NavSection>
       </nav>
 
@@ -413,6 +422,14 @@ export default function EnhancedSidebar() {
                 icon={getIcon("settings")}
                 label="Configurações" 
                 active={location === "/settings"} 
+                collapsed={false}
+              />
+              
+              <NavItem 
+                href="/admin/configuracoes" 
+                icon={<ShieldCheck size={20} />}
+                label="Administração" 
+                active={location.startsWith("/admin")} 
                 collapsed={false}
               />
             </NavSection>
