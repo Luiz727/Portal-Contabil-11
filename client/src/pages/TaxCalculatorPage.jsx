@@ -105,12 +105,7 @@ const TaxCalculatorPage = () => {
     }
   }, [toast]);
 
-  useEffect(() => {
-    setFormData(prev => ({ 
-      ...prev, 
-      empresaIdContexto: empresaAtual ? empresaAtual.id : null 
-    }));
-  }, [empresaAtual]);
+  // Removemos este useEffect que estava causando atualizações circulares
 
   const saveSimulationsToStorage = (updatedSimulations) => {
     try {
