@@ -211,100 +211,13 @@ const TaxCalculatorPage = () => {
     return defaultValues[taxName] || 0;
   };
 
-  const calculateSummary = useCallback((currentProdutos, currentValorVendaTotalGlobal) => {
-    if (!currentProdutos || currentProdutos.length === 0) {
-      setSummary(null);
-      return currentProdutos; 
-    }
-  
-    let faturamentoTotalItens = 0;
-    currentProdutos.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
-      faturamentoTotalItens += qtd * vVendaUnitario;
-    });
-  
-    let produtosProcessados = [...currentProdutos];
-    let faturamentoFinalCalculo = faturamentoTotalItens;
-  
-    if (currentValorVendaTotalGlobal && parseFloat(currentValorVendaTotalGlobal) > 0 && faturamentoTotalItens > 0) {
-      const valorGlobalNumerico = parseFloat(currentValorVendaTotalGlobal);
-      const fatorDistribuicao = valorGlobalNumerico / faturamentoTotalItens;
-      faturamentoFinalCalculo = valorGlobalNumerico;
-  
-      produtosProcessados = currentProdutos.map(p => {
-        const itemFaturamentoOriginal = (parseFloat(p.quantidade) || 0) * (parseFloat(p.valorVendaUnitario) || 0);
-        const itemFaturamentoRateado = itemFaturamentoOriginal * fatorDistribuicao;
-        const quantidadeValida = parseFloat(p.quantidade) || 1; 
-        return {
-          ...p,
-          valorVendaUnitario: itemFaturamentoRateado / quantidadeValida,
-          valorVendaTotal: itemFaturamentoRateado
-        };
-      });
-    } else {
-       produtosProcessados = currentProdutos.map(p => {
-          const qtd = parseFloat(p.quantidade) || 0;
-          const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
-          return {
-            ...p, 
-            valorVendaTotal: qtd * vVendaUnitario 
-          };
-      });
-    }
-  
-    let custoTotalProdutos = 0;
-    let totalImpostosVendas = 0;
-  
-    produtosProcessados.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0; 
-      const itemFaturamento = parseFloat(p.valorVendaTotal) || 0; 
-      
-      custoTotalProdutos += qtd * pCusto;
-  
-      let itemImpostosVendas = 0;
-      const icmsRate = getTaxRateForCalc(p, 'icms');
-      const pisRate = getTaxRateForCalc(p, 'pis');
-      const cofinsRate = getTaxRateForCalc(p, 'cofins');
-      const ipiRate = getTaxRateForCalc(p, 'ipi'); 
-      const issRate = getTaxRateForCalc(p, 'iss');
-      const simplesRate = getTaxRateForCalc(p, 'simplesNacionalAliquota');
-  
-      if (user.type === 'EmpresaUsuaria' && empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional' && simplesRate > 0) {
-        itemImpostosVendas = itemFaturamento * simplesRate;
-      } else {
-        itemImpostosVendas = itemFaturamento * (icmsRate + pisRate + cofinsRate + issRate) + ((qtd * pCusto) * ipiRate);
-      }
-      
-      totalImpostosVendas += itemImpostosVendas;
-    });
-  
-    const impostosCompras = custoTotalProdutos * 0.05; // Créditos tributários estimados em 5% do custo
-    const difal = faturamentoFinalCalculo * 0.02; // Estimativa de DIFAL em 2% do faturamento
-    const lucroBruto = faturamentoFinalCalculo - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
-  
-    setSummary({
-      faturamentoTotal: faturamentoFinalCalculo,
-      custoTotalProdutos,
-      impostosVendas: totalImpostosVendas,
-      impostosCompras,
-      difal,
-      lucroBruto,
-    });
-    
-    // Removido toast automático durante o cálculo
-    // Só exibiremos toast ao clicar no botão de simulação
-    
-    return produtosProcessados; 
-  }, [empresaAtual, userTaxConfig, user.type, toast, getTaxRateForCalc]);
+  // IMPORTANTE: Eliminada função calculateSummary que estava causando atualizações infinitas
   
 
   // Removemos completamente o useEffect que causava atualização infinita
   
   // Realizamos o cálculo apenas quando o usuário clicar no botão "Calcular Impostos"
   const realizarCalculo = () => {
-    // Usar diretamente a função calculateSummary para atualizar o sumário sem ciclo infinito
     if (formData.produtos.length === 0) {
       toast({ 
         variant: "destructive",
@@ -315,50 +228,74 @@ const TaxCalculatorPage = () => {
       return;
     }
     
-    // Aplicar o cálculo sem atualizar o estado formData (evita loop infinito)
-    let custoTotalProdutos = 0;
-    let totalImpostosVendas = 0;
-    let faturamentoTotal = 0;
-    
-    // Calcular valores básicos
-    formData.produtos.forEach(p => {
-      const qtd = parseFloat(p.quantidade) || 0;
-      const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
-      const vVenda = parseFloat(p.valorVendaUnitario) || 0;
+    try {
+      // Primeiro, processamos os produtos e suas quantidades/valores
+      const produtos = [...formData.produtos];
+      let faturamentoTotalItens = 0;
+      let custoTotalProdutos = 0;
       
-      custoTotalProdutos += qtd * pCusto;
-      faturamentoTotal += qtd * vVenda;
-    });
-    
-    // Aplicar impostos conforme regime
-    if (empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional') {
-      const aliquota = empresaAtual.config_fiscal_padrao.simplesNacionalAliquota / 100 || 0.06;
-      totalImpostosVendas = faturamentoTotal * aliquota;
-    } else {
-      // Impostos padrão para outros regimes
-      totalImpostosVendas = faturamentoTotal * 0.15; // ICMS + PIS + COFINS estimados
+      // Calcular faturamento total dos itens
+      produtos.forEach(p => {
+        const qtd = parseFloat(p.quantidade) || 0;
+        const vVendaUnitario = parseFloat(p.valorVendaUnitario) || 0;
+        const pCusto = parseFloat(p.precoCusto || p.preco_custo) || 0;
+        
+        faturamentoTotalItens += qtd * vVendaUnitario;
+        custoTotalProdutos += qtd * pCusto;
+      });
+      
+      // Determinar o faturamento final de cálculo (com possível rateio global)
+      const valorGlobalNumerico = formData.valorVendaTotalGlobal ? parseFloat(formData.valorVendaTotalGlobal) : 0;
+      let faturamentoFinalCalculo = faturamentoTotalItens;
+      
+      if (valorGlobalNumerico > 0 && faturamentoTotalItens > 0) {
+        faturamentoFinalCalculo = valorGlobalNumerico;
+      }
+      
+      // Calcular impostos
+      let totalImpostosVendas = 0;
+      
+      if (empresaAtual && empresaAtual.regime_tributario === 'Simples Nacional') {
+        const aliquota = (empresaAtual.config_fiscal_padrao.simplesNacionalAliquota || 6) / 100;
+        totalImpostosVendas = faturamentoFinalCalculo * aliquota;
+      } else {
+        const icmsRate = 0.18; // 18%
+        const pisRate = 0.0165; // 1.65%
+        const cofinsRate = 0.076; // 7.6%
+        totalImpostosVendas = faturamentoFinalCalculo * (icmsRate + pisRate + cofinsRate);
+      }
+      
+      // Calcular outros valores
+      const impostosCompras = custoTotalProdutos * 0.05; // Créditos tributários estimados em 5% do custo
+      const difal = faturamentoFinalCalculo * 0.02; // Estimativa de DIFAL em 2% do faturamento
+      const lucroBruto = faturamentoFinalCalculo - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
+      
+      // Atualizar o sumário
+      setSummary({
+        faturamentoTotal: faturamentoFinalCalculo,
+        custoTotalProdutos,
+        impostosVendas: totalImpostosVendas,
+        impostosCompras,
+        difal,
+        lucroBruto,
+      });
+      
+      // Notificar o usuário apenas quando solicitado explicitamente
+      toast({ 
+        title: "Cálculos Realizados", 
+        description: "Os impostos e margens foram calculados com sucesso.",
+        className: "bg-primary text-primary-foreground",
+        duration: 3000 // Desaparece em 3 segundos
+      });
+    } catch (error) {
+      console.error('Erro ao calcular impostos:', error);
+      toast({ 
+        variant: "destructive",
+        title: "Erro nos cálculos", 
+        description: "Ocorreu um erro ao calcular os impostos. Verifique os valores informados.",
+        duration: 3000
+      });
     }
-    
-    const impostosCompras = custoTotalProdutos * 0.05;
-    const difal = faturamentoTotal * 0.02;
-    const lucroBruto = faturamentoTotal - custoTotalProdutos - totalImpostosVendas - impostosCompras - difal;
-    
-    // Atualizar sumário diretamente
-    setSummary({
-      faturamentoTotal,
-      custoTotalProdutos,
-      impostosVendas: totalImpostosVendas,
-      impostosCompras,
-      difal,
-      lucroBruto,
-    });
-    
-    toast({ 
-      title: "Cálculos Realizados", 
-      description: "Os impostos e margens foram calculados com sucesso.",
-      className: "bg-primary text-primary-foreground",
-      duration: 3000 // Desaparece em 3 segundos
-    });
   };
   
 
