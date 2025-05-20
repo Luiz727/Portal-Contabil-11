@@ -13,8 +13,12 @@ const NavItem = ({ icon, label, href, active }: NavItemProps) => {
   return (
     <Link href={href}>
       <div 
-        className={`nav-link d-flex align-items-center px-3 py-2 rounded-2 mb-1 ${active ? 'active bg-primary text-white' : 'text-white-50'}`}
-        style={{ textDecoration: 'none', cursor: 'pointer' }}
+        className={`nav-link d-flex align-items-center px-3 py-2 rounded-2 mb-1 ${active ? 'active text-secondary' : 'text-white-50'}`}
+        style={{ 
+          textDecoration: 'none', 
+          cursor: 'pointer',
+          backgroundColor: active ? '#d9bb42' : 'transparent'
+        }}
       >
         <span className="material-icons me-2 small">{icon}</span>
         <span>{label}</span>
@@ -62,12 +66,14 @@ export default function Sidebar() {
 
   return (
     <aside className="flex-shrink-0">
-      <div className="d-flex flex-column bg-dark text-white h-100 overflow-auto" style={{ width: '250px' }}>
-        {/* Logo */}
-        <div className="p-3 border-bottom border-secondary">
+      <div className="d-flex flex-column bg-secondary text-white h-100 overflow-auto" style={{ width: '250px', backgroundColor: '#4a4a4a' }}>
+        {/* Logo NIXCON */}
+        <div className="p-3 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="d-flex align-items-center">
-            <span className="material-icons me-2">account_balance</span>
-            <h1 className="fs-5 fw-semibold mb-0">ContaSmart</h1>
+            <h1 className="fs-5 fw-semibold mb-0">
+              <span style={{ color: '#d9bb42' }}>NIX</span>
+              <span className="text-white">CON</span>
+            </h1>
           </div>
         </div>
 
@@ -176,11 +182,11 @@ export default function Sidebar() {
         </nav>
 
         {/* User Profile */}
-        <div className="border-top border-secondary p-3">
+        <div className="border-top p-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="d-flex align-items-center">
             <img 
               className="rounded-circle object-fit-cover"
-              style={{ width: '32px', height: '32px' }}
+              style={{ width: '32px', height: '32px', border: '2px solid #d9bb42' }}
               src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} 
               alt="Foto de perfil do usuário" 
             />
@@ -188,7 +194,7 @@ export default function Sidebar() {
               <p className="mb-0 small fw-medium text-white">
                 {"Usuário"}
               </p>
-              <p className="mb-0 small text-white-50">{"Cliente"}</p>
+              <p className="mb-0 small" style={{ color: '#d9bb42' }}>{"Cliente"}</p>
             </div>
             <a href="/api/logout" className="ms-auto text-white-50 btn btn-link p-0">
               <span className="material-icons small">logout</span>
