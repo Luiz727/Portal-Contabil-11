@@ -176,10 +176,10 @@ export default function EnhancedSidebar() {
           />
           
           <NavItem 
-            href="/invoices" 
+            href="/tax-calculator" 
             icon={getIcon("invoices")}
             label="Calculadora de Impostos" 
-            active={location === "/invoices"} 
+            active={location === "/tax-calculator"} 
             collapsed={collapsed}
           />
           
@@ -348,10 +348,10 @@ export default function EnhancedSidebar() {
               />
               
               <NavItem 
-                href="/invoices" 
+                href="/tax-calculator" 
                 icon={getIcon("invoices")}
                 label="Calculadora de Impostos" 
-                active={location === "/invoices"} 
+                active={location === "/tax-calculator"} 
                 collapsed={false}
               />
               
