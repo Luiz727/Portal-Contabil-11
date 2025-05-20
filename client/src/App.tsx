@@ -7,6 +7,7 @@ import "./bootstrap"; // Importa o JavaScript do Bootstrap
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
+import LoginPage from "@/pages/LoginPage";
 import Tasks from "@/pages/Tasks";
 import Clients from "@/pages/Clients";
 import Documents from "@/pages/Documents";
@@ -37,7 +38,8 @@ import { ProdutosProvider } from "@/contexts/ProdutosContext";
 
 function Router() {
   // Vamos utilizar uma versão simplificada para evitar erros sem o contexto completo
-  const { isAuthenticated, isLoading } = { isAuthenticated: true, isLoading: false };
+  // Em produção, isso será substituído pelo contexto real de autenticação
+  const { isAuthenticated, isLoading } = { isAuthenticated: false, isLoading: false };
 
   if (isLoading) {
     return (
@@ -49,7 +51,7 @@ function Router() {
 
   return (
     <Switch>
-      {!isAuthenticated && <Route path="/" component={Login} />}
+      {!isAuthenticated && <Route path="/" component={LoginPage} />}
       
       {isAuthenticated && (
         <Route path="/">

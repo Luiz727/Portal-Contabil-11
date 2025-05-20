@@ -1,145 +1,101 @@
-import { useAuth } from '../contexts/AuthContext';
-import { 
-  UserRole, 
-  SystemModule, 
-  AccessLevel
-} from '../../shared/auth/permissions';
+import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
+import { useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
-/**
- * Hook para gerenciar acesso em camadas
- * Determina qual interface/funcionalidades mostrar com base no papel do usuário
- */
-export function useLayeredAccess() {
-  const { user, userRole, canAccessModule } = useAuth();
+// Importa o sistema de permissões
+import { UserRole, SystemModule, hasPermission, isSuperAdmin, determineUserRole } from '../../shared/auth/permissions';
 
-  // Determina se o usuário está na camada admin (administração do sistema)
-  const isAdminLayer = userRole === UserRole.ADMIN;
-  
-  // Determina se o usuário está na camada de escritório de contabilidade
-  const isEscritorioLayer = userRole === UserRole.ESCRITORIO || isAdminLayer;
-  
-  // Determina se o usuário está na camada de empresa usuária
-  const isEmpresaLayer = userRole === UserRole.EMPRESA || isEscritorioLayer;
-  
-  // Determina se o usuário está na camada de cliente
-  const isClienteLayer = userRole === UserRole.CLIENTE || isEmpresaLayer;
-  
-  // Funções específicas para funcionalidades por camada
-  
-  // Administração do Sistema
-  const canAccessSystemConfig = isAdminLayer || 
-    canAccessModule(SystemModule.SYSTEM_CONFIG, AccessLevel.ADMIN);
-  
-  const canManageUsers = isAdminLayer || 
-    canAccessModule(SystemModule.USER_MANAGEMENT, AccessLevel.ADMIN);
-  
-  // Escritório de Contabilidade
-  const canManageEmpresas = isEscritorioLayer || 
-    canAccessModule(SystemModule.CLIENTES, AccessLevel.ADMIN);
-  
-  const canConfigureFiscal = isEscritorioLayer || 
-    canAccessModule(SystemModule.FISCAL_AJUSTES, AccessLevel.ADMIN);
-  
-  // Empresa Usuária
-  const canManageClientes = isEmpresaLayer || 
-    canAccessModule(SystemModule.CLIENTES, AccessLevel.WRITE);
-  
-  const canManageProducts = isEmpresaLayer || 
-    canAccessModule(SystemModule.FISCAL_CADASTROS, AccessLevel.WRITE);
-  
-  const canEmitInvoices = isEmpresaLayer || 
-    canAccessModule(SystemModule.FISCAL_EMISSOR, AccessLevel.WRITE);
-  
-  // Clientes 
-  const canViewInvoices = isClienteLayer || 
-    canAccessModule(SystemModule.DOCUMENTOS, AccessLevel.READ);
-  
-  return {
-    // Camadas gerais
-    isAdminLayer,
-    isEscritorioLayer,
-    isEmpresaLayer,
-    isClienteLayer,
-    
-    // Permissões específicas por funcionalidade
-    canAccessSystemConfig,
-    canManageUsers,
-    canManageEmpresas,
-    canConfigureFiscal,
-    canManageClientes,
-    canManageProducts,
-    canEmitInvoices,
-    canViewInvoices,
-    
-    // Informações extras
-    currentRole: userRole,
-    empresaId: user?.empresaId
-  };
+interface LayeredAccessContextType {
+  userRole: UserRole;
+  isLoading: boolean;
+  checkPermission: (module: SystemModule, action: string) => boolean;
+  getUserRole: () => UserRole;
+  canView: (module: SystemModule) => boolean;
+  canCreate: (module: SystemModule) => boolean;
+  canEdit: (module: SystemModule) => boolean;
+  canDelete: (module: SystemModule) => boolean;
+  canAdmin: (module: SystemModule) => boolean;
+  isSuperAdmin: boolean;
 }
 
-/**
- * Hook para gerenciar visibilidade específica para cada camada
- * Facilita a renderização condicional de componentes de interface
- */
-export function useLayeredUI() {
-  const {
-    isAdminLayer,
-    isEscritorioLayer,
-    isEmpresaLayer,
-    isClienteLayer
-  } = useLayeredAccess();
-  
-  // Determina quais elementos de UI mostrar com base na camada do usuário
-  
-  // Para o Menu/Sidebar principal
-  const visibleMenuItems = {
-    // Módulos principais
-    dashboard: isClienteLayer, // Todos podem ver o dashboard, mas adaptado ao seu perfil
-    fiscal: isEmpresaLayer,    // Apenas empresas e acima
-    financeiro: isEmpresaLayer,
-    documentos: isClienteLayer, // Todos precisam ver documentos
-    clientes: isEmpresaLayer,  // Empresas gerenciam seus clientes
-    tarefas: isEmpresaLayer,   // Tarefas para empresas e acima
-    
-    // Submódulos específicos
-    fiscalEmissor: isEmpresaLayer,
-    fiscalCadastros: isEmpresaLayer,
-    fiscalRelatorios: isEmpresaLayer,
-    fiscalImportacao: isEmpresaLayer,
-    
-    // Módulos de administração
-    empresaManagement: isEscritorioLayer, // Gerenciamento de empresas pelo escritório
-    userManagement: isAdminLayer,        // Gerenciamento de usuários pelo admin
-    systemSettings: isAdminLayer,        // Configurações do sistema pelo admin
-    
-    // Ferramentas especiais
-    taxCalculator: isClienteLayer,       // Todos os perfis podem acessar a calculadora
-    
-    // Configurações específicas
-    escritorioSettings: isEscritorioLayer, // Configurações do escritório
-    empresaSettings: isEmpresaLayer      // Configurações da empresa
-  };
-  
-  // Para o painel principal
-  const visiblePanels = {
-    // Painéis de Dashboard
-    overviewPanel: isClienteLayer,
-    fiscalStatusPanel: isEmpresaLayer,
-    financeiroStatusPanel: isEmpresaLayer,
-    clientesStatusPanel: isEmpresaLayer,
-    
-    // Painéis Administrativos
-    adminStatusPanel: isAdminLayer,
-    escritorioStatusPanel: isEscritorioLayer,
-    
-    // Ações e Botões
-    emitirNFButton: isEmpresaLayer,
-    gerenciarEmpresasButton: isEscritorioLayer,
-    gerenciarUsuariosButton: isAdminLayer
-  };
-  
-  return {
-    visibleMenuItems,
-    visiblePanels
-  };
+const LayeredAccessContext = createContext<LayeredAccessContextType | undefined>(undefined);
+
+export const useLayeredAccess = () => {
+  const context = useContext(LayeredAccessContext);
+  if (!context) {
+    throw new Error('useLayeredAccess deve ser usado dentro de um LayeredAccessProvider');
+  }
+  return context;
+};
+
+interface LayeredAccessProviderProps {
+  children: ReactNode;
 }
+
+export const LayeredAccessProvider = ({ children }: LayeredAccessProviderProps) => {
+  const { user, isLoading: authLoading } = useAuth();
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.CLIENTE);
+  const [isLoading, setIsLoading] = useState(true);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (user) {
+        // Determina o papel do usuário com base nas informações
+        const role = determineUserRole(user);
+        setUserRole(role);
+      } else {
+        setUserRole(UserRole.CLIENTE);
+      }
+      setIsLoading(false);
+    }
+  }, [user, authLoading]);
+
+  // Verifica superadmin pelo email
+  const checkSuperAdmin = user ? isSuperAdmin(user.email || '') : false;
+
+  // Função para verificar permissão para uma ação
+  const checkPermission = (module: SystemModule, action: string) => {
+    // Verifica se o usuário é superadmin, que tem acesso a tudo
+    if (checkSuperAdmin) {
+      return true;
+    }
+    
+    // Para outros usuários, verifica permissões específicas
+    return hasPermission(userRole, module, action as any);
+  };
+
+  // Obtém o papel atual do usuário
+  const getUserRole = (): UserRole => userRole;
+
+  // Funções helper para verificações comuns
+  const canView = (module: SystemModule) => checkPermission(module, 'view');
+  const canCreate = (module: SystemModule) => checkPermission(module, 'create');
+  const canEdit = (module: SystemModule) => checkPermission(module, 'edit');
+  const canDelete = (module: SystemModule) => checkPermission(module, 'delete');
+  const canAdmin = (module: SystemModule) => checkPermission(module, 'admin');
+
+  // Contexto de valor
+  const contextValue: LayeredAccessContextType = {
+    userRole,
+    isLoading,
+    checkPermission,
+    getUserRole,
+    canView,
+    canCreate,
+    canEdit,
+    canDelete,
+    canAdmin,
+    isSuperAdmin: checkSuperAdmin
+  };
+
+  return (
+    <LayeredAccessContext.Provider value={contextValue}>
+      {children}
+    </LayeredAccessContext.Provider>
+  );
+};
+
+export default useLayeredAccess;
