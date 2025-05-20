@@ -97,11 +97,11 @@ const PainelAdministrativoPage = () => {
     <div className="p-6">
       <div className="flex items-center gap-4 mb-6">
         <div className="w-10 h-10 bg-[#d9bb42]/10 flex items-center justify-center rounded-lg">
-          <Settings size={24} className="text-[#d9bb42]" />
+          <LayoutDashboard size={24} className="text-[#d9bb42]" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Configurações Administrativas</h1>
-          <p className="text-gray-500">Gerencie planos, permissões e configurações do sistema</p>
+          <h1 className="text-2xl font-semibold text-gray-800">Painel Administrativo</h1>
+          <p className="text-gray-500">Acesso centralizado a todas as ferramentas administrativas</p>
         </div>
       </div>
       

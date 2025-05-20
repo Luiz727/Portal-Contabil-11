@@ -346,7 +346,7 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
           
           <SidebarItem 
             icon={Settings} 
-            label="Config. Administrativas" 
+            label="Painel Administrativo" 
             to="/admin/painel" 
             active={location === "/admin/painel"} 
             collapsed={collapsed}
