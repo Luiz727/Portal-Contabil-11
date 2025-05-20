@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import EnhancedSidebar from "@/components/EnhancedSidebar";
 import Header from "@/components/Header";
-import NIXCONSidebarResponsivo from "@/components/nixcon-ui/NIXCONSidebarResponsivo";
+import NIXCONSidebarResponsivo2 from "@/components/nixcon-ui/NIXCONSidebarResponsivo2";
 import NIXCONHeaderResponsivo from "@/components/nixcon-ui/NIXCONHeaderResponsivo";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -64,7 +64,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Novo sidebar responsivo */}
-      <NIXCONSidebarResponsivo onToggle={setIsSidebarOpen} />
+      <NIXCONSidebarResponsivo2 onToggle={setIsSidebarOpen} />
       
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
