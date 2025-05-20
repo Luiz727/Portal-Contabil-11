@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./bootstrap"; // Importa o JavaScript do Bootstrap
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import NIXCONDashboard from "@/pages/NIXCONDashboard";
 import Login from "@/pages/Login";
 import Tasks from "@/pages/Tasks";
 import Clients from "@/pages/Clients";
@@ -53,7 +54,7 @@ function Router() {
       {isAuthenticated && (
         <Route path="/">
           <MainLayout>
-            <Dashboard />
+            <NIXCONDashboard />
           </MainLayout>
         </Route>
       )}

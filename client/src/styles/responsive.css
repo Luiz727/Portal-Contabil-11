@@ -1,0 +1,552 @@
+/* Sistema de Responsividade NIXCON
+   Arquivo dedicado a estilos responsivos para garantir consistência em todos os módulos
+*/
+
+/* Estilos Base para todos os tamanhos de tela */
+.nixcon-container {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.nixcon-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.5rem;
+  margin-left: -0.5rem;
+}
+
+.nixcon-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.nixcon-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tipografia Responsiva */
+h1.nixcon-title {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #4a4a4a;
+}
+
+h2.nixcon-subtitle {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #4a4a4a;
+}
+
+.nixcon-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #666666;
+}
+
+/* Layouts Responsivos */
+.nixcon-flex {
+  display: flex;
+}
+
+.nixcon-flex-col {
+  flex-direction: column;
+}
+
+.nixcon-items-center {
+  align-items: center;
+}
+
+.nixcon-justify-between {
+  justify-content: space-between;
+}
+
+.nixcon-gap-2 {
+  gap: 0.5rem;
+}
+
+.nixcon-gap-4 {
+  gap: 1rem;
+}
+
+/* Grid System Responsivo */
+.nixcon-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* Botões NIXCON Padronizados */
+.nixcon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nixcon-btn-primary {
+  background-color: #d9bb42;
+  color: #ffffff;
+  border: 1px solid #d9bb42;
+}
+
+.nixcon-btn-primary:hover {
+  background-color: #c9ad37;
+  border-color: #c9ad37;
+}
+
+.nixcon-btn-outline {
+  background-color: transparent;
+  color: #d9bb42;
+  border: 1px solid #d9bb42;
+}
+
+.nixcon-btn-outline:hover {
+  background-color: rgba(217, 187, 66, 0.1);
+}
+
+.nixcon-btn-link {
+  background-color: transparent;
+  color: #d9bb42;
+  border: none;
+  padding: 0.25rem 0.5rem;
+}
+
+.nixcon-btn-link:hover {
+  text-decoration: underline;
+}
+
+/* Cores NIXCON Padronizadas */
+.nixcon-text-primary {
+  color: #d9bb42 !important;
+}
+
+.nixcon-bg-primary {
+  background-color: #d9bb42 !important;
+}
+
+.nixcon-border-primary {
+  border-color: #d9bb42 !important;
+}
+
+.nixcon-text-secondary {
+  color: #4a4a4a !important;
+}
+
+.nixcon-bg-secondary {
+  background-color: #4a4a4a !important;
+}
+
+.nixcon-border-secondary {
+  border-color: #4a4a4a !important;
+}
+
+/* Espaçamentos Responsivos */
+.nixcon-p-2 {
+  padding: 0.5rem;
+}
+
+.nixcon-p-4 {
+  padding: 1rem;
+}
+
+.nixcon-py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.nixcon-px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.nixcon-m-2 {
+  margin: 0.5rem;
+}
+
+.nixcon-m-4 {
+  margin: 1rem;
+}
+
+.nixcon-my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.nixcon-mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+/* Media Queries - Mobile First */
+/* Extra Small (xs) - até 576px - Padrão, não precisa de media query */
+
+/* Small (sm) - a partir de 576px */
+@media (min-width: 576px) {
+  .nixcon-container {
+    max-width: 540px;
+  }
+  
+  .nixcon-grid-sm-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  h1.nixcon-title {
+    font-size: 1.75rem;
+  }
+  
+  h2.nixcon-subtitle {
+    font-size: 1.5rem;
+  }
+  
+  .nixcon-text {
+    font-size: 1rem;
+  }
+  
+  .nixcon-flex-sm-row {
+    flex-direction: row;
+  }
+}
+
+/* Medium (md) - a partir de 768px */
+@media (min-width: 768px) {
+  .nixcon-container {
+    max-width: 720px;
+  }
+  
+  .nixcon-grid-md-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  h1.nixcon-title {
+    font-size: 2rem;
+  }
+  
+  .nixcon-hidden-md {
+    display: none;
+  }
+  
+  .nixcon-visible-md {
+    display: block;
+  }
+}
+
+/* Large (lg) - a partir de 992px */
+@media (min-width: 992px) {
+  .nixcon-container {
+    max-width: 960px;
+  }
+  
+  .nixcon-grid-lg-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  
+  .nixcon-py-lg-4 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .nixcon-px-lg-6 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Extra Large (xl) - a partir de 1200px */
+@media (min-width: 1200px) {
+  .nixcon-container {
+    max-width: 1140px;
+  }
+  
+  .nixcon-grid-xl-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Estilos para módulos específicos */
+
+/* Dashboard */
+.nixcon-dashboard-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.nixcon-dashboard-card-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nixcon-dashboard-card-body {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+.nixcon-dashboard-card-footer {
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Calculadora de Impostos */
+.nixcon-tax-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .nixcon-tax-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.nixcon-tax-summary {
+  background-color: #faf7e8;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e4cc6a;
+}
+
+.nixcon-tax-total {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d9bb42;
+  margin-bottom: 1rem;
+}
+
+/* Componentes comuns */
+.nixcon-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.nixcon-badge-primary {
+  background-color: rgba(217, 187, 66, 0.1);
+  color: #d9bb42;
+}
+
+.nixcon-badge-secondary {
+  background-color: rgba(74, 74, 74, 0.1);
+  color: #4a4a4a;
+}
+
+.nixcon-alert {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.nixcon-alert-info {
+  background-color: rgba(217, 187, 66, 0.1);
+  border: 1px solid rgba(217, 187, 66, 0.3);
+  color: #d9bb42;
+}
+
+.nixcon-alert-warning {
+  background-color: #fff8e6;
+  border: 1px solid #fdecbe;
+  color: #d97706;
+}
+
+.nixcon-alert-success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+}
+
+.nixcon-alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+/* Módulo Fiscal */
+.nixcon-fiscal-dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .nixcon-fiscal-dashboard {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Animações e Transições */
+.nixcon-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nixcon-slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Elementos de Formulário NIXCON */
+.nixcon-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.nixcon-input:focus {
+  outline: none;
+  border-color: #d9bb42;
+  box-shadow: 0 0 0 3px rgba(217, 187, 66, 0.2);
+}
+
+.nixcon-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #4a4a4a;
+}
+
+.nixcon-select {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  appearance: none;
+}
+
+.nixcon-select:focus {
+  outline: none;
+  border-color: #d9bb42;
+  box-shadow: 0 0 0 3px rgba(217, 187, 66, 0.2);
+}
+
+/* Utilitários de visibilidade */
+.nixcon-hidden {
+  display: none !important;
+}
+
+.nixcon-visible {
+  display: block !important;
+}
+
+@media (min-width: 576px) {
+  .nixcon-hidden-sm-up {
+    display: none !important;
+  }
+  
+  .nixcon-visible-sm-up {
+    display: block !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .nixcon-hidden-md-up {
+    display: none !important;
+  }
+  
+  .nixcon-visible-md-up {
+    display: block !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .nixcon-hidden-lg-up {
+    display: none !important;
+  }
+  
+  .nixcon-visible-lg-up {
+    display: block !important;
+  }
+}
+
+/* Correções específicas para problemas de layout */
+.btn-primary, 
+.btn-info, 
+.btn-success, 
+.btn-blue, 
+.btn-outline-primary, 
+.btn-outline-info, 
+.btn-outline-success {
+  background-color: #d9bb42 !important;
+  border-color: #d9bb42 !important;
+  color: #fff !important;
+}
+
+.btn-outline-primary, 
+.btn-outline-info, 
+.btn-outline-success {
+  background-color: transparent !important;
+  color: #d9bb42 !important;
+}
+
+.btn-outline-primary:hover, 
+.btn-outline-info:hover, 
+.btn-outline-success:hover {
+  background-color: #d9bb42 !important;
+  color: #fff !important;
+}
+
+.text-info, 
+.text-blue, 
+.text-primary,
+.text-info-emphasis, 
+.link-info, 
+.link-primary {
+  color: #d9bb42 !important;
+}
+
+/* Correção para links azuis em módulos específicos */
+a:not(.btn):not(.nav-link) {
+  color: #d9bb42 !important;
+}
+
+a:not(.btn):not(.nav-link):hover {
+  color: #c9ad37 !important;
+}
+
+/* Componentes do Bootstrap padronizados */
+.bg-info, 
+.bg-primary,
+.bg-blue {
+  background-color: #d9bb42 !important;
+}
