@@ -86,7 +86,7 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
               
               <div className="ml-2">
                 <h1 className="text-xl font-bold">
-                  <span className="text-amber-500">NIX</span>
+                  <span style={{color: "#d9bb42"}}>NIX</span>
                   <span className="text-gray-600">CON</span>
                 </h1>
               </div>
@@ -95,7 +95,7 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
             {/* Desktop View */}
             <div className="hidden md:flex md:items-center">
               <h1 className="text-2xl font-bold mr-8">
-                <span className="text-amber-500">NIX</span>
+                <span style={{color: "#d9bb42"}}>NIX</span>
                 <span className="text-gray-600">CON</span>
               </h1>
               

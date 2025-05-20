@@ -51,14 +51,14 @@ body {
   --color-red-light: #fff1f1;
   --color-green: #26a862;
   --color-green-light: #ebfaef;
-  --color-blue: #3b82f6;
-  --color-blue-light: #ebf5ff;
+  --color-blue: #d9bb42;           /* Substituído pelo dourado NIXCON */
+  --color-blue-light: #faf7e8;     /* Substituído pelo fundo dourado NIXCON */
   
   /* Cores de status */
   --color-success: #22c55e;
   --color-warning: #eab308;
   --color-error: #ef4444;
-  --color-info: #3b82f6;
+  --color-info: #d9bb42;           /* Substituído pelo dourado NIXCON */
   
   /* Fontes */
   --font-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

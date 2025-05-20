@@ -90,17 +90,21 @@ function Router() {
         </Route>
       )}
       
-      {/* A calculadora é acessível mesmo sem autenticação */}
-      <Route path="/tax-calculator">
-        <MainLayout>
-          <TaxCalculatorPage />
-        </MainLayout>
-      </Route>
+      {/* A calculadora agora só é acessível com autenticação */}
+      {isAuthenticated && (
+        <Route path="/tax-calculator">
+          <MainLayout>
+            <TaxCalculatorPage />
+          </MainLayout>
+        </Route>
+      )}
       
-      {/* Nova rota para o estilo NIXCON da calculadora */}
-      <Route path="/calculadora-nixcon">
-        <TaxCalculatorNIXCONPage />
-      </Route>
+      {/* Nova rota NIXCON da calculadora com autenticação */}
+      {isAuthenticated && (
+        <Route path="/calculadora-nixcon">
+          <TaxCalculatorNIXCONPage />
+        </Route>
+      )}
       
       {isAuthenticated && (
         <Route path="/financial">

@@ -19,19 +19,19 @@
   }
   
   .nixcon-gold {
-    color: hsl(43, 100%, 50%);
+    color: #d9bb42;
   }
   
   .nixcon-gold-bg {
-    background-color: hsl(43, 100%, 50%);
+    background-color: #d9bb42;
   }
   
   .nixcon-gray {
-    color: hsl(220, 14%, 25%);
+    color: #4a4a4a;
   }
   
   .nixcon-gray-bg {
-    background-color: hsl(220, 14%, 25%);
+    background-color: #4a4a4a;
   }
 }
 
@@ -61,55 +61,55 @@
 :root {
   /* Cores da NIXCON - Ouro e Cinza */
   --background: 0 0% 100%;
-  --foreground: 220 14% 25%;
-  --muted: 220 14% 95%;
-  --muted-foreground: 220 10% 50%;
+  --foreground: 0 0% 29%; /* Cinza NIXCON */
+  --muted: 43 60% 96%; /* Fundo dourado suave */
+  --muted-foreground: 0 0% 45%;
   --popover: 0 0% 100%;
-  --popover-foreground: 220 14% 25%;
+  --popover-foreground: 0 0% 29%;
   --card: 0 0% 100%;
-  --card-foreground: 220 14% 25%;
-  --border: 220 13% 90%;
-  --input: 220 13% 90%;
+  --card-foreground: 0 0% 29%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
   
   /* Cor primária: Ouro NIXCON */
-  --primary: 43 100% 50%;
-  --primary-foreground: 220 20% 25%;
+  --primary: 43 60% 55%; /* Exatamente #d9bb42 */
+  --primary-foreground: 0 0% 20%;
   
   /* Cores secundárias */
-  --secondary: 220 14% 95%;
-  --secondary-foreground: 220 20% 30%;
-  --accent: 43 80% 96%;
-  --accent-foreground: 220 20% 25%;
+  --secondary: 0 0% 29%; /* Cinza NIXCON #4a4a4a */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 43 60% 96%;
+  --accent-foreground: 0 0% 29%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 43 100% 50%;
+  --ring: 43 60% 55%; /* Exatamente #d9bb42 */
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: 220 35% 15%;
-  --foreground: 0 0% 98%;
-  --muted: 220 25% 25%;
-  --muted-foreground: 220 20% 70%;
-  --popover: 220 35% 15%;
-  --popover-foreground: 0 0% 98%;
-  --card: 220 35% 18%;
-  --card-foreground: 0 0% 98%;
-  --border: 220 25% 25%;
-  --input: 220 25% 25%;
+  --background: 0 0% 15%;
+  --foreground: 0 0% 90%;
+  --muted: 43 25% 25%;
+  --muted-foreground: 0 0% 70%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 90%;
+  --card: 0 0% 18%;
+  --card-foreground: 0 0% 90%;
+  --border: 0 0% 25%;
+  --input: 0 0% 25%;
   
   /* Cor primária: Ouro NIXCON também no modo escuro */
-  --primary: 43 100% 50%;
-  --primary-foreground: 220 35% 15%;
+  --primary: 43 60% 55%; /* Exatamente #d9bb42 */
+  --primary-foreground: 0 0% 15%;
   
   /* Cores secundárias no modo escuro */
-  --secondary: 220 25% 25%;
+  --secondary: 0 0% 25%;
   --secondary-foreground: 0 0% 98%;
-  --accent: 43 60% 25%;
-  --accent-foreground: 43 100% 60%;
+  --accent: 43 30% 25%;
+  --accent-foreground: 43 60% 60%;
   --destructive: 0 70% 40%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 43 100% 50%;
+  --ring: 43 60% 55%; /* Exatamente #d9bb42 */
   --radius: 0.5rem;
   }
 
