@@ -106,14 +106,14 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
             
             <div className="hidden group-hover:block absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
               <Link href="/settings/profile">
-                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <div className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
                   Perfil
-                </a>
+                </div>
               </Link>
               <Link href="/settings">
-                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <div className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
                   Configurações
-                </a>
+                </div>
               </Link>
               <div className="border-t border-gray-100 my-1"></div>
               <a href="/api/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
