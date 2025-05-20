@@ -344,6 +344,15 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
             onClick={handleItemClick} 
           />
           
+          <SidebarItem 
+            icon={Settings} 
+            label="Config. Administrativas" 
+            to="/admin/painel" 
+            active={location === "/admin/painel"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+          
           {user && user.id && (
             <div className={`mt-6 px-4 py-2 ${collapsed ? 'text-center' : ''}`}>
               <div className={`flex items-center ${collapsed ? 'justify-center' : ''}`}>

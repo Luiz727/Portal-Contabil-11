@@ -28,7 +28,7 @@ type HeaderProps = {
   onVisualizationChange?: (type: "escritorio" | "empresa") => void;
 };
 
-export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
+export default function Header({ toggleSidebar, fiscalModule = true, onVisualizationChange }: HeaderProps) {
   const { user } = useAuth();
   const { actingAsEmpresa } = useEmpresas();
   const [searchQuery, setSearchQuery] = useState("");
