@@ -460,7 +460,7 @@ const TaxCalculatorPage = () => {
                 handleProductInputChange={handleProductInputChange}
                 addProductToSimulation={addProductToSimulation}
                 removeProductFromSimulation={removeProductFromSimulation}
-                calculateSummary={calculateSummary}
+                calculateSummary={realizarCalculo}
                 universalProducts={universalProducts}
                 isEditing={isEditing}
               />
