@@ -36,6 +36,7 @@ import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
 import ProdutosUniversaisPage from "./pages/admin/ProdutosUniversaisPage";
 import ImportacaoProdutosPage from "./pages/admin/ImportacaoProdutosPage";
 import PlanosAssinaturasPage from "./pages/admin/PlanosAssinaturasPage";
+import EmpresasUsuariasPage from "./pages/admin/EmpresasUsuariasPage";
 
 // Contextos
 import { EmpresasProvider } from "@/contexts/EmpresasContext";
@@ -185,6 +186,14 @@ function Router() {
         <Route path="/admin/configuracoes">
           <MainLayout>
             <ConfiguracoesAdminPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/empresas-usuarias">
+          <MainLayout>
+            <EmpresasUsuariasPage />
           </MainLayout>
         </Route>
       )}

@@ -298,6 +298,15 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
         
         <SidebarSection title="Administração" collapsed={collapsed}>
           <SidebarItem 
+            icon={Users} 
+            label="Empresas Usuárias" 
+            to="/admin/empresas-usuarias" 
+            active={location === "/admin/empresas-usuarias"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+          
+          <SidebarItem 
             icon={PackageOpen} 
             label="Produtos Universais" 
             to="/admin/produtos-universais" 
