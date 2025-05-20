@@ -38,11 +38,11 @@ const NavItem = ({ icon, label, href, active, collapsed = false }: NavItemProps)
   return (
     <Link href={href}>
       <div className={cn(
-        "flex items-center py-2 px-3 rounded-md mb-1 text-sm font-medium transition-colors cursor-pointer",
-        "hover:bg-primary/10 hover:text-primary",
+        "flex items-center py-2 px-3 mb-1 text-sm font-medium transition-colors cursor-pointer",
+        "hover:bg-gray-100",
         active 
-          ? "bg-primary/15 text-primary" 
-          : "text-foreground/80"
+          ? "bg-gray-100 text-gray-800 border-l-4 border-[#d9bb42]" 
+          : "text-gray-700"
       )}>
         <div className="mr-2 h-5 w-5">{icon}</div>
         {!collapsed && <span>{label}</span>}
@@ -61,7 +61,7 @@ const NavSection = ({ title, children, collapsed = false }: NavSectionProps) => 
   return (
     <div className="mb-6">
       {!collapsed && (
-        <h6 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <h6 className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           {title}
         </h6>
       )}
@@ -104,21 +104,21 @@ export default function EnhancedSidebar({ isMobile = false, closeSidebar }: Enha
   // Configuração dos ícones para cada item de navegação
   const getIcon = (name: string) => {
     const iconMap: Record<string, React.ReactNode> = {
-      dashboard: <LayoutDashboard size={20} />,
-      tasks: <FileText size={20} />,
-      clients: <Users size={20} />,
-      documents: <FileText size={20} />,
-      invoices: <Receipt size={20} />,
-      fiscal: <Receipt size={20} />,
-      whatsapp: <MessageSquare size={20} />,
-      financial: <Wallet size={20} />,
-      inventory: <Package2 size={20} />,
-      reconciliation: <ArrowLeftRight size={20} />,
-      reports: <BarChart2 size={20} />,
-      integrations: <Puzzle size={20} />,
-      settings: <Settings size={20} />
+      dashboard: <LayoutDashboard size={20} className="text-[#d9bb42]" />,
+      tasks: <FileText size={20} className="text-[#d9bb42]" />,
+      clients: <Users size={20} className="text-[#d9bb42]" />,
+      documents: <FileText size={20} className="text-[#d9bb42]" />,
+      invoices: <Receipt size={20} className="text-[#d9bb42]" />,
+      fiscal: <Receipt size={20} className="text-[#d9bb42]" />,
+      whatsapp: <MessageSquare size={20} className="text-[#d9bb42]" />,
+      financial: <Wallet size={20} className="text-[#d9bb42]" />,
+      inventory: <Package2 size={20} className="text-[#d9bb42]" />,
+      reconciliation: <ArrowLeftRight size={20} className="text-[#d9bb42]" />,
+      reports: <BarChart2 size={20} className="text-[#d9bb42]" />,
+      integrations: <Puzzle size={20} className="text-[#d9bb42]" />,
+      settings: <Settings size={20} className="text-[#d9bb42]" />
     };
-    return iconMap[name] || <FileText size={20} />;
+    return iconMap[name] || <FileText size={20} className="text-[#d9bb42]" />;
   };
 
   // Versão para desktop/tablet
@@ -129,17 +129,15 @@ export default function EnhancedSidebar({ isMobile = false, closeSidebar }: Enha
     )}>
       {/* Cabeçalho com logo */}
       <div className="p-4 flex items-center justify-between border-b border-border">
-        {!collapsed && (
-          <div className="flex items-center">
-            <span className="font-bold text-lg text-amber-500">NIX</span>
-            <span className="font-bold text-lg text-gray-600">CON</span>
-          </div>
-        )}
+        <div className="flex items-center">
+          <span className="font-bold text-lg text-[#d9bb42]">NIX</span>
+          <span className="font-bold text-lg text-[#4a4a4a]">CON</span>
+        </div>
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto"
+          className="ml-auto text-[#4a4a4a]"
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </Button>
