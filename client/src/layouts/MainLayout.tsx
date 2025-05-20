@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import EnhancedSidebar from "@/components/EnhancedSidebar";
 import Header from "@/components/Header";
+import NIXCONSidebarResponsivo from "@/components/nixcon-ui/NIXCONSidebarResponsivo";
+import NIXCONHeaderResponsivo from "@/components/nixcon-ui/NIXCONHeaderResponsivo";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -16,7 +18,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isFiscalModule = location.startsWith('/fiscal');
 
   // Verifica a rota atual para determinar se precisa de autenticação
-  const isCalculatorPage = location === '/tax-calculator';
+  const isCalculatorPage = location === '/tax-calculator' || location === '/calculadora-nixcon';
+  const isCalendarPage = location === '/calendar';
   
   useEffect(() => {
     // Não redireciona se for a página da calculadora de impostos
@@ -101,13 +104,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return null;
   }
 
-  // Para o módulo fiscal, usamos o layout normal com a sidebar
+  // Layout unificado para todas as páginas, incluindo calculadora e módulo fiscal
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Sidebar em desktop ou tablet */}
-      <div className="hidden md:block flex-shrink-0">
-        <EnhancedSidebar />
-      </div>
+      {/* Novo sidebar responsivo */}
+      <NIXCONSidebarResponsivo onToggle={setIsSidebarOpen} />
       
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
@@ -117,21 +118,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
         ></div>
       )}
       
-      {/* Mobile sidebar */}
-      <div 
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <EnhancedSidebar isMobile={true} closeSidebar={() => setIsSidebarOpen(false)} />
-      </div>
-      
       {/* Main content */}
-      <main className="flex-grow flex flex-col overflow-hidden">
-        <Header toggleSidebar={toggleSidebar} fiscalModule={isFiscalModule} />
+      <main className="flex-grow flex flex-col overflow-hidden hide-scrollbar">
+        <style>
+          {`
+          /* Ocultar barras de rolagem em toda a aplicação */
+          .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+          }
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+          }
+          `}
+        </style>
         
-        <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8">
+        {/* Novo header responsivo com seleção de empresa */}
+        <NIXCONHeaderResponsivo 
+          onMenuToggle={toggleSidebar} 
+          empresas={[
+            { id: '1', nome: 'Comércio Varejista Alfa Ltda' },
+            { id: '2', nome: 'Holding Investimentos XYZ S.A.' },
+            { id: '3', nome: 'Serviços Contábeis NIXCON' }
+          ]}
+          empresaSelecionada={{ id: '1', nome: 'Comércio Varejista Alfa Ltda' }}
+          onChangeEmpresa={(empresa) => console.log('Empresa selecionada:', empresa)}
+        />
+        
+        <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8 hide-scrollbar">
           <div className="mx-auto max-w-7xl">
             {children}
           </div>

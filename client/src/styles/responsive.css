@@ -2,6 +2,16 @@
    Arquivo dedicado a estilos responsivos para garantir consistência em todos os módulos
 */
 
+/* Ocultar barras de rolagem em toda a aplicação */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 /* Estilos Base para todos os tamanhos de tela */
 .nixcon-container {
   width: 100%;
