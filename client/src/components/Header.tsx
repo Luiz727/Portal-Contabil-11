@@ -28,9 +28,15 @@ type HeaderProps = {
   onVisualizationChange?: (type: "escritorio" | "empresa") => void;
 };
 
-export default function Header({ toggleSidebar, fiscalModule = true, onVisualizationChange }: HeaderProps) {
+export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
   const { user } = useAuth();
-  const { actingAsEmpresa } = useEmpresas();
+  const { actingAsEmpresa, userType } = useEmpresas();
+  const [isEscritorioView, setIsEscritorioView] = useState(userType === 'Escritorio');
+  
+  useEffect(() => {
+    // Sincronizar com o tipo de usuário ao carregar
+    setIsEscritorioView(userType === 'Escritorio' && !actingAsEmpresa);
+  }, [userType, actingAsEmpresa]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -69,7 +75,7 @@ export default function Header({ toggleSidebar, fiscalModule = true, onVisualiza
               </Button>
             </Link>
             <div className="flex items-center">
-              <h2 className="text-lg font-semibold text-gray-800">Módulo Fiscal</h2>
+              <h2 className="text-lg font-semibold text-gray-800">{(fiscalModule || isEscritorioView) ? "Módulo Fiscal" : "Dashboard"}</h2>
               <Badge variant="default" className="ml-2 bg-primary text-primary-foreground">v1.0</Badge>
             </div>
           </div>
@@ -135,10 +141,10 @@ export default function Header({ toggleSidebar, fiscalModule = true, onVisualiza
               <div className="hidden sm:flex sm:items-center sm:border sm:border-gray-200 sm:rounded-md sm:px-3 sm:py-1.5 sm:bg-white cursor-pointer hover:bg-gray-50">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium px-2 py-0.5 bg-gray-100 rounded text-gray-700">
-                    {fiscalModule ? "NX" : "CA"}
+                    {isEscritorioView ? "NX" : "CA"}
                   </span>
                   <span className="text-sm text-gray-700">
-                    {fiscalModule ? "NIXCON" : "Comércio ABC"}
+                    {isEscritorioView ? "NIXCON" : "Comércio ABC"}
                   </span>
                 </div>
               </div>
@@ -148,24 +154,26 @@ export default function Header({ toggleSidebar, fiscalModule = true, onVisualiza
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => {
                 if (onVisualizationChange) onVisualizationChange("escritorio");
-                window.location.href = "/admin/produtos-universais";
+                setIsEscritorioView(true);
+                window.location.href = "/admin/painel";
               }}>
                 <User2 className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Visão do Escritório</span>
-                {fiscalModule && <Check className="ml-auto h-4 w-4" />}
+                {(fiscalModule || isEscritorioView) && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Empresas</DropdownMenuLabel>
               <DropdownMenuItem 
-                className={!fiscalModule ? "bg-gray-50" : ""}
+                className={!fiscalModule && !isEscritorioView ? "bg-gray-50" : ""}
                 onClick={() => {
                   if (onVisualizationChange) onVisualizationChange("empresa");
+                  setIsEscritorioView(false);
                   window.location.href = "/";
                 }}
               >
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Comércio ABC</span>
-                {!fiscalModule && <Check className="ml-auto h-4 w-4" />}
+                {(!fiscalModule && !isEscritorioView) && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
                 if (onVisualizationChange) onVisualizationChange("empresa");
