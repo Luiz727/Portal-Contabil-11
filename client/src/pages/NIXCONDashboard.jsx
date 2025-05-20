@@ -22,12 +22,12 @@ const NIXCONDashboard = () => {
   return (
     <div className="nixcon-container nixcon-py-4">
       {/* Cabeçalho do Dashboard */}
-      <div className="nixcon-flex nixcon-flex-col nixcon-gap-4 md:nixcon-flex-row md:nixcon-items-center md:nixcon-justify-between mb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h1 className="nixcon-title">Dashboard</h1>
-          <p className="nixcon-text">Visão geral das atividades do escritório</p>
+          <h1 className="text-2xl font-semibold text-gray-700 mb-1">Dashboard</h1>
+          <p className="text-sm text-gray-500">Visão geral das atividades do escritório</p>
         </div>
-        <div className="nixcon-flex nixcon-flex-col xs:nixcon-flex-row nixcon-gap-2">
+        <div className="flex flex-col xs:flex-row gap-2">
           <select 
             className="text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d9bb42] focus:border-[#d9bb42]"
             value={selectedCompany}
@@ -39,7 +39,7 @@ const NIXCONDashboard = () => {
           </select>
           
           <button 
-            className="flex items-center gap-2 bg-[#d9bb42] text-white py-2 px-4 rounded-md text-sm font-medium"
+            className="flex items-center justify-center gap-2 bg-[#d9bb42] text-white py-2 px-4 rounded-md text-sm font-medium"
             onClick={handleCreateTask}
           >
             <PlusCircle size={16} />
@@ -49,51 +49,51 @@ const NIXCONDashboard = () => {
       </div>
       
       {/* Cards de Estatísticas */}
-      <div className="nixcon-grid nixcon-grid-sm-2 nixcon-grid-md-3 nixcon-grid-lg-4 nixcon-gap-4 mb-6">
-        <div className="nixcon-card nixcon-dashboard-card nixcon-fade-in" style={{animationDelay: '0.1s'}}>
-          <div className="nixcon-flex nixcon-items-center nixcon-gap-4">
-            <div className="nixcon-flex nixcon-items-center nixcon-justify-center rounded-full w-12 h-12 nixcon-bg-primary/10">
-              <FileText className="nixcon-text-primary" size={20} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-md shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10">
+              <FileText className="text-[#d9bb42]" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-500">Documentos Novos</p>
-              <h3 className="text-2xl font-semibold nixcon-text-secondary">{statsData.newDocuments}</h3>
+              <h3 className="text-2xl font-semibold text-gray-700">{statsData.newDocuments}</h3>
             </div>
           </div>
         </div>
         
-        <div className="nixcon-card nixcon-dashboard-card nixcon-fade-in" style={{animationDelay: '0.2s'}}>
-          <div className="nixcon-flex nixcon-items-center nixcon-gap-4">
-            <div className="nixcon-flex nixcon-items-center nixcon-justify-center rounded-full w-12 h-12 nixcon-bg-primary/10">
-              <Users className="nixcon-text-primary" size={20} />
+        <div className="bg-white p-4 rounded-md shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10">
+              <Users className="text-[#d9bb42]" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-500">Tarefas Pendentes</p>
-              <h3 className="text-2xl font-semibold nixcon-text-secondary">{statsData.pendingTasks}</h3>
+              <h3 className="text-2xl font-semibold text-gray-700">{statsData.pendingTasks}</h3>
             </div>
           </div>
         </div>
         
-        <div className="nixcon-card nixcon-dashboard-card nixcon-fade-in" style={{animationDelay: '0.3s'}}>
-          <div className="nixcon-flex nixcon-items-center nixcon-gap-4">
-            <div className="nixcon-flex nixcon-items-center nixcon-justify-center rounded-full w-12 h-12 nixcon-bg-primary/10">
-              <Calendar className="nixcon-text-primary" size={20} />
+        <div className="bg-white p-4 rounded-md shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10">
+              <Calendar className="text-[#d9bb42]" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-500">Eventos Próximos</p>
-              <h3 className="text-2xl font-semibold nixcon-text-secondary">{statsData.upcomingEvents}</h3>
+              <h3 className="text-2xl font-semibold text-gray-700">{statsData.upcomingEvents}</h3>
             </div>
           </div>
         </div>
         
-        <div className="nixcon-card nixcon-dashboard-card nixcon-fade-in" style={{animationDelay: '0.4s'}}>
-          <div className="nixcon-flex nixcon-items-center nixcon-gap-4">
-            <div className="nixcon-flex nixcon-items-center nixcon-justify-center rounded-full w-12 h-12 nixcon-bg-primary/10">
-              <Bell className="nixcon-text-primary" size={20} />
+        <div className="bg-white p-4 rounded-md shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10">
+              <Bell className="text-[#d9bb42]" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-500">Notificações</p>
-              <h3 className="text-2xl font-semibold nixcon-text-secondary">{statsData.recentNotifications}</h3>
+              <h3 className="text-2xl font-semibold text-gray-700">{statsData.recentNotifications}</h3>
             </div>
           </div>
         </div>

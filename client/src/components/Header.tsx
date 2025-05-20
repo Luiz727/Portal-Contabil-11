@@ -99,14 +99,14 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
                 <span className="text-[#4a4a4a]">CON</span>
               </h1>
               
-              <div ref={searchRef} className="relative transition-all duration-200 w-80">
-                <Input
-                  type="text"
-                  placeholder="Buscar documentos, clientes..."
-                  className="pl-3 pr-4 py-2 h-9 rounded-md border-gray-200"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              <div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-gray-500 hover:text-[#d9bb42]"
+                >
+                  <span className="material-icons">filter_list</span>
+                </Button>
               </div>
             </div>
           </>
@@ -129,8 +129,8 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
           {/* Seletor de empresas com estilo conforme a imagem de referência */}
           <div className="hidden sm:flex sm:items-center sm:border sm:border-gray-200 sm:rounded-md sm:px-3 sm:py-1.5 sm:bg-white">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">CA</span>
-              <span className="text-sm">Comércio ABC</span>
+              <span className="text-sm font-medium px-1 py-0.5 bg-gray-100 rounded text-gray-700">CA</span>
+              <span className="text-sm text-gray-700">Comércio ABC</span>
             </div>
           </div>
 
