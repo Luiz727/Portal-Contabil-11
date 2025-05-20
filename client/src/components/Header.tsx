@@ -54,8 +54,10 @@ export default function Header({ toggleSidebar, fiscalModule = false }: HeaderPr
               </button>
               <div className="ml-3">
                 <div className="flex items-center">
-                  <img src="/src/assets/icon-nixcon.png" alt="NIXCON" className="h-6 mr-2" />
-                  <h1 className="text-lg font-medium">NIXCON</h1>
+                  <h1 className="text-lg font-medium">
+                    <span className="font-bold text-amber-500">NIX</span>
+                    <span className="font-bold text-gray-600">CON</span>
+                  </h1>
                 </div>
               </div>
             </div>

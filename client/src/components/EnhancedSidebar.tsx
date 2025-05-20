@@ -125,8 +125,8 @@ export default function EnhancedSidebar() {
       <div className="p-4 flex items-center justify-between border-b border-border">
         {!collapsed && (
           <div className="flex items-center">
-            <img src="/src/assets/icon-nixcon.png" alt="NIXCON" className="h-8 mr-2" />
-            <span className="font-bold text-lg">NIXCON</span>
+            <span className="font-bold text-lg text-amber-500">NIX</span>
+            <span className="font-bold text-lg text-gray-600">CON</span>
           </div>
         )}
         <Button 
@@ -305,8 +305,8 @@ export default function EnhancedSidebar() {
         <div className="h-full flex flex-col">
           <div className="p-4 flex items-center justify-between border-b border-border">
             <div className="flex items-center">
-              <img src="/src/assets/icon-nixcon.png" alt="NIXCON" className="h-8 mr-2" />
-              <span className="font-bold text-lg">NIXCON</span>
+              <span className="font-bold text-lg text-amber-500">NIX</span>
+              <span className="font-bold text-lg text-gray-600">CON</span>
             </div>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">

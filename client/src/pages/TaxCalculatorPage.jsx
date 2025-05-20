@@ -300,12 +300,20 @@ const TaxCalculatorPage = () => {
   }, [empresaAtual, userTaxConfig, user.type, toast, getTaxRateForCalc]);
   
 
-  useEffect(() => {
+  // Realizamos o cálculo apenas quando o usuário adicionar, remover ou editar produtos
+  // ou quando alterar o valor de venda total global, não automaticamente
+  const realizarCalculo = () => {
     const produtosAtualizados = calculateSummary(formData.produtos, formData.valorVendaTotalGlobal);
     if (JSON.stringify(produtosAtualizados) !== JSON.stringify(formData.produtos)) {
-       setFormData(prev => ({ ...prev, produtos: produtosAtualizados }));
+      setFormData(prev => ({ ...prev, produtos: produtosAtualizados }));
     }
-  }, [formData.produtos, formData.valorVendaTotalGlobal, calculateSummary]);
+    
+    toast({ 
+      title: "Cálculos Realizados", 
+      description: "Os impostos e margens foram calculados com sucesso.",
+      className: "bg-primary text-primary-foreground"
+    });
+  };
   
 
   const handleSaveSimulation = () => {

@@ -12,8 +12,10 @@ export default function Login() {
             </div>
           </div>
           <div className="flex flex-col items-center space-y-3">
-            <img src="/src/assets/logo-nixcon.png" alt="NIXCON" className="h-16" />
-            <CardTitle className="text-2xl font-bold">NIXCON</CardTitle>
+            <CardTitle className="text-4xl font-bold">
+              <span className="text-amber-500">NIX</span>
+              <span className="text-gray-600">CON</span>
+            </CardTitle>
           </div>
           <CardDescription>
             Sistema completo para escritórios de contabilidade
