@@ -31,11 +31,19 @@ type HeaderProps = {
 export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
   const { user } = useAuth();
   const { actingAsEmpresa, userType } = useEmpresas();
-  const [isEscritorioView, setIsEscritorioView] = useState(userType === 'Escritorio');
+  const [isEscritorioView, setIsEscritorioView] = useState(false);
   
   useEffect(() => {
-    // Sincronizar com o tipo de usuário ao carregar
-    setIsEscritorioView(userType === 'Escritorio' && !actingAsEmpresa);
+    // Carregar modo de visualização salvo, com valor padrão baseado no tipo de usuário
+    const savedVisualizationMode = localStorage.getItem('visualizationMode');
+    if (savedVisualizationMode === 'escritorio') {
+      setIsEscritorioView(true);
+    } else if (savedVisualizationMode === 'empresa') {
+      setIsEscritorioView(false);
+    } else {
+      // Default é escritório para usuários do escritório sem preferência salva
+      setIsEscritorioView(userType === 'Escritorio' && !actingAsEmpresa);
+    }
   }, [userType, actingAsEmpresa]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -63,7 +71,7 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
   return (
     <header className="sticky top-0 bg-white border-b border-primary/10 shadow-sm z-40 backdrop-blur-sm bg-white/95">
       <div className="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        {fiscalModule ? (
+        {isEscritorioView ? (
           <div className="flex items-center">
             <Link href="/">
               <Button
@@ -155,25 +163,27 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
               <DropdownMenuItem onClick={() => {
                 if (onVisualizationChange) onVisualizationChange("escritorio");
                 setIsEscritorioView(true);
+                localStorage.setItem('visualizationMode', 'escritorio');
                 window.location.href = "/admin/painel";
               }}>
                 <User2 className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Visão do Escritório</span>
-                {(fiscalModule || isEscritorioView) && <Check className="ml-auto h-4 w-4" />}
+                {isEscritorioView && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Empresas</DropdownMenuLabel>
               <DropdownMenuItem 
-                className={!fiscalModule && !isEscritorioView ? "bg-gray-50" : ""}
+                className={!isEscritorioView ? "bg-gray-50" : ""}
                 onClick={() => {
                   if (onVisualizationChange) onVisualizationChange("empresa");
                   setIsEscritorioView(false);
+                  localStorage.setItem('visualizationMode', 'empresa');
                   window.location.href = "/";
                 }}
               >
                 <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
                 <span>Comércio ABC</span>
-                {(!fiscalModule && !isEscritorioView) && <Check className="ml-auto h-4 w-4" />}
+                {!isEscritorioView && <Check className="ml-auto h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
                 if (onVisualizationChange) onVisualizationChange("empresa");
