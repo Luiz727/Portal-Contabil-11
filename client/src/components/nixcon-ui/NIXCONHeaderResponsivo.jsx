@@ -79,7 +79,12 @@ const NIXCONHeaderResponsivo = ({
                       id="empresa-menu"
                       aria-expanded="true"
                       aria-haspopup="true"
-                      onClick={() => {}}
+                      onClick={() => {
+                        if (onChangeEmpresa && empresaSelecionada) {
+                          onChangeEmpresa(empresaSelecionada);
+                          setViewMode('empresa');
+                        }
+                      }}
                     >
                       {empresaSelecionada?.nome || 'Selecione uma empresa'}
                       <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
@@ -87,6 +92,36 @@ const NIXCONHeaderResponsivo = ({
                   </div>
                 </div>
               )}
+              
+              {/* Indicador de Visão (Escritório/Empresa) */}
+              <div className="ml-4">
+                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  viewMode === 'escritorio' 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {viewMode === 'escritorio' ? (
+                    <>
+                      <Building className="inline-block w-3 h-3 mr-1" />
+                      Visão Escritório
+                    </>
+                  ) : (
+                    <>
+                      <UserCircle className="inline-block w-3 h-3 mr-1" />
+                      Visão Empresa
+                    </>
+                  )}
+                </div>
+                
+                {viewMode === 'empresa' && (
+                  <button 
+                    onClick={() => setViewMode('escritorio')}
+                    className="ml-2 text-xs text-primary hover:underline"
+                  >
+                    Alternar para Escritório
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           
@@ -233,7 +268,7 @@ const NIXCONHeaderResponsivo = ({
         </div>
       </div>
       
-      {/* Seletor de Empresas Mobile */}
+      {/* Seletor de Empresas Mobile com Indicador de Visão */}
       {empresas && empresas.length > 0 && (
         <div className="border-t border-gray-200 md:hidden px-4 py-2 bg-gray-50">
           <select
@@ -241,7 +276,10 @@ const NIXCONHeaderResponsivo = ({
             value={empresaSelecionada?.id || ''}
             onChange={(e) => {
               const empresa = empresas.find(emp => emp.id === e.target.value);
-              if (empresa && onChangeEmpresa) onChangeEmpresa(empresa);
+              if (empresa && onChangeEmpresa) {
+                onChangeEmpresa(empresa);
+                setViewMode('empresa');
+              }
             }}
           >
             <option value="" disabled>Selecione uma empresa</option>
@@ -251,6 +289,36 @@ const NIXCONHeaderResponsivo = ({
               </option>
             ))}
           </select>
+
+          {/* Indicador de Visão Mobile */}
+          <div className="mt-2 flex flex-col items-center">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              viewMode === 'escritorio' 
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-blue-100 text-blue-800'
+            }`}>
+              {viewMode === 'escritorio' ? (
+                <>
+                  <Building className="inline-block w-3 h-3 mr-1" />
+                  Visão Escritório
+                </>
+              ) : (
+                <>
+                  <UserCircle className="inline-block w-3 h-3 mr-1" />
+                  Visão Empresa: {empresaSelecionada?.nome}
+                </>
+              )}
+            </div>
+            
+            {viewMode === 'empresa' && (
+              <button 
+                onClick={() => setViewMode('escritorio')}
+                className="mt-1 text-xs text-primary hover:underline"
+              >
+                Alternar para Visão Escritório
+              </button>
+            )}
+          </div>
         </div>
       )}
     </header>
