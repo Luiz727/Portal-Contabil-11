@@ -160,9 +160,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 return (
                   <li key={item.id}>
                     <Link href={item.path}>
-                      <a
+                      <div
                         className={cn(
-                          "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                          "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                           isActive
                             ? "bg-primary/10 text-primary"
                             : "text-gray-700 hover:bg-gray-100"
@@ -178,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                           isActive ? "text-primary" : "text-gray-500"
                         )} />
                         {item.label}
-                      </a>
+                      </div>
                     </Link>
                   </li>
                 );
