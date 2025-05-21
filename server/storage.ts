@@ -20,6 +20,7 @@ import {
   notifications,
   honorarios,
   documentPatterns,
+  empresasUsuarias,
   type User,
   type Client,
   type Task,
@@ -40,6 +41,8 @@ import {
   type InsertHonorario,
   type DocumentPattern,
   type InsertDocumentPattern,
+  type EmpresaUsuaria,
+  type InsertEmpresaUsuaria,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, desc, sql, lt, or, like, not, isNull } from "drizzle-orm";
@@ -50,6 +53,13 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
+
+  // Empresas Usuárias operations
+  getEmpresaUsuaria(id: number): Promise<EmpresaUsuaria | undefined>;
+  getEmpresasUsuarias(): Promise<EmpresaUsuaria[]>;
+  getEmpresasUsuariasByStatus(status: string): Promise<EmpresaUsuaria[]>;
+  createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria>;
+  updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined>;
   
   // Client operations
   getClient(id: number): Promise<Client | undefined>;
@@ -186,6 +196,34 @@ export class DatabaseStorage implements IStorage {
 
   async getUsersByRole(role: string): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, role));
+  }
+
+  // Empresas Usuárias operations
+  async getEmpresaUsuaria(id: number): Promise<EmpresaUsuaria | undefined> {
+    const [empresa] = await db.select().from(empresasUsuarias).where(eq(empresasUsuarias.id, id));
+    return empresa;
+  }
+
+  async getEmpresasUsuarias(): Promise<EmpresaUsuaria[]> {
+    return await db.select().from(empresasUsuarias).orderBy(empresasUsuarias.nome);
+  }
+
+  async getEmpresasUsuariasByStatus(status: string): Promise<EmpresaUsuaria[]> {
+    return await db.select().from(empresasUsuarias).where(eq(empresasUsuarias.status, status));
+  }
+
+  async createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria> {
+    const [newEmpresa] = await db.insert(empresasUsuarias).values(empresa).returning();
+    return newEmpresa;
+  }
+
+  async updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined> {
+    const [updatedEmpresa] = await db
+      .update(empresasUsuarias)
+      .set({ ...empresa, updatedAt: new Date() })
+      .where(eq(empresasUsuarias.id, id))
+      .returning();
+    return updatedEmpresa;
   }
 
   // Client operations

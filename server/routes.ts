@@ -26,7 +26,8 @@ import {
   insertSupplierSchema,
   insertProductCategorySchema,
   insertApiIntegrationSchema,
-  insertImportExportLogSchema
+  insertImportExportLogSchema,
+  insertEmpresaUsuariaSchema
 } from "@shared/schema";
 import { xml2js, js2xml } from "xml-js";
 

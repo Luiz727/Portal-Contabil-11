@@ -316,6 +316,55 @@ export const productCategories = pgTable("product_categories", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Empresas Usuárias (clientes do escritório de contabilidade)
+export const empresasUsuarias = pgTable("empresas_usuarias", {
+  id: integer("id").primaryKey(), // Código da empresa no sistema Domínio
+  nome: text("nome").notNull(),
+  cnpj: text("cnpj").unique().notNull(),
+  email: text("email"),
+  telefone: text("telefone"),
+  contato: text("contato"),
+  status: text("status").default("Ativo").notNull(), // Ativo, Movimento, Inativo, Suspenso, Baixado
+  regime: text("regime"), // Simples Nacional, Lucro Presumido, Lucro Real, etc.
+  honorarios: decimal("honorarios", { precision: 10, scale: 2 }),
+  vencimento: integer("vencimento"), // Dia do vencimento dos honorários
+  inicioContrato: date("inicio_contrato"),
+  fimContrato: date("fim_contrato"),
+  cep: text("cep"),
+  logradouro: text("logradouro"),
+  numero: text("numero"),
+  complemento: text("complemento"),
+  bairro: text("bairro"),
+  cidade: text("cidade"),
+  estado: text("estado"),
+  cpfResponsavel: text("cpf_responsavel"), // CPF do responsável legal
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tipos e esquemas para as empresas usuárias
+export const insertEmpresaUsuariaSchema = createInsertSchema(empresasUsuarias, {
+  honorarios: (schema) => schema.honorarios.optional(),
+  vencimento: (schema) => schema.vencimento.optional(),
+  inicioContrato: (schema) => schema.inicioContrato.optional(),
+  fimContrato: (schema) => schema.fimContrato.optional(),
+  email: (schema) => schema.email.optional(),
+  telefone: (schema) => schema.telefone.optional(),
+  contato: (schema) => schema.contato.optional(),
+  regime: (schema) => schema.regime.optional(),
+  cep: (schema) => schema.cep.optional(),
+  logradouro: (schema) => schema.logradouro.optional(),
+  numero: (schema) => schema.numero.optional(),
+  complemento: (schema) => schema.complemento.optional(),
+  bairro: (schema) => schema.bairro.optional(),
+  cidade: (schema) => schema.cidade.optional(),
+  estado: (schema) => schema.estado.optional(),
+  cpfResponsavel: (schema) => schema.cpfResponsavel.optional(),
+});
+
+export type InsertEmpresaUsuaria = z.infer<typeof insertEmpresaUsuariaSchema>;
+export type EmpresaUsuaria = typeof empresasUsuarias.$inferSelect;
+
 // API integrations
 export const apiIntegrations = pgTable("api_integrations", {
   id: serial("id").primaryKey(),
