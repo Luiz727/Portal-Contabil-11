@@ -308,7 +308,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     const result = await db.delete(roles).where(eq(roles.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Permission operations
@@ -340,7 +340,164 @@ export class DatabaseStorage implements IStorage {
   
   async deletePermission(id: number): Promise<boolean> {
     const result = await db.delete(permissions).where(eq(permissions.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+  
+  // Role Permission operations
+  async getRolePermissions(roleId: number): Promise<Permission[]> {
+    const result = await db
+      .select({
+        permission: permissions
+      })
+      .from(rolePermissions)
+      .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+      .where(eq(rolePermissions.roleId, roleId));
+      
+    return result.map(r => r.permission);
+  }
+  
+  async addPermissionToRole(roleId: number, permissionId: number): Promise<RolePermission> {
+    const [rolePermission] = await db
+      .insert(rolePermissions)
+      .values({ roleId, permissionId })
+      .onConflictDoNothing()
+      .returning();
+      
+    if (!rolePermission) {
+      // Se já existe, apenas retorna o existente
+      const [existing] = await db
+        .select()
+        .from(rolePermissions)
+        .where(and(
+          eq(rolePermissions.roleId, roleId),
+          eq(rolePermissions.permissionId, permissionId)
+        ));
+      return existing;
+    }
+    
+    return rolePermission;
+  }
+  
+  async removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean> {
+    const result = await db
+      .delete(rolePermissions)
+      .where(and(
+        eq(rolePermissions.roleId, roleId),
+        eq(rolePermissions.permissionId, permissionId)
+      ));
+      
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+  
+  // User Role operations
+  async getUserRoles(userId: string): Promise<Role[]> {
+    const result = await db
+      .select({
+        role: roles
+      })
+      .from(userRoles)
+      .innerJoin(roles, eq(userRoles.roleId, roles.id))
+      .where(eq(userRoles.userId, userId));
+      
+    return result.map(r => r.role);
+  }
+  
+  async addRoleToUser(userId: string, roleId: number): Promise<UserRole> {
+    const [userRole] = await db
+      .insert(userRoles)
+      .values({ userId, roleId })
+      .onConflictDoNothing()
+      .returning();
+      
+    if (!userRole) {
+      // Se já existe, apenas retorna o existente
+      const [existing] = await db
+        .select()
+        .from(userRoles)
+        .where(and(
+          eq(userRoles.userId, userId),
+          eq(userRoles.roleId, roleId)
+        ));
+      return existing;
+    }
+    
+    return userRole;
+  }
+  
+  async removeRoleFromUser(userId: string, roleId: number): Promise<boolean> {
+    const result = await db
+      .delete(userRoles)
+      .where(and(
+        eq(userRoles.userId, userId),
+        eq(userRoles.roleId, roleId)
+      ));
+      
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+  
+  // User View Mode operations
+  async getUserViewMode(userId: string, viewMode: string): Promise<UserViewMode | undefined> {
+    const [userViewMode] = await db
+      .select()
+      .from(userViewModes)
+      .where(and(
+        eq(userViewModes.userId, userId),
+        eq(userViewModes.viewMode, viewMode)
+      ));
+      
+    return userViewMode;
+  }
+  
+  async saveUserViewMode(viewModeData: InsertUserViewMode): Promise<UserViewMode> {
+    // Atualiza o último acesso do modo de visualização anterior
+    await db
+      .update(userViewModes)
+      .set({ lastUsed: new Date() })
+      .where(and(
+        eq(userViewModes.userId, viewModeData.userId),
+        eq(userViewModes.viewMode, viewModeData.viewMode)
+      ));
+    
+    // Insere ou atualiza o modo de visualização
+    const [userViewMode] = await db
+      .insert(userViewModes)
+      .values({
+        ...viewModeData,
+        lastUsed: new Date()
+      })
+      .onConflictDoUpdate({
+        target: [userViewModes.userId, userViewModes.viewMode],
+        set: {
+          ...viewModeData,
+          lastUsed: new Date(),
+          updatedAt: new Date()
+        }
+      })
+      .returning();
+      
+    return userViewMode;
+  }
+  
+  // Access control operations
+  async hasPermission(userId: string, permissionCode: string): Promise<boolean> {
+    // Verifica se o usuário tem a permissão através de seus papéis
+    const userRolesWithPermission = await db
+      .select()
+      .from(userRoles)
+      .innerJoin(
+        rolePermissions, 
+        eq(userRoles.roleId, rolePermissions.roleId)
+      )
+      .innerJoin(
+        permissions, 
+        eq(rolePermissions.permissionId, permissions.id)
+      )
+      .where(and(
+        eq(userRoles.userId, userId),
+        eq(permissions.code, permissionCode)
+      ));
+      
+    return userRolesWithPermission.length > 0;
   }
 
   // Client operations
