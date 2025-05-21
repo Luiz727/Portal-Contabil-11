@@ -18,6 +18,7 @@ import {
   importExportLogs,
   whatsappMessages,
   notifications,
+  usuariosEmpresas, type UsuarioEmpresa, type InsertUsuarioEmpresa,
   honorarios,
   documentPatterns,
   empresasUsuarias,
@@ -60,6 +61,14 @@ export interface IStorage {
   getEmpresasUsuariasByStatus(status: string): Promise<EmpresaUsuaria[]>;
   createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria>;
   updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined>;
+  
+  // Vinculação Usuários-Empresas
+  vincularUsuarioEmpresa(vinculo: InsertUsuarioEmpresa): Promise<UsuarioEmpresa>;
+  desvincularUsuarioEmpresa(userId: string, empresaId: number): Promise<void>;
+  atualizarNivelPermissaoUsuarioEmpresa(userId: string, empresaId: number, permissionLevel: string): Promise<UsuarioEmpresa | undefined>;
+  getEmpresasDoUsuario(userId: string): Promise<EmpresaUsuaria[]>;
+  getUsuariosDaEmpresa(empresaId: number): Promise<{ user: User, permissionLevel: string }[]>;
+  verificarVinculoUsuarioEmpresa(userId: string, empresaId: number): Promise<UsuarioEmpresa | undefined>;
   
   // Client operations
   getClient(id: number): Promise<Client | undefined>;
@@ -868,6 +877,81 @@ export class DatabaseStorage implements IStorage {
       .where(eq(documentPatterns.id, id))
       .returning();
     return result;
+  }
+
+  // Implementação das funções de gerenciamento de usuários por empresa
+  async vincularUsuarioEmpresa(vinculo: InsertUsuarioEmpresa): Promise<UsuarioEmpresa> {
+    const [novoVinculo] = await db.insert(usuariosEmpresas)
+      .values([vinculo])
+      .returning();
+    return novoVinculo;
+  }
+  
+  async desvincularUsuarioEmpresa(userId: string, empresaId: number): Promise<void> {
+    await db.delete(usuariosEmpresas)
+      .where(
+        and(
+          eq(usuariosEmpresas.userId, userId),
+          eq(usuariosEmpresas.empresaId, empresaId)
+        )
+      );
+  }
+  
+  async atualizarNivelPermissaoUsuarioEmpresa(
+    userId: string, 
+    empresaId: number, 
+    permissionLevel: string
+  ): Promise<UsuarioEmpresa | undefined> {
+    const [vinculoAtualizado] = await db.update(usuariosEmpresas)
+      .set({ 
+        permissionLevel,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(usuariosEmpresas.userId, userId),
+          eq(usuariosEmpresas.empresaId, empresaId)
+        )
+      )
+      .returning();
+    
+    return vinculoAtualizado;
+  }
+  
+  async getEmpresasDoUsuario(userId: string): Promise<EmpresaUsuaria[]> {
+    const vinculos = await db.select({
+      empresa: empresasUsuarias
+    })
+    .from(usuariosEmpresas)
+    .innerJoin(empresasUsuarias, eq(usuariosEmpresas.empresaId, empresasUsuarias.id))
+    .where(eq(usuariosEmpresas.userId, userId));
+    
+    return vinculos.map(v => v.empresa);
+  }
+  
+  async getUsuariosDaEmpresa(empresaId: number): Promise<{ user: User, permissionLevel: string }[]> {
+    const vinculos = await db.select({
+      user: users,
+      permissionLevel: usuariosEmpresas.permissionLevel
+    })
+    .from(usuariosEmpresas)
+    .innerJoin(users, eq(usuariosEmpresas.userId, users.id))
+    .where(eq(usuariosEmpresas.empresaId, empresaId));
+    
+    return vinculos;
+  }
+  
+  async verificarVinculoUsuarioEmpresa(userId: string, empresaId: number): Promise<UsuarioEmpresa | undefined> {
+    const [vinculo] = await db.select()
+      .from(usuariosEmpresas)
+      .where(
+        and(
+          eq(usuariosEmpresas.userId, userId),
+          eq(usuariosEmpresas.empresaId, empresaId)
+        )
+      );
+    
+    return vinculo;
   }
 }
 
