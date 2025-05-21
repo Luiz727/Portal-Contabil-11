@@ -7,7 +7,7 @@ import "./bootstrap"; // Importa o JavaScript do Bootstrap
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import NIXCONDashboard from "@/pages/NIXCONDashboard";
-import Login from "@/pages/Login";
+import LoginPage from "@/pages/LoginPage";
 import SemPermissaoPage from "@/pages/SemPermissaoPage";
 import Tasks from "@/pages/Tasks";
 import Clients from "@/pages/Clients";
@@ -61,7 +61,8 @@ function Router() {
 
   return (
     <Switch>
-      {!isAuthenticated && <Route path="/" component={Login} />}
+      {!isAuthenticated && <Route path="/" component={LoginPage} />}
+      {!isAuthenticated && <Route path="/login" component={LoginPage} />}
 
       {isAuthenticated && (
         <Route path="/">

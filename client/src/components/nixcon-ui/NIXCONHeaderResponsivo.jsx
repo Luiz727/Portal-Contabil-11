@@ -61,11 +61,13 @@ const NIXCONHeaderResponsivo = ({
           
           <div className="flex items-center">
             <div className="md:hidden flex-shrink-0 flex items-center ml-2">
-              <img
-                className="h-8 w-auto"
-                src={logoNixconFull}
-                alt="NIXCON"
-              />
+              <a href="/" className="flex items-center">
+                <img
+                  className="h-8 w-auto"
+                  src={logoNixconFull}
+                  alt="NIXCON"
+                />
+              </a>
             </div>
             
             {/* Seletor de Empresas */}

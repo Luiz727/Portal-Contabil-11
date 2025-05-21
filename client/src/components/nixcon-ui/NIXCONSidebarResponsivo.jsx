@@ -123,11 +123,13 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
     >
       <div className="p-4 border-b border-gray-200 mb-2 flex items-center justify-between">
         <div className={`flex items-center ${collapsed ? 'justify-center w-full' : ''}`}>
-          <img 
-            src={collapsed ? logoNixconIcon : logoNixconFull} 
-            alt="NIXCON Logo" 
-            className="h-8" 
-          />
+          <Link href="/" className="flex items-center">
+            <img 
+              src={collapsed ? logoNixconIcon : logoNixconFull} 
+              alt="NIXCON Logo" 
+              className="h-8" 
+            />
+          </Link>
         </div>
         
         <button
