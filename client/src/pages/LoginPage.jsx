@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation, useHistory } from 'wouter';
+import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -9,7 +9,9 @@ import {
   DropdownMenuGroup,
   DropdownMenuSub,
   DropdownMenuSubContent,
-  DropdownMenuSubTrigger
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { 
@@ -21,7 +23,9 @@ import {
   Check, 
   Eye,
   ChevronRight,
-  Settings
+  Settings,
+  Shield,
+  Users
 } from "lucide-react";
 import { useViewMode, VIEW_MODES, VIEW_MODE_NAMES } from '@/contexts/ViewModeContext';
 import { useEmpresas } from '@/contexts/EmpresasContext';
@@ -30,7 +34,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAuth } from '@/hooks/useAuth';
 
 const ViewModeSelector = () => {
-  const { viewMode, changeViewMode, viewModeName } = useViewMode();
+  const { 
+    viewMode, 
+    changeViewMode, 
+    viewModeName, 
+    currentCompany, 
+    activeProfile, 
+    profiles,
+    setActiveProfile
+  } = useViewMode();
   const { isAdmin, isSuperAdmin } = useAuth();
   const { empresas, empresaAtual, changeEmpresa } = useEmpresas();
   const [open, setOpen] = useState(false);
@@ -54,18 +66,29 @@ const ViewModeSelector = () => {
   
   // Ícones para cada modo de visualização
   const viewModeIcons = {
-    [VIEW_MODES.ACCOUNTING_OFFICE]: <Building size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.CLIENT_COMPANY]: <Store size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.EXTERNAL_ACCOUNTANT]: <Calculator size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.EXTERNAL_USER]: <User size={16} className="text-[#d9bb42] mr-2" />
+    [VIEW_MODES.ESCRITORIO]: <Building size={16} className="text-[#d9bb42] mr-2" />,
+    [VIEW_MODES.EMPRESA]: <Store size={16} className="text-[#d9bb42] mr-2" />,
+    [VIEW_MODES.CONTADOR]: <Calculator size={16} className="text-[#d9bb42] mr-2" />,
+    [VIEW_MODES.EXTERNO]: <User size={16} className="text-[#d9bb42] mr-2" />
   };
   
   // Função para mudar a empresa e o modo de visualização
-  const changeEmpresaAndMode = (empresaId, mode = VIEW_MODES.CLIENT_COMPANY) => {
+  const changeEmpresaAndMode = (empresa, mode = VIEW_MODES.EMPRESA) => {
     if (changeEmpresa) {
-      changeEmpresa(empresaId);
+      changeEmpresa(empresa.id);
     }
-    changeViewMode(mode);
+    
+    // Passa a empresa selecionada para o changeViewMode
+    changeViewMode(mode, empresa);
+    setOpen(false);
+  };
+  
+  // Função para alterar apenas o perfil ativo
+  const changeActiveProfile = (profileId) => {
+    if (profiles[profileId]) {
+      setActiveProfile(profiles[profileId]);
+      localStorage.setItem('nixcon_active_profile', JSON.stringify(profiles[profileId]));
+    }
     setOpen(false);
   };
 
@@ -79,6 +102,11 @@ const ViewModeSelector = () => {
               <div className="flex items-center px-3 py-2 rounded-md bg-gray-100 text-sm">
                 {viewModeIcons[viewMode]}
                 <span className="mr-1">{viewModeName}</span>
+                {activeProfile && (
+                  <Badge variant="outline" className="ml-2 bg-amber-50 text-xs">
+                    {activeProfile.nome}
+                  </Badge>
+                )}
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -96,7 +124,11 @@ const ViewModeSelector = () => {
         <Button variant="outline" className="border-dashed border-muted-foreground">
           <Eye className="mr-2 h-4 w-4 text-[#d9bb42]" />
           <span className="mr-1">{viewModeName}</span>
-          <Badge variant="outline" className="ml-2 bg-amber-50 text-xs">Admin</Badge>
+          {activeProfile && (
+            <Badge variant="outline" className="ml-2 bg-amber-50 text-xs">
+              {activeProfile.nome}
+            </Badge>
+          )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -106,12 +138,12 @@ const ViewModeSelector = () => {
         
         {/* Escritório Contábil */}
         <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.ACCOUNTING_OFFICE)}
+          onClick={() => changeViewMode(VIEW_MODES.ESCRITORIO)}
           className="cursor-pointer"
         >
           <Building size={16} className="text-[#d9bb42] mr-2" />
           <span>Visão do Escritório</span>
-          {viewMode === VIEW_MODES.ACCOUNTING_OFFICE && (
+          {viewMode === VIEW_MODES.ESCRITORIO && (
             <Check className="ml-auto h-4 w-4" />
           )}
         </DropdownMenuItem>
@@ -120,12 +152,12 @@ const ViewModeSelector = () => {
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="cursor-pointer">
             <Store size={16} className="text-[#d9bb42] mr-2" />
-            <span>Visão da Empresa Cliente</span>
-            {viewMode === VIEW_MODES.CLIENT_COMPANY && (
+            <span>Visão da Empresa</span>
+            {viewMode === VIEW_MODES.EMPRESA && (
               <Check className="ml-auto h-4 w-4 mr-2" />
             )}
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-64">
+          <DropdownMenuSubContent className="w-72">
             <DropdownMenuLabel>Selecione a Empresa</DropdownMenuLabel>
             <DropdownMenuSeparator />
             
@@ -133,14 +165,14 @@ const ViewModeSelector = () => {
               <DropdownMenuItem 
                 key={empresa.id}
                 className="cursor-pointer"
-                onClick={() => changeEmpresaAndMode(empresa.id, VIEW_MODES.CLIENT_COMPANY)}
+                onClick={() => changeEmpresaAndMode(empresa, VIEW_MODES.EMPRESA)}
               >
                 <Store size={16} className="text-[#d9bb42] mr-2" />
                 <div className="flex flex-col">
                   <span className="text-sm">{empresa.nome}</span>
                   <span className="text-xs text-muted-foreground">{empresa.cnpj}</span>
                 </div>
-                {empresaAtual && empresaAtual.id === empresa.id && viewMode === VIEW_MODES.CLIENT_COMPANY && (
+                {empresaAtual && empresaAtual.id === empresa.id && viewMode === VIEW_MODES.EMPRESA && (
                   <Check className="ml-auto h-4 w-4" />
                 )}
               </DropdownMenuItem>
@@ -149,43 +181,81 @@ const ViewModeSelector = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <a href="/admin/configuracoes-empresa" className="cursor-pointer">
-                <Eye size={16} className="text-[#d9bb42] mr-2" />
-                <span>Configurar Empresa</span>
+                <Settings size={16} className="text-[#d9bb42] mr-2" />
+                <span>Configurar Empresas</span>
               </a>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         
-        {/* Contador Externo */}
+        {/* Contador */}
         <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.EXTERNAL_ACCOUNTANT)}
+          onClick={() => changeViewMode(VIEW_MODES.CONTADOR)}
           className="cursor-pointer"
         >
           <Calculator size={16} className="text-[#d9bb42] mr-2" />
-          <span>Visão de Contador Externo</span>
-          {viewMode === VIEW_MODES.EXTERNAL_ACCOUNTANT && (
+          <span>Visão de Contador</span>
+          {viewMode === VIEW_MODES.CONTADOR && (
             <Check className="ml-auto h-4 w-4" />
           )}
         </DropdownMenuItem>
         
         {/* Usuário Externo */}
         <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.EXTERNAL_USER)}
+          onClick={() => changeViewMode(VIEW_MODES.EXTERNO)}
           className="cursor-pointer"
         >
           <User size={16} className="text-[#d9bb42] mr-2" />
-          <span>Visão de Usuário Externo</span>
-          {viewMode === VIEW_MODES.EXTERNAL_USER && (
+          <span>Visão Externa</span>
+          {viewMode === VIEW_MODES.EXTERNO && (
             <Check className="ml-auto h-4 w-4" />
           )}
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
+        {/* Submenu para perfis de visualização */}
+        {viewMode === VIEW_MODES.EMPRESA && currentCompany && (
+          <>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="cursor-pointer">
+                <Shield size={16} className="text-[#d9bb42] mr-2" />
+                <span>Perfil de Visualização</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-64">
+                <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                {Object.values(profiles).filter(profile => 
+                  profile.id.includes('empresa_')
+                ).map((profile) => (
+                  <DropdownMenuItem 
+                    key={profile.id}
+                    className="cursor-pointer"
+                    onClick={() => changeActiveProfile(profile.id)}
+                  >
+                    <Users size={16} className="text-[#d9bb42] mr-2" />
+                    <div className="flex flex-col">
+                      <span className="text-sm">{profile.nome}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {profile.permissoes.length} permissões
+                      </span>
+                    </div>
+                    {activeProfile && activeProfile.id === profile.id && (
+                      <Check className="ml-auto h-4 w-4" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         {/* Link para configurações de perfil e visualização */}
         <DropdownMenuItem asChild>
           <a href="/admin/configuracoes?tab=visualizacoes" className="cursor-pointer">
-            <Eye size={16} className="text-[#d9bb42] mr-2" />
+            <Settings size={16} className="text-[#d9bb42] mr-2" />
             <span>Configurar Perfis de Visualização</span>
           </a>
         </DropdownMenuItem>
