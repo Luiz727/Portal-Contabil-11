@@ -7,6 +7,7 @@ import { registerIntegraNfRoutes } from "./routes/integraNfRoutes";
 import { registerHonorariosRoutes } from "./honorariosRoutes";
 import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
 import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
+import { registerAdminRoutes } from "./routes/adminRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -72,6 +73,9 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Rotas administrativas
+  registerAdminRoutes(app);
   
   // Registrar as rotas para os diversos módulos
   registerNfeRoutes(app);

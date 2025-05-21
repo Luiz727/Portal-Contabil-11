@@ -333,6 +333,14 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
                     <span>Configurações</span>
                   </DropdownMenuItem>
                 </Link>
+                
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/superadmin">
+                    <span className="material-icons mr-2 text-sm">shield</span>
+                    <span>Configurar SuperAdmin</span>
+                  </Link>
+                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
                   <span className="material-icons mr-2 text-sm">logout</span>
