@@ -128,28 +128,42 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
+  // Verificar se o usuário está autenticado via Replit Auth
+  if (req.isAuthenticated() && req.user) {
+    const user = req.user as any;
+    
+    // Verificar expiração do token quando existir
+    if (user.expires_at) {
+      const now = Math.floor(Date.now() / 1000);
+      
+      if (now <= user.expires_at) {
+        return next();
+      }
+      
+      const refreshToken = user.refresh_token;
+      if (refreshToken) {
+        try {
+          const config = await getOidcConfig();
+          const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+          updateUserSession(user, tokenResponse);
+          return next();
+        } catch (error) {
+          console.error("Erro ao renovar token:", error);
+          return res.redirect("/api/login");
+        }
+      }
+    } else {
+      // Se não tiver expires_at, é uma sessão válida sem renovação
+      return next();
+    }
   }
-
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
+  
+  // Verificar se há sessão de desenvolvimento (para ambiente de desenvolvimento)
+  if (process.env.NODE_ENV === 'development' && req.session && req.session.user) {
+    // Permitir a sessão de desenvolvimento
     return next();
   }
-
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    return res.redirect("/api/login");
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    return res.redirect("/api/login");
-  }
+  
+  // Se chegou aqui, não está autenticado
+  return res.status(401).json({ message: "Unauthorized" });
 };
