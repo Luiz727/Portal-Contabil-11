@@ -20,6 +20,12 @@ import {
   notifications,
   honorarios,
   documentPatterns,
+  roles,
+  permissions,
+  rolePermissions,
+  userRoles,
+  userViewModes,
+  clientUsers,
   type User,
   type Client,
   type Task,
@@ -40,6 +46,16 @@ import {
   type InsertHonorario,
   type DocumentPattern,
   type InsertDocumentPattern,
+  type Role,
+  type InsertRole,
+  type Permission,
+  type InsertPermission,
+  type RolePermission,
+  type UserRole,
+  type UserViewMode,
+  type InsertUserViewMode,
+  type ClientUser,
+  VIEW_MODES,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, desc, sql, lt, or, like, not, isNull } from "drizzle-orm";
@@ -50,6 +66,42 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
+  updateUserStatus(id: string, isActive: boolean): Promise<User | undefined>;
+  updateUserLastLogin(id: string): Promise<User | undefined>;
+  
+  // Role operations
+  getRole(id: number): Promise<Role | undefined>;
+  getRoleByName(name: string): Promise<Role | undefined>;
+  getAllRoles(): Promise<Role[]>;
+  createRole(role: InsertRole): Promise<Role>;
+  updateRole(id: number, role: Partial<Role>): Promise<Role | undefined>;
+  deleteRole(id: number): Promise<boolean>;
+  
+  // Permission operations
+  getPermission(id: number): Promise<Permission | undefined>;
+  getPermissionByCode(code: string): Promise<Permission | undefined>;
+  getAllPermissions(): Promise<Permission[]>;
+  getPermissionsByModule(module: string): Promise<Permission[]>;
+  createPermission(permission: InsertPermission): Promise<Permission>;
+  deletePermission(id: number): Promise<boolean>;
+  
+  // Role Permission operations
+  getRolePermissions(roleId: number): Promise<Permission[]>;
+  addPermissionToRole(roleId: number, permissionId: number): Promise<RolePermission>;
+  removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean>;
+  
+  // User Role operations
+  getUserRoles(userId: string): Promise<Role[]>;
+  addRoleToUser(userId: string, roleId: number): Promise<UserRole>;
+  removeRoleFromUser(userId: string, roleId: number): Promise<boolean>;
+  
+  // User View Mode operations
+  getUserViewMode(userId: string, viewMode: string): Promise<UserViewMode | undefined>;
+  saveUserViewMode(viewMode: InsertUserViewMode): Promise<UserViewMode>;
+  
+  // Access control operations
+  hasPermission(userId: string, permissionCode: string): Promise<boolean>;
   
   // Client operations
   getClient(id: number): Promise<Client | undefined>;

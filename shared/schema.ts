@@ -130,6 +130,8 @@ export const companyGroups = pgTable("company_groups", {
 export const clientUsers = pgTable("client_users", {
   clientId: integer("client_id").notNull().references(() => clients.id, { onDelete: 'cascade' }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  accessLevel: text("access_level").default("basic").notNull(), // basic, standard, admin
+  createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   pk: primaryKey(table.clientId, table.userId),
 }));
@@ -938,3 +940,37 @@ export type InsertTaxSimulationItem = typeof taxSimulationItems.$inferInsert;
 export type TaxSimulationItem = typeof taxSimulationItems.$inferSelect;
 export type InsertProductKit = typeof productKits.$inferInsert;
 export type ProductKit = typeof productKits.$inferSelect;
+
+// Esquemas e tipos para o sistema de autenticação e autorização
+
+export const insertRoleSchema = createInsertSchema(roles, {
+  name: z.string().min(3).max(50),
+  description: z.string().optional(),
+  isSystem: z.boolean().default(false),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertRole = z.infer<typeof insertRoleSchema>;
+export type Role = typeof roles.$inferSelect;
+
+export const insertPermissionSchema = createInsertSchema(permissions, {
+  code: z.string().min(3).max(50),
+  name: z.string().min(3).max(100),
+  module: z.string().min(2).max(50),
+}).omit({ id: true, createdAt: true });
+export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+export type Permission = typeof permissions.$inferSelect;
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions);
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({ createdAt: true });
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+export type UserRole = typeof userRoles.$inferSelect;
+
+export const insertUserViewModeSchema = createInsertSchema(userViewModes).omit({ id: true, createdAt: true, updatedAt: true, lastUsed: true });
+export type InsertUserViewMode = z.infer<typeof insertUserViewModeSchema>;
+export type UserViewMode = typeof userViewModes.$inferSelect;
+
+export const insertClientUserSchema = createInsertSchema(clientUsers).omit({ createdAt: true });
+export type InsertClientUser = z.infer<typeof insertClientUserSchema>;
+export type ClientUser = typeof clientUsers.$inferSelect;
