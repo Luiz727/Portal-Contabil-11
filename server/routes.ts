@@ -17,11 +17,7 @@ import path from "path";
 import fs from "fs";
 import { z } from "zod";
 
-// Função auxiliar temporária para simular autenticação enquanto o sistema multitenancy está sendo implementado
-function getCurrentUserId(req: any): string {
-  // Temporariamente retorna um ID de usuário fixo para depuração
-  return "1";
-}
+import { getCurrentUserId, getCurrentViewMode, getCurrentEmpresaId, getCurrentUserRole } from "./helpers";
 import { 
   insertTaskSchema, 
   insertClientSchema, 

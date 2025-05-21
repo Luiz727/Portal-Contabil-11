@@ -8,7 +8,11 @@ import { honorarios, clients, nfses } from "../shared/schema";
 export function registerHonorariosRoutes(app: Express) {
   // Desativando temporariamente o sistema de multitenancy para depuração
   
-
+  // Criando rota temporária de verificação para checar a funcionalidade básica
+  app.get("/api/honorarios/check", (req: Request, res: Response) => {
+    res.json({ status: "ok", message: "API de honorários está funcionando" });
+  });
+  
   // Temporariamente removendo middlewares de autenticação para depuração
   app.get("/api/honorarios", async (req: Request, res: Response) => {
     try {
