@@ -22,7 +22,7 @@ import Integrations from "@/pages/Integrations";
 import WhatsApp from "@/pages/WhatsApp";
 import ImpostometroPage from "./pages/ImpostometroPage";
 import MainLayout from "@/layouts/MainLayout";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, AuthProvider } from "./contexts/AuthContext";
 
 // Novo módulo fiscal integrado
 import FiscalPage from "@/pages/FiscalPage";
@@ -44,9 +44,9 @@ import UsuariosPermissoesPage from "./pages/admin/UsuariosPermissoesPage";
 import SuperAdminPage from "./pages/admin/SuperAdminPage";
 
 // Contextos
-import { EmpresasProvider } from "@/contexts/EmpresasContext";
-import { ProdutosProvider } from "@/contexts/ProdutosContext";
-import { ViewModeProvider } from "@/contexts/ViewModeContext";
+import { EmpresasProvider } from "./contexts/EmpresasContext";
+import { ProdutosProvider } from "./contexts/ProdutosContext";
+import { ViewModeProvider } from "./contexts/ViewModeContext";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -273,14 +273,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <ViewModeProvider>
-          <EmpresasProvider>
-            <ProdutosProvider>
-              <Toaster />
-              <Router />
-            </ProdutosProvider>
-          </EmpresasProvider>
-        </ViewModeProvider>
+        <AuthProvider>
+          <ViewModeProvider>
+            <EmpresasProvider>
+              <ProdutosProvider>
+                <Toaster />
+                <Router />
+              </ProdutosProvider>
+            </EmpresasProvider>
+          </ViewModeProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
