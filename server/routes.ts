@@ -103,6 +103,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Rota temporária para desenvolvimento - simula um login
+  app.post('/api/auth/dev-login', async (req, res) => {
+    try {
+      const { email, role = 'admin' } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+      
+      // Buscar usuário por e-mail ou criar um usuário temporário
+      let user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        // Criar um usuário temporário para testes
+        const userData = {
+          id: `dev-${Date.now()}`,
+          email,
+          firstName: "Usuário",
+          lastName: "Desenvolvimento",
+          role,
+          profileImageUrl: null,
+        };
+        
+        user = await storage.upsertUser(userData);
+      }
+      
+      // Configurar uma sessão para o usuário
+      if (req.session) {
+        req.session.user = {
+          claims: {
+            sub: user.id,
+            email: user.email,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            role: user.role,
+            profile_image_url: user.profileImageUrl
+          }
+        };
+        await new Promise((resolve) => req.session.save(resolve));
+      }
+      
+      return res.status(200).json(user);
+    } catch (error) {
+      console.error("Erro no login de desenvolvimento:", error);
+      return res.status(500).json({ message: "Erro interno no servidor" });
+    }
+  });
+  
   // Rota para listar todos os usuários (para administração)
   app.get('/api/users', isAuthenticated, async (req: any, res) => {
     try {

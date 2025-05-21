@@ -211,6 +211,11 @@ export class DatabaseStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(users.firstName);
   }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
 
   // Empresas Usuárias operations
   async getEmpresaUsuaria(id: number): Promise<EmpresaUsuaria | undefined> {
