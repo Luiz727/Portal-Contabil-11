@@ -1,12 +1,12 @@
 import React from 'react';
-import { useViewMode } from '@/contexts/ViewModeContext';
+import { useViewMode } from '../contexts/ViewModeContext';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import { Briefcase, Building2, User, Users } from 'lucide-react';
 
 // Componente que mostra o ícone apropriado para cada modo de visualização

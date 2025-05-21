@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useViewMode } from '../contexts/ViewModeContext';
 import ViewModeSelector from './ViewModeSelector';
+import EmpresaSelector from './EmpresaSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +75,11 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           {/* Seletor de modo de visualização */}
           <div className="hidden md:block">
             <ViewModeSelector />
+          </div>
+          
+          {/* Seletor de empresa (visível apenas no modo empresa) */}
+          <div className="hidden md:block ml-2">
+            <EmpresaSelector />
           </div>
           
           {/* Notificações */}
