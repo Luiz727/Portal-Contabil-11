@@ -1,17 +1,12 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-// Temporariamente comentando para depuração
-// import { setupAuth, isAuthenticated } from "./replitAuth";
 import { registerNfeRoutes } from "./nfeRoutes";
 import { registerIntegraNfRoutes } from "./routes/integraNfRoutes";
 import { registerHonorariosRoutes } from "./honorariosRoutes";
 import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
 import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
-// Temporariamente desativando as rotas de multitenancy para depuração
-// import { registerViewModeRoutes } from "./routes/viewModeRoutes";
-// import { registerEmpresasRoutes } from "./routes/empresasRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
