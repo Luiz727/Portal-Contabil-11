@@ -4,18 +4,6 @@
 /* Configurações de Base */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap');
 
-@import 'index.css';
-@import './styles/responsive.css';
-@import './styles/hide-scrollbar.css';
-
-/* Estilos globais consolidados */
-:root {
-  --primary: #0097fb;
-  --secondary: #64748b;
-  --background: #ffffff;
-  --foreground: #020817;
-}
-
 html {
   font-size: 100%;
   scroll-behavior: smooth;
@@ -35,7 +23,7 @@ body {
 }
 
 /* Variáveis CSS - Estilo NIXCON como nas imagens de referência */
-::root {
+:root {
   /* Layout */
   --max-width: 1200px;
   --gap: 1rem;
