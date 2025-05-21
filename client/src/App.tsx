@@ -40,7 +40,7 @@ import ImportacaoProdutosPage from "./pages/admin/ImportacaoProdutosPage";
 import PlanosAssinaturasPage from "./pages/admin/PlanosAssinaturasPage";
 import EmpresasUsuariasPage from "./pages/admin/EmpresasUsuariasPage";
 import PainelAdministrativoPage from "./pages/admin/PainelAdministrativoPage";
-import UsuariosPermissoesPage from "./pages/admin/UsuariosPermissoesPage";
+import PermissoesUsuariosPage from "./pages/admin/PermissoesUsuariosPage";
 import SuperAdminPage from "./pages/admin/SuperAdminPage";
 
 // Contextos
@@ -240,7 +240,7 @@ function Router() {
       {isAuthenticated && (
         <Route path="/admin/usuarios">
           <MainLayout>
-            <UsuariosPermissoesPage />
+            <PermissoesUsuariosPage />
           </MainLayout>
         </Route>
       )}
