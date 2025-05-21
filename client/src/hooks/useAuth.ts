@@ -18,6 +18,9 @@ export function useAuth() {
     retry: false,
   });
 
+  // Verifica se o usuário é superadmin
+  const isSuperAdmin = user?.role === "superadmin";
+  
   // Verifica se o usuário é admin
   const isAdmin = user?.role === "admin";
   
@@ -28,12 +31,13 @@ export function useAuth() {
   const isClient = user?.role === "client";
   
   // Verificar se o usuário tem acesso ao escritório contábil
-  const hasOfficeAccess = isAdmin || isAccountant;
+  const hasOfficeAccess = isSuperAdmin || isAdmin || isAccountant;
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
+    isSuperAdmin,
     isAdmin,
     isAccountant,
     isClient,
