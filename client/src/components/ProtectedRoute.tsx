@@ -24,11 +24,13 @@ export function ProtectedRoute({
     }
 
     // Se existem roles permitidas e o usuário não tem a role necessária
+    // Superadmin tem acesso a todas as áreas
     if (
       !isLoading &&
       isAuthenticated && 
       allowedRoles.length > 0 && 
       user && 
+      user.role !== "superadmin" && // Superadmin sempre tem acesso
       !allowedRoles.includes(user.role)
     ) {
       setLocation("/sem-permissao");
@@ -50,10 +52,12 @@ export function ProtectedRoute({
   }
 
   // Verificações de permissão
+  // Superadmin tem acesso a todas as áreas
   if (
     isAuthenticated && 
     allowedRoles.length > 0 && 
     user && 
+    user.role !== "superadmin" && // Superadmin sempre tem acesso
     !allowedRoles.includes(user.role)
   ) {
     return null; // Vai redirecionar no useEffect
