@@ -1,10 +1,10 @@
 import { Request, Response, Express } from "express";
 import { storage } from "./storage";
-import { requireAuth, requireRole, requireViewMode, isAuthenticated, isEscritorioUser } from "./middleware/auth";
-import { insertHonorarioSchema, ViewMode } from "./shared/schema";
+import { requireAuth, requireRole, requireViewMode, isAuthenticated, isEscritorioUser, ViewMode } from "./middleware/auth";
+import { insertHonorarioSchema } from "../shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { honorarios, clients, nfses } from "@shared/schema";
+import { honorarios, clients, nfses } from "../shared/schema";
 
 export function registerHonorariosRoutes(app: Express) {
   // Usando os middlewares mais avançados de autenticação e permissionamento
