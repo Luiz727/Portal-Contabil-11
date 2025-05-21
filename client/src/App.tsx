@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import NIXCONDashboard from "@/pages/NIXCONDashboard";
 import Login from "@/pages/Login";
+import SemPermissaoPage from "@/pages/SemPermissaoPage";
 import Tasks from "@/pages/Tasks";
 import Clients from "@/pages/Clients";
 import Documents from "@/pages/Documents";
@@ -230,6 +231,11 @@ function Router() {
           </MainLayout>
         </Route>
       )}
+
+      {/* Página de acesso negado/sem permissão */}
+      <Route path="/sem-permissao">
+        <SemPermissaoPage />
+      </Route>
 
       <Route component={NotFound} />
     </Switch>

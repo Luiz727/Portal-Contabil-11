@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
+import { LoginButton } from "./LoginButton";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import EmpresaSelector from "@/components/EmpresaSelector";
@@ -297,45 +298,51 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* User Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 p-0 ml-1">
-                <Avatar className="h-9 w-9 border-2 border-primary/10">
-                  <AvatarImage src={avatarUrl} alt={user?.firstName || "Usuário"} />
-                  <AvatarFallback className="bg-muted">
-                    <span className="material-icons">person</span>
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 mt-1">
-              <div className="px-4 pt-3 pb-2">
-                <p className="font-medium">{user?.firstName || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <Link href="/settings/profile">
-                <DropdownMenuItem>
-                  <span className="material-icons mr-2 text-sm">person</span>
-                  <span>Meu Perfil</span>
-                </DropdownMenuItem>
-              </Link>
-              <Link href="/settings">
-                <DropdownMenuItem>
-                  <span className="material-icons mr-2 text-sm">settings</span>
-                  <span>Configurações</span>
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <Link href="/api/logout">
-                <DropdownMenuItem>
+          {/* Botão de Login/Perfil do Usuário */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 p-0 ml-1">
+                  <Avatar className="h-9 w-9 border-2 border-primary/10">
+                    <AvatarImage src={avatarUrl} alt={user?.firstName || "Usuário"} />
+                    <AvatarFallback className="bg-muted">
+                      <span className="material-icons">person</span>
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-1">
+                <div className="px-4 pt-3 pb-2">
+                  <p className="font-medium">{user?.firstName || "Usuário"}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
+                  <p className="text-xs mt-1 bg-gray-100 text-gray-600 rounded px-2 py-0.5 inline-block">
+                    {user.role === "admin" ? "Administrador" : 
+                     user.role === "accountant" ? "Contador" : "Cliente"}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <Link href="/settings/profile">
+                  <DropdownMenuItem>
+                    <span className="material-icons mr-2 text-sm">person</span>
+                    <span>Meu Perfil</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/settings">
+                  <DropdownMenuItem>
+                    <span className="material-icons mr-2 text-sm">settings</span>
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
                   <span className="material-icons mr-2 text-sm">logout</span>
                   <span>Sair</span>
                 </DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <LoginButton />
+          )}
         </div>
       </div>
       
