@@ -16,6 +16,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { z } from "zod";
+
+// Função auxiliar temporária para simular autenticação enquanto o sistema multitenancy está sendo implementado
+function getCurrentUserId(req: any): string {
+  // Temporariamente retorna um ID de usuário fixo para depuração
+  return "1";
+}
 import { 
   insertTaskSchema, 
   insertClientSchema, 
@@ -305,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
       
-      const userId = req.user.claims.sub;
+      const userId = "1"; // Temporariamente usando ID fixo para depuração
       const { clientId, description, categoryId } = req.body;
       
       const documentData = insertDocumentSchema.parse({
@@ -405,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/events', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = "1"; // Temporariamente usando ID fixo para depuração
       const eventData = insertEventSchema.parse({
         ...req.body,
         createdBy: userId
@@ -475,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/financial/transactions', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = "1"; // Temporariamente usando ID fixo para depuração
       const transactionData = insertFinancialTransactionSchema.parse({
         ...req.body,
         createdBy: userId
