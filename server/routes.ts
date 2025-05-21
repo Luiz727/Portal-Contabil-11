@@ -1,7 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// Temporariamente comentando para depuração
+// import { setupAuth, isAuthenticated } from "./replitAuth";
 import { registerNfeRoutes } from "./nfeRoutes";
 import { registerIntegraNfRoutes } from "./routes/integraNfRoutes";
 import { registerHonorariosRoutes } from "./honorariosRoutes";
@@ -74,8 +75,8 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware temporariamente desativado para depuração
+  // await setupAuth(app);
   
   // Rotas administrativas
   registerAdminRoutes(app);
@@ -98,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -110,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get('/api/dashboard/stats', isAuthenticated, async (req, res) => {
+  app.get('/api/dashboard/stats', async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
