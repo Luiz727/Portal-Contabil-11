@@ -40,17 +40,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { id: 'financial', label: 'Financeiro', icon: DollarSign, path: '/financial' },
         { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal', subItems: [
           { id: 'dashboard', label: 'Dashboard Fiscal', path: '/fiscal' },
-          { id: 'calculator', label: 'Calculadora de Impostos', path: '/tax-calculator' },
-          { id: 'impostometro', label: 'Impostômetro', path: '/impostometro' }
+          { id: 'calculator', label: 'Calculadora de Impostos', path: '/tax-calculator' }
         ]},
-        { id: 'honorarios', label: 'Honorários', icon: DollarSign, path: '/honorarios' },
         { id: 'calendar', label: 'Calendário', icon: Calendar, path: '/calendar' },
         { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
         { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
-        { id: 'invoices', label: 'Notas Fiscais', icon: FileText, path: '/invoices' },
-        { id: 'inventory', label: 'Inventário', icon: Package, path: '/inventory' },
-        { id: 'reconciliation', label: 'Reconciliação', icon: FileCheck, path: '/reconciliation' },
-        { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare, path: '/whatsapp' },
         { id: 'reports', label: 'Relatórios', icon: BarChart2, path: '/reports' },
         { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
         { id: 'admin', label: 'Administração', icon: Shield, path: '/admin' }

@@ -3,9 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { 
   LayoutDashboard, ReceiptText, FileText, Users, 
   PackageOpen, Truck, Tags, Calculator, 
-  CreditCard, BarChart3, Wrench, ChevronDown,
-  Calendar, MessageSquare, DollarSign, Package,
-  FileCheck
+  CreditCard, BarChart3, Wrench, ChevronDown
 } from 'lucide-react';
 import logoNixcon from '../../assets/logo-nixcon.png';
 
@@ -75,48 +73,6 @@ export default function NIXCONSidebar() {
           label="Calculadora de Impostos" 
           to="/tax-calculator" 
           active={location === "/tax-calculator"} 
-        />
-
-        <SidebarItem 
-          icon={BarChart3} 
-          label="Impostômetro" 
-          to="/impostometro" 
-          active={location === "/impostometro"} 
-        />
-
-        <SidebarItem 
-          icon={DollarSign} 
-          label="Honorários" 
-          to="/honorarios" 
-          active={location === "/honorarios"} 
-        />
-
-        <SidebarItem 
-          icon={Calendar} 
-          label="Calendário" 
-          to="/calendar" 
-          active={location === "/calendar"} 
-        />
-
-        <SidebarItem 
-          icon={Package} 
-          label="Inventário" 
-          to="/inventory" 
-          active={location === "/inventory"} 
-        />
-
-        <SidebarItem 
-          icon={FileCheck} 
-          label="Reconciliação" 
-          to="/reconciliation" 
-          active={location === "/reconciliation"} 
-        />
-
-        <SidebarItem 
-          icon={MessageSquare} 
-          label="WhatsApp" 
-          to="/whatsapp" 
-          active={location === "/whatsapp"} 
         />
         
         <SidebarSection title="Cadastros da Empresa">
