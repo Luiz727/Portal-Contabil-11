@@ -34,11 +34,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     ];
 
     // Menu items specific to each view mode
-    const viewModeItems: Record<string, Array<{ id: string, label: string, icon: any, path: string }>> = {
+    const viewModeItems: Record<string, Array<{ id: string, label: string, icon: any, path: string, subItems?: Array<{ id: string, label: string, path: string }> }>> = {
       'escritorio': [
         { id: 'clients', label: 'Clientes', icon: Users, path: '/clients' },
         { id: 'financial', label: 'Financeiro', icon: DollarSign, path: '/financial' },
-        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal', subItems: [
+          { id: 'dashboard', label: 'Dashboard Fiscal', path: '/fiscal' },
+          { id: 'calculator', label: 'Calculadora de Impostos', path: '/tax-calculator' }
+        ]},
         { id: 'calendar', label: 'Calendário', icon: Calendar, path: '/calendar' },
         { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
         { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
@@ -47,7 +50,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { id: 'admin', label: 'Administração', icon: Shield, path: '/admin' }
       ],
       'empresa': [
-        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal', subItems: [
+          { id: 'dashboard', label: 'Dashboard Fiscal', path: '/fiscal' },
+          { id: 'calculator', label: 'Calculadora de Impostos', path: '/tax-calculator' }
+        ]},
         { id: 'financial', label: 'Financeiro', icon: DollarSign, path: '/financial' },
         { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
         { id: 'invoices', label: 'Notas Fiscais', icon: FileIcon, path: '/invoices' },
@@ -56,7 +62,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       ],
       'contador': [
         { id: 'clients', label: 'Clientes', icon: Users, path: '/clients' },
-        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal', subItems: [
+          { id: 'dashboard', label: 'Dashboard Fiscal', path: '/fiscal' },
+          { id: 'calculator', label: 'Calculadora de Impostos', path: '/tax-calculator' }
+        ]},
         { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
         { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
         { id: 'calendar', label: 'Calendário', icon: Calendar, path: '/calendar' }
@@ -156,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {menuItems.map((item) => {
                 const isActive = location === item.path;
                 const Icon = item.icon;
-                
+
                 return (
                   <li key={item.id}>
                     <Link href={item.path}>

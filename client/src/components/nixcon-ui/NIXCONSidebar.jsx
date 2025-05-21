@@ -68,6 +68,12 @@ export default function NIXCONSidebar() {
           active={location === "/fiscal" || location === "/tax-calculator"} 
           hasSubmenu 
         />
+        <SidebarItem 
+          icon={Calculator} 
+          label="Calculadora de Impostos" 
+          to="/tax-calculator" 
+          active={location === "/tax-calculator"} 
+        />
         
         <SidebarSection title="Cadastros da Empresa">
           <SidebarItem 
