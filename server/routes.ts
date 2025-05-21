@@ -98,16 +98,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
     try {
-      // Temporariamente retornando um usuário simulado para depuração
-      res.json({
-        id: 1,
-        email: 'admin@nixcon.com.br',
-        name: 'Administrador',
-        role: 'admin'
-      });
+      const userId = getCurrentUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      res.status(500).json({ message: "Erro ao buscar dados do usuário" });
     }
   });
 
