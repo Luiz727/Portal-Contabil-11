@@ -30,39 +30,39 @@ const NIXCONHeaderResponsivo2 = ({
     { id: 2, titulo: 'Vencimento de imposto próximo', data: '18/05/2025', lida: true },
     { id: 3, titulo: 'Documento enviado para assinatura', data: '17/05/2025', lida: true }
   ]);
-  
+
   const toggleUserMenu = () => {
     setShowUserMenu(!showUserMenu);
     if (showNotifications) setShowNotifications(false);
     if (showEmpresaSelector) setShowEmpresaSelector(false);
   };
-  
+
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
     if (showUserMenu) setShowUserMenu(false);
     if (showEmpresaSelector) setShowEmpresaSelector(false);
   };
-  
+
   const toggleEmpresaSelector = () => {
     setShowEmpresaSelector(!showEmpresaSelector);
     if (showUserMenu) setShowUserMenu(false);
     if (showNotifications) setShowNotifications(false);
   };
-  
+
   const handleLogout = async () => {
     window.location.href = '/api/logout';
   };
-  
+
   const handleChangeEmpresa = (empresa) => {
     if (onChangeEmpresa) onChangeEmpresa(empresa);
     setShowEmpresaSelector(false);
     setViewMode('empresa');
   };
-  
+
   const switchToEscritorioView = () => {
     setViewMode('escritorio');
   };
-  
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
       <div className="nixcon-container mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,47 +76,57 @@ const NIXCONHeaderResponsivo2 = ({
               <Menu size={24} />
             </button>
           </div>
-          
+
           <div className="flex items-center">
-            <div className="md:hidden flex-shrink-0 flex items-center ml-2">
+            {/* Logo para mobile */}
+            <div className="md:hidden flex-shrink-0 flex items-center">
               <img
-                className="h-8 w-auto"
-                src={logoNixconFull}
+                className="h-8 w-auto object-contain"
+                src="/assets/logo-nixcon-icon.png"
                 alt="NIXCON"
               />
             </div>
-            
-            {/* Seletor de Empresas */}
-            <div className="hidden md:ml-6 md:flex md:items-center">
-              <div className="relative inline-block text-left">
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                  onClick={toggleEmpresaSelector}
-                >
-                  {empresaSelecionada?.nome || 'Selecione uma empresa'}
-                  <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                </button>
-                
-                {showEmpresaSelector && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                    <div className="py-1">
-                      {empresas.map(empresa => (
-                        <button
-                          key={empresa.id}
-                          className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => handleChangeEmpresa(empresa)}
-                        >
-                          {empresa.nome}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+
+            {/* Logo para desktop */}
+            <div className="hidden md:flex flex-shrink-0 items-center">
+              <img
+                className="h-10 w-auto object-contain"
+                src="/assets/logo-nixcon-full.png"
+                alt="NIXCON"
+              />
             </div>
           </div>
-          
+
+          {/* Seletor de Empresas */}
+          <div className="hidden md:ml-6 md:flex md:items-center">
+            <div className="relative inline-block text-left">
+              <button
+                type="button"
+                className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                onClick={toggleEmpresaSelector}
+              >
+                {empresaSelecionada?.nome || 'Selecione uma empresa'}
+                <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
+              </button>
+
+              {showEmpresaSelector && (
+                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                  <div className="py-1">
+                    {empresas.map(empresa => (
+                      <button
+                        key={empresa.id}
+                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => handleChangeEmpresa(empresa)}
+                      >
+                        {empresa.nome}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Indicador de Visão (Escritório/Empresa) */}
           <div className="hidden md:flex items-center">
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -136,7 +146,7 @@ const NIXCONHeaderResponsivo2 = ({
                 </>
               )}
             </div>
-            
+
             {viewMode === 'empresa' && (
               <button 
                 onClick={switchToEscritorioView}
@@ -146,7 +156,7 @@ const NIXCONHeaderResponsivo2 = ({
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center">
             {/* Barra de Pesquisa */}
             <div className="hidden md:ml-4 md:flex-1 md:flex md:max-w-xs">
@@ -166,7 +176,7 @@ const NIXCONHeaderResponsivo2 = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Notificações */}
             <button
               type="button"
@@ -181,7 +191,7 @@ const NIXCONHeaderResponsivo2 = ({
                 )}
               </div>
             </button>
-            
+
             {/* Menu do Usuário */}
             <div className="ml-3 relative">
               <div>
@@ -207,7 +217,7 @@ const NIXCONHeaderResponsivo2 = ({
                   )}
                 </button>
               </div>
-              
+
               {/* Dropdown do menu do usuário */}
               {showUserMenu && (
                 <div
@@ -251,7 +261,7 @@ const NIXCONHeaderResponsivo2 = ({
                   </a>
                 </div>
               )}
-              
+
               {/* Dropdown de notificações */}
               {showNotifications && (
                 <div className="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
@@ -289,7 +299,7 @@ const NIXCONHeaderResponsivo2 = ({
           </div>
         </div>
       </div>
-      
+
       {/* Seletor de Empresas Mobile */}
       {empresas && empresas.length > 0 && (
         <div className="border-t border-gray-200 md:hidden px-4 py-2 bg-gray-50">
@@ -308,7 +318,7 @@ const NIXCONHeaderResponsivo2 = ({
               </option>
             ))}
           </select>
-          
+
           {/* Indicador de visão mobile */}
           <div className="mt-2 text-center">
             <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -318,7 +328,7 @@ const NIXCONHeaderResponsivo2 = ({
             }`}>
               {viewMode === 'escritorio' ? 'Visão Escritório' : `Visão ${empresaSelecionada?.nome}`}
             </div>
-            
+
             {viewMode === 'empresa' && (
               <button 
                 onClick={switchToEscritorioView}
