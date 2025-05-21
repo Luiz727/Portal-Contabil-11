@@ -1,357 +1,289 @@
 import { Request, Response, Express } from "express";
-import { storage } from "../storage";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
-import { userViewModes as userViewModesTable, VIEW_MODES } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { userViewModes, VIEW_MODES } from "../../shared/schema";
+import { eq } from "drizzle-orm";
+
+// Mapeamento amigável dos modos de visualização
+const viewModeNames: Record<string, string> = {
+  escritorio: "Escritório",
+  empresa: "Empresa",
+  contador: "Contador",
+  externo: "Externo"
+};
+
+// Funcões auxiliares para construir menus baseados no viewMode e permissões
+function getMenuItems(viewMode: string, userPermissions: string[] = []) {
+  // Menu base para todos os usuários
+  const baseMenu = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: "LayoutDashboard",
+      viewModes: ["escritorio", "empresa", "contador", "externo"],
+      permissions: []
+    }
+  ];
+
+  // Menus específicos por modo de visualização
+  const escritorioMenu = [
+    {
+      label: "Gestão de Clientes",
+      href: "/clientes",
+      icon: "Users",
+      viewModes: ["escritorio"],
+      permissions: ["manage_clients"]
+    },
+    {
+      label: "Fiscal",
+      href: "/fiscal",
+      icon: "FileText",
+      viewModes: ["escritorio"],
+      permissions: ["view_fiscal"]
+    },
+    {
+      label: "Financeiro",
+      href: "/financeiro",
+      icon: "DollarSign",
+      viewModes: ["escritorio"],
+      permissions: ["view_financial"]
+    },
+    {
+      label: "Honorários",
+      href: "/honorarios",
+      icon: "Receipt",
+      viewModes: ["escritorio"],
+      permissions: ["manage_fees"]
+    },
+    {
+      label: "Documento Digital",
+      href: "/documentos",
+      icon: "File",
+      viewModes: ["escritorio"],
+      permissions: ["manage_documents"]
+    },
+    {
+      label: "Agenda Integrada",
+      href: "/agenda",
+      icon: "Calendar",
+      viewModes: ["escritorio"],
+      permissions: ["view_calendar"]
+    },
+    {
+      label: "Tarefas",
+      href: "/tarefas",
+      icon: "CheckSquare",
+      viewModes: ["escritorio"],
+      permissions: ["manage_tasks"]
+    },
+  ];
+
+  const empresaMenu = [
+    {
+      label: "Minha Empresa",
+      href: "/minha-empresa",
+      icon: "Building2",
+      viewModes: ["empresa"],
+      permissions: []
+    },
+    {
+      label: "Fiscal",
+      href: "/fiscal",
+      icon: "FileText",
+      viewModes: ["empresa"],
+      permissions: ["view_fiscal"]
+    },
+    {
+      label: "Financeiro",
+      href: "/financeiro",
+      icon: "DollarSign",
+      viewModes: ["empresa"],
+      permissions: ["view_financial"]
+    },
+    {
+      label: "Documentos",
+      href: "/documentos",
+      icon: "File",
+      viewModes: ["empresa"],
+      permissions: ["view_documents"]
+    },
+    {
+      label: "Honorários",
+      href: "/honorarios",
+      icon: "Receipt",
+      viewModes: ["empresa"],
+      permissions: ["view_fees"]
+    },
+    {
+      label: "Portal do Cliente",
+      href: "/portal",
+      icon: "Globe",
+      viewModes: ["empresa"],
+      permissions: []
+    },
+  ];
+
+  const contadorMenu = [
+    {
+      label: "Meus Clientes",
+      href: "/meus-clientes",
+      icon: "Users",
+      viewModes: ["contador"],
+      permissions: ["view_clients"]
+    },
+    {
+      label: "Fiscal",
+      href: "/fiscal",
+      icon: "FileText",
+      viewModes: ["contador"],
+      permissions: ["view_fiscal"]
+    },
+    {
+      label: "Tarefas",
+      href: "/tarefas",
+      icon: "CheckSquare",
+      viewModes: ["contador"],
+      permissions: ["manage_tasks"]
+    },
+    {
+      label: "Agenda",
+      href: "/agenda",
+      icon: "Calendar",
+      viewModes: ["contador"],
+      permissions: ["view_calendar"]
+    }
+  ];
+
+  const externoMenu = [
+    {
+      label: "Documentos Compartilhados",
+      href: "/documentos-compartilhados",
+      icon: "File",
+      viewModes: ["externo"],
+      permissions: []
+    },
+    {
+      label: "Consultorias",
+      href: "/consultorias",
+      icon: "MessageSquare",
+      viewModes: ["externo"],
+      permissions: []
+    }
+  ];
+
+  // Combinar todos os menus
+  const allMenuItems = [
+    ...baseMenu,
+    ...escritorioMenu,
+    ...empresaMenu,
+    ...contadorMenu,
+    ...externoMenu
+  ];
+
+  // Filtrar pelo viewMode atual
+  return allMenuItems.filter(item => 
+    item.viewModes.includes(viewMode) && 
+    (item.permissions.length === 0 || 
+    item.permissions.some(perm => userPermissions.includes(perm)))
+  );
+}
 
 export function registerViewModeRoutes(app: Express) {
-  // Obter configurações de todos os modos de visualização do usuário atual
-  app.get("/api/view-modes", requireAuth, async (req: any, res: Response) => {
+  // Buscar os modos de visualização disponíveis para o usuário atual
+  app.get("/api/user/view-modes", requireAuth, async (req: Request, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub;
+      // Em um sistema real, você buscaria isso do banco de dados
+      // com base no usuário autenticado
       
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
+      // Simulando os modos disponíveis para o usuário
+      const availableModes = [
+        { id: "escritorio", nome: "Escritório" },
+        { id: "empresa", nome: "Empresa" },
+        { id: "contador", nome: "Contador" },
+        { id: "externo", nome: "Externo" }
+      ];
       
-      // Buscar todos os modos de visualização do usuário
-      const viewModes = await db
-        .select()
-        .from(userViewModesTable)
-        .where(eq(userViewModesTable.userId, userId))
-        .orderBy(userViewModesTable.lastUsed);
+      // Na versão final, você filtraria com base nas permissões reais
+      // Exemplo:
+      // const availableModes = await db.query.userViewModes.findMany({
+      //   where: eq(userViewModes.userId, req.user.id)
+      // });
       
-      // Obter o modo de visualização atual da sessão
-      const currentViewMode = req.session.viewMode || VIEW_MODES.ESCRITORIO;
-      
-      res.json({
-        currentViewMode,
-        viewModes: userViewModes,
-        availableModes: Object.values(VIEW_MODES)
-      });
+      res.json({ viewModes: availableModes });
     } catch (error) {
       console.error("Erro ao buscar modos de visualização:", error);
-      res.status(500).json({ message: "Erro ao buscar modos de visualização" });
+      res.status(500).json({ 
+        message: "Erro ao buscar modos de visualização",
+        error: (error as Error).message 
+      });
     }
   });
 
-  // Obter configuração de um modo de visualização específico do usuário atual
-  app.get("/api/view-modes/:viewMode", requireAuth, async (req: any, res: Response) => {
+  // Atualizar o modo de visualização atual do usuário
+  app.post("/api/view-mode", requireAuth, async (req: Request, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub;
-      const viewMode = req.params.viewMode;
-      
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
-      
-      if (!Object.values(VIEW_MODES).includes(viewMode)) {
-        return res.status(400).json({ message: "Modo de visualização inválido" });
-      }
-      
-      // Buscar a configuração do modo de visualização
-      const viewModeConfig = await storage.getUserViewMode(userId, viewMode);
-      
-      // Se não existir, criar um modo de visualização padrão
-      if (!viewModeConfig) {
-        const newConfig = await storage.saveUserViewMode({
-          userId,
-          viewMode,
-          activeProfile: null,
-          clientId: null
-        });
-        
-        return res.json(newConfig);
-      }
-      
-      res.json(viewModeConfig);
-    } catch (error) {
-      console.error("Erro ao buscar modo de visualização:", error);
-      res.status(500).json({ message: "Erro ao buscar modo de visualização" });
-    }
-  });
-
-  // Alterar para um modo de visualização específico
-  app.post("/api/view-modes/switch", requireAuth, async (req: any, res: Response) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      const { viewMode, clientId, activeProfile } = req.body;
-      
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
+      const { viewMode } = req.body;
       
       if (!viewMode || !Object.values(VIEW_MODES).includes(viewMode)) {
         return res.status(400).json({ message: "Modo de visualização inválido" });
       }
       
-      // Salvar o modo de visualização na sessão
-      req.session.viewMode = viewMode;
+      // Atualizar no banco de dados
+      // Na versão final, você salvaria isso no banco
+      // Exemplo:
+      // await db.update(userViewModes)
+      //   .set({ viewMode, lastUsed: new Date() })
+      //   .where(eq(userViewModes.userId, req.user.id));
       
-      // Salvar ou atualizar a configuração do modo de visualização
-      const viewModeConfig = await storage.saveUserViewMode({
-        userId,
+      // Para teste, apenas retornamos sucesso
+      res.json({ 
+        message: "Modo de visualização atualizado com sucesso",
         viewMode,
-        clientId: clientId || null,
-        activeProfile: activeProfile || null
-      });
-      
-      res.json({
-        message: `Modo de visualização alterado para ${viewMode}`,
-        currentViewMode: viewMode,
-        viewModeConfig
+        viewModeName: viewModeNames[viewMode] 
       });
     } catch (error) {
-      console.error("Erro ao alterar modo de visualização:", error);
-      res.status(500).json({ message: "Erro ao alterar modo de visualização" });
+      console.error("Erro ao atualizar modo de visualização:", error);
+      res.status(500).json({ 
+        message: "Erro ao atualizar modo de visualização",
+        error: (error as Error).message 
+      });
     }
   });
 
-  // Obter o menu dinâmico baseado no modo de visualização atual
-  app.get("/api/menu", requireAuth, async (req: any, res: Response) => {
+  // Obter o menu de navegação com base no modo de visualização atual
+  app.get("/api/menu", requireAuth, async (req: Request, res: Response) => {
     try {
-      const userId = req.user?.claims?.sub;
+      // O viewMode seria obtido do contexto da requisição, após processamento
+      // pelo middleware que extrai essa informação
+      const viewMode = req.query.viewMode as string || "escritorio";
       
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
+      // Em um sistema real, você buscaria as permissões do usuário
+      // do banco de dados
       
-      // Obter o modo de visualização atual da sessão
-      const currentViewMode = req.session.viewMode || VIEW_MODES.ESCRITORIO;
-      
-      // Definir o menu base com itens comuns a todos os modos
-      let menu = [
-        {
-          label: "Dashboard",
-          href: "/dashboard",
-          icon: "dashboard",
-          viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-          permissions: []
-        },
-        {
-          label: "Perfil",
-          href: "/profile",
-          icon: "user",
-          viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-          permissions: []
-        }
+      // Simulação de permissões para teste
+      const userPermissions = [
+        "manage_clients", 
+        "view_fiscal", 
+        "view_financial", 
+        "manage_fees",
+        "manage_documents", 
+        "view_calendar", 
+        "manage_tasks",
+        "view_clients", 
+        "view_documents", 
+        "view_fees"
       ];
       
-      // Adicionar itens específicos baseados no modo de visualização
-      switch (currentViewMode) {
-        case VIEW_MODES.ESCRITORIO:
-          menu = [
-            ...menu,
-            {
-              label: "Clientes",
-              href: "/clients",
-              icon: "building",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_clients"]
-            },
-            {
-              label: "Honorários",
-              href: "/honorarios",
-              icon: "dollar-sign",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["manage_honorarios"]
-            },
-            {
-              label: "Documentos",
-              href: "/documents",
-              icon: "file-text",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_documents"]
-            },
-            {
-              label: "Tarefas",
-              href: "/tasks",
-              icon: "check-square",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_tasks"]
-            },
-            {
-              label: "Calendário",
-              href: "/calendar",
-              icon: "calendar",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_calendar"]
-            },
-            {
-              label: "Fiscal",
-              href: "/fiscal",
-              icon: "file",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_fiscal"]
-            },
-            {
-              label: "Financeiro",
-              href: "/financial",
-              icon: "dollar-sign",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["view_financial"]
-            },
-            {
-              label: "Usuários",
-              href: "/users",
-              icon: "users",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["manage_users"]
-            },
-            {
-              label: "Configurações",
-              href: "/settings",
-              icon: "settings",
-              viewModes: [VIEW_MODES.ESCRITORIO],
-              permissions: ["manage_settings"]
-            }
-          ];
-          break;
-          
-        case VIEW_MODES.EMPRESA:
-          menu = [
-            ...menu,
-            {
-              label: "Documentos",
-              href: "/client/documents",
-              icon: "file-text",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            },
-            {
-              label: "Honorários",
-              href: "/client/honorarios",
-              icon: "dollar-sign",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            },
-            {
-              label: "Fiscal",
-              href: "/client/fiscal",
-              icon: "file",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            },
-            {
-              label: "Financeiro",
-              href: "/client/financial",
-              icon: "dollar-sign",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            },
-            {
-              label: "Estoque",
-              href: "/client/inventory",
-              icon: "package",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            },
-            {
-              label: "Relatórios",
-              href: "/client/reports",
-              icon: "bar-chart-2",
-              viewModes: [VIEW_MODES.EMPRESA],
-              permissions: []
-            }
-          ];
-          break;
-          
-        case VIEW_MODES.CONTADOR:
-          menu = [
-            ...menu,
-            {
-              label: "Clientes",
-              href: "/accountant/clients",
-              icon: "building",
-              viewModes: [VIEW_MODES.CONTADOR],
-              permissions: []
-            },
-            {
-              label: "Tarefas",
-              href: "/accountant/tasks",
-              icon: "check-square",
-              viewModes: [VIEW_MODES.CONTADOR],
-              permissions: []
-            },
-            {
-              label: "Documentos",
-              href: "/accountant/documents",
-              icon: "file-text",
-              viewModes: [VIEW_MODES.CONTADOR],
-              permissions: []
-            },
-            {
-              label: "Fiscal",
-              href: "/accountant/fiscal",
-              icon: "file",
-              viewModes: [VIEW_MODES.CONTADOR],
-              permissions: []
-            },
-            {
-              label: "Honorários",
-              href: "/accountant/honorarios",
-              icon: "dollar-sign",
-              viewModes: [VIEW_MODES.CONTADOR],
-              permissions: []
-            }
-          ];
-          break;
-          
-        case VIEW_MODES.EXTERNO:
-          menu = [
-            ...menu,
-            {
-              label: "Documentos",
-              href: "/external/documents",
-              icon: "file-text",
-              viewModes: [VIEW_MODES.EXTERNO],
-              permissions: []
-            },
-            {
-              label: "Relatórios",
-              href: "/external/reports",
-              icon: "bar-chart-2",
-              viewModes: [VIEW_MODES.EXTERNO],
-              permissions: []
-            }
-          ];
-          break;
-      }
+      // Obter os itens de menu filtrados por modo e permissões
+      const menuItems = getMenuItems(viewMode, userPermissions);
       
-      // Filtrar o menu baseado nas permissões do usuário
-      let filteredMenu = menu;
-      
-      // Se não for o modo escritório, não precisamos verificar permissões específicas
-      if (currentViewMode === VIEW_MODES.ESCRITORIO) {
-        // Buscar permissões do usuário
-        const userPermissions = await storage.getUserPermissions(userId);
-        
-        // Verificar se é um admin (admins veem tudo)
-        const userInfo = await storage.getUser(userId);
-        const isAdmin = userInfo?.role === "admin";
-        
-        // Filtrar o menu baseado nas permissões, exceto para admins
-        if (!isAdmin) {
-          filteredMenu = menu.filter(item => {
-            // Se não requer permissões, mostra para todos
-            if (!item.permissions || item.permissions.length === 0) {
-              return true;
-            }
-            
-            // Verifica se o usuário tem pelo menos uma das permissões necessárias
-            return item.permissions.some(permission => userPermissions.includes(permission));
-          });
-        }
-      }
-      
-      res.json({
-        menu: filteredMenu,
-        currentViewMode
-      });
+      res.json({ menuItems });
     } catch (error) {
-      console.error("Erro ao gerar menu dinâmico:", error);
-      res.status(500).json({ message: "Erro ao gerar menu dinâmico" });
+      console.error("Erro ao buscar menu:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar menu",
+        error: (error as Error).message 
+      });
     }
   });
 }

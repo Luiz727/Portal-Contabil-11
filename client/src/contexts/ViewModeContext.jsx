@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { VIEW_MODES } from '../../shared/schema';
 import { useToast } from '@/hooks/use-toast';
+
+// Definindo as constantes dos modos de visualização aqui para evitar problemas de importação
+const VIEW_MODES = {
+  ESCRITORIO: 'escritorio',
+  EMPRESA: 'empresa',
+  CONTADOR: 'contador',
+  EXTERNO: 'externo'
+};
 
 // Criação do contexto para o modo de visualização
 const ViewModeContext = createContext({
