@@ -86,7 +86,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(409).json({ message: "Já existe um papel com este nome" });
       }
       
-      const role = await storage.createRole({ name, description });
+      const role = await storage.createRole({ name, description, isSystem: false });
       return res.status(201).json(role);
     } catch (error) {
       console.error("Erro ao criar papel:", error);
@@ -123,7 +123,7 @@ export function registerAdminRoutes(app: Express) {
       try {
         const updatedRole = await storage.updateRole(roleId, { name, description });
         return res.json(updatedRole);
-      } catch (error) {
+      } catch (error: any) {
         if (error.message === "Cannot modify system roles") {
           return res.status(403).json({ message: "Não é possível modificar papéis do sistema" });
         }
@@ -151,7 +151,7 @@ export function registerAdminRoutes(app: Express) {
         }
         
         return res.status(204).end();
-      } catch (error) {
+      } catch (error: any) {
         if (error.message === "Cannot delete system roles") {
           return res.status(403).json({ message: "Não é possível excluir papéis do sistema" });
         }

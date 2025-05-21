@@ -74,6 +74,32 @@ export interface IStorage {
   getRole(id: number): Promise<Role | undefined>;
   getRoleByName(name: string): Promise<Role | undefined>;
   getAllRoles(): Promise<Role[]>;
+  createRole(roleData: InsertRole): Promise<Role>;
+  updateRole(id: number, roleData: Partial<Role>): Promise<Role | undefined>;
+  deleteRole(id: number): Promise<boolean>;
+  
+  // Permission operations
+  getPermission(id: number): Promise<Permission | undefined>;
+  getPermissionByCode(code: string): Promise<Permission | undefined>;
+  getAllPermissions(): Promise<Permission[]>;
+  getPermissionsByModule(module: string): Promise<Permission[]>;
+  createPermission(permissionData: InsertPermission): Promise<Permission>;
+  deletePermission(id: number): Promise<boolean>;
+  
+  // Role Permission operations
+  getRolePermissions(roleId: number): Promise<Permission[]>;
+  addPermissionToRole(roleId: number, permissionId: number): Promise<RolePermission>;
+  removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean>;
+  
+  // User Role operations
+  getUserRoles(userId: string): Promise<Role[]>;
+  addRoleToUser(userId: string, roleId: number): Promise<UserRole>;
+  removeRoleFromUser(userId: string, roleId: number): Promise<boolean>;
+  
+  // Role operations
+  getRole(id: number): Promise<Role | undefined>;
+  getRoleByName(name: string): Promise<Role | undefined>;
+  getAllRoles(): Promise<Role[]>;
   createRole(role: InsertRole): Promise<Role>;
   updateRole(id: number, role: Partial<Role>): Promise<Role | undefined>;
   deleteRole(id: number): Promise<boolean>;
