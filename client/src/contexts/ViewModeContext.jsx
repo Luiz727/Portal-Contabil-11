@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+// Definindo as constantes dos modos de visualização
 export const VIEW_MODES = {
   ESCRITORIO: 'escritorio',
   EMPRESA: 'empresa',
@@ -8,20 +9,31 @@ export const VIEW_MODES = {
   EXTERNO: 'externo'
 };
 
+// Mapeamento de nomes amigáveis para modos de visualização
+export const VIEW_MODE_NAMES = {
+  [VIEW_MODES.ESCRITORIO]: 'Escritório',
+  [VIEW_MODES.EMPRESA]: 'Empresa',
+  [VIEW_MODES.CONTADOR]: 'Contador',
+  [VIEW_MODES.EXTERNO]: 'Externo'
+};
+
+// Criando o contexto
 const ViewModeContext = createContext({
-  viewMode: 'escritorio',
-  viewModeName: 'Escritório',
+  viewMode: VIEW_MODES.ESCRITORIO,
+  viewModeName: VIEW_MODE_NAMES[VIEW_MODES.ESCRITORIO],
   setViewMode: () => {},
   availableViewModes: [],
   isLoading: true,
   error: null
 });
 
+// Hook para acessar o contexto
 export const useViewMode = () => useContext(ViewModeContext);
 
+// Provedor do contexto
 export const ViewModeProvider = ({ children }) => {
-  const [viewMode, setViewModeState] = useState('escritorio');
-  const [viewModeName, setViewModeName] = useState('Escritório');
+  const [viewMode, setViewModeState] = useState(VIEW_MODES.ESCRITORIO);
+  const [viewModeName, setViewModeName] = useState(VIEW_MODE_NAMES[VIEW_MODES.ESCRITORIO]);
   const [availableViewModes, setAvailableViewModes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,10 +50,7 @@ export const ViewModeProvider = ({ children }) => {
     }
 
     setViewModeState(mode);
-    
-    const modeName = VIEW_MODES[mode] || 'Desconhecido';
-    setViewModeName(modeName);
-    
+    setViewModeName(VIEW_MODE_NAMES[mode] || 'Desconhecido');
     localStorage.setItem('viewMode', mode);
     
     fetch('/api/view-mode', {
@@ -56,7 +65,7 @@ export const ViewModeProvider = ({ children }) => {
 
     toast({
       title: 'Modo de visualização alterado',
-      description: `Agora você está no modo ${modeName}`,
+      description: `Agora você está no modo ${VIEW_MODE_NAMES[mode]}`,
     });
   };
 
@@ -64,6 +73,25 @@ export const ViewModeProvider = ({ children }) => {
     const fetchAvailableViewModes = async () => {
       setIsLoading(true);
       try {
+        // Para desenvolvimento, vamos usar dados simulados
+        const mockViewModes = [
+          { id: VIEW_MODES.ESCRITORIO, name: VIEW_MODE_NAMES[VIEW_MODES.ESCRITORIO] },
+          { id: VIEW_MODES.EMPRESA, name: VIEW_MODE_NAMES[VIEW_MODES.EMPRESA] },
+          { id: VIEW_MODES.CONTADOR, name: VIEW_MODE_NAMES[VIEW_MODES.CONTADOR] },
+          { id: VIEW_MODES.EXTERNO, name: VIEW_MODE_NAMES[VIEW_MODES.EXTERNO] }
+        ];
+        
+        setAvailableViewModes(mockViewModes);
+        
+        const savedMode = localStorage.getItem('viewMode');
+        if (savedMode && mockViewModes.find(vm => vm.id === savedMode)) {
+          setViewMode(savedMode);
+        } else if (mockViewModes.length > 0) {
+          setViewMode(mockViewModes[0].id);
+        }
+        
+        // Quando a API estiver pronta, descomente o código abaixo
+        /*
         const response = await fetch('/api/user/view-modes');
         
         if (!response.ok) {
@@ -79,12 +107,13 @@ export const ViewModeProvider = ({ children }) => {
         } else if (data.viewModes.length > 0) {
           setViewMode(data.viewModes[0].id);
         }
+        */
       } catch (err) {
         console.error('Erro ao carregar modos de visualização:', err);
         setError(err.message);
         
-        setViewModeState('escritorio');
-        setViewModeName('Escritório');
+        setViewModeState(VIEW_MODES.ESCRITORIO);
+        setViewModeName(VIEW_MODE_NAMES[VIEW_MODES.ESCRITORIO]);
       } finally {
         setIsLoading(false);
       }
@@ -109,4 +138,5 @@ export const ViewModeProvider = ({ children }) => {
   );
 };
 
-export default ViewModeContext;
+// Exportamos o contexto para acessar nos componentes que precisam dele
+export { ViewModeContext };

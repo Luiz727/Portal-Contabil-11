@@ -1,116 +1,173 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-// Criação do contexto para autenticação
+// Criando o contexto de autenticação
 const AuthContext = createContext({
   user: null,
-  isLoading: true,
   isAuthenticated: false,
-  isSuperAdmin: false,
-  isAdmin: false,
-  isAccountant: false,
-  isClient: false,
-  hasOfficeAccess: false,
-  hasPermission: () => false,
-  shouldShowComponent: () => false,
+  isLoading: true,
+  login: () => {},
   logout: () => {},
+  error: null
 });
 
-// Hook personalizado para usar o contexto
+// Hook para acessar o contexto
 export const useAuth = () => useContext(AuthContext);
 
-// Componente provedor do contexto
+// Provedor do contexto
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { toast } = useToast();
 
-  // Carrega os dados do usuário
+  // Para desenvolvimento, vamos simular um usuário logado
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
+    const mockUser = {
+      id: '1',
+      name: 'Administrador NIXCON',
+      email: 'admin@nixcon.com.br',
+      role: 'admin',
+      permissions: ['*']
+    };
+    
+    setUser(mockUser);
+    setIsAuthenticated(true);
+    setIsLoading(false);
+    
+    // Em produção, você faria uma chamada API para verificar a sessão
+    /*
+    const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch('/api/auth/session');
         
         if (!response.ok) {
-          if (response.status === 401) {
-            // Usuário não está autenticado
-            setUser(null);
-            return;
-          }
-          throw new Error('Falha ao carregar usuário');
+          throw new Error('Falha ao verificar autenticação');
         }
         
         const data = await response.json();
-        setUser(data.user);
+        
+        if (data.user) {
+          setUser(data.user);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       } catch (err) {
-        console.error('Erro ao carregar usuário:', err);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar suas informações. Por favor, tente novamente mais tarde.',
-          variant: 'destructive',
-        });
+        console.error('Erro ao verificar autenticação:', err);
+        setError(err.message);
+        setUser(null);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchUser();
+    
+    checkAuth();
+    */
   }, []);
 
-  // Função para verificar se o usuário tem uma permissão específica
-  const hasPermission = (permission) => {
-    if (!user || !user.permissions) return false;
-    return user.permissions.includes(permission);
-  };
-
-  // Função auxiliar para verificar se deve mostrar um componente baseado em permissões
-  const shouldShowComponent = (requiredPermissions) => {
-    if (!requiredPermissions || requiredPermissions.length === 0) return true;
-    if (!user || !user.permissions) return false;
-    
-    // Verifica se o usuário tem pelo menos uma das permissões requeridas
-    return requiredPermissions.some(permission => user.permissions.includes(permission));
-  };
-
-  // Função para logout
-  const logout = async () => {
+  const login = async (credentials) => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      setUser(null);
-      // Redireciona para a página de login
-      window.location.href = '/login';
-    } catch (err) {
-      console.error('Erro ao fazer logout:', err);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível fazer logout. Por favor, tente novamente.',
-        variant: 'destructive',
+      setIsLoading(true);
+      // Em produção, você faria uma chamada API para autenticar
+      /*
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
       });
+      
+      if (!response.ok) {
+        throw new Error('Falha ao fazer login');
+      }
+      
+      const data = await response.json();
+      
+      setUser(data.user);
+      setIsAuthenticated(true);
+      */
+      
+      // Para desenvolvimento, simulando login bem-sucedido
+      const mockUser = {
+        id: '1',
+        name: credentials.email.split('@')[0],
+        email: credentials.email,
+        role: 'admin',
+        permissions: ['*']
+      };
+      
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      
+      toast({
+        title: 'Login realizado com sucesso',
+        description: `Bem-vindo, ${mockUser.name}!`,
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Erro ao fazer login:', err);
+      setError(err.message);
+      
+      toast({
+        title: 'Erro ao fazer login',
+        description: err.message,
+        variant: 'destructive'
+      });
+      
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Propriedades derivadas para facilitar a verificação de papéis
-  const isAuthenticated = !!user;
-  const isSuperAdmin = hasPermission('super_admin');
-  const isAdmin = hasPermission('admin');
-  const isAccountant = hasPermission('contador');
-  const isClient = hasPermission('cliente');
-  const hasOfficeAccess = hasPermission('acesso_escritorio');
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      // Em produção, você faria uma chamada API para fazer logout
+      /*
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Falha ao fazer logout');
+      }
+      */
+      
+      setUser(null);
+      setIsAuthenticated(false);
+      
+      toast({
+        title: 'Logout realizado com sucesso',
+        description: 'Você saiu do sistema com segurança.',
+      });
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+      setError(err.message);
+      
+      toast({
+        title: 'Erro ao fazer logout',
+        description: err.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Valor do contexto
   const contextValue = {
     user,
-    isLoading,
     isAuthenticated,
-    isSuperAdmin,
-    isAdmin,
-    isAccountant,
-    isClient,
-    hasOfficeAccess,
-    hasPermission,
-    shouldShowComponent,
+    isLoading,
+    login,
     logout,
+    error
   };
 
   return (

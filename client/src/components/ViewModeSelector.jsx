@@ -1,24 +1,24 @@
 import React from 'react';
-import { useViewMode } from '../contexts/ViewModeContext';
+import { useViewMode, VIEW_MODES } from '../contexts/ViewModeContext';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "./ui/select";
 import { Briefcase, Building2, User, Users } from 'lucide-react';
 
 // Componente que mostra o ícone apropriado para cada modo de visualização
 const ViewModeIcon = ({ mode }) => {
   switch (mode) {
-    case 'escritorio':
+    case VIEW_MODES.ESCRITORIO:
       return <Briefcase className="h-4 w-4 mr-2" />;
-    case 'empresa':
+    case VIEW_MODES.EMPRESA:
       return <Building2 className="h-4 w-4 mr-2" />;
-    case 'contador':
+    case VIEW_MODES.CONTADOR:
       return <User className="h-4 w-4 mr-2" />;
-    case 'externo':
+    case VIEW_MODES.EXTERNO:
       return <Users className="h-4 w-4 mr-2" />;
     default:
       return <Briefcase className="h-4 w-4 mr-2" />;

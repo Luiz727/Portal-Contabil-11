@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { useViewMode } from './ViewModeContext';
-import { useToast } from '../hooks/use-toast';
 
-// Criação do contexto para empresas
+// Criando o contexto de empresas
 const EmpresasContext = createContext({
   empresas: [],
   empresaAtual: null,
@@ -11,10 +11,10 @@ const EmpresasContext = createContext({
   error: null
 });
 
-// Hook personalizado para usar o contexto
+// Hook para acessar o contexto
 export const useEmpresas = () => useContext(EmpresasContext);
 
-// Componente provedor do contexto
+// Provedor do contexto
 export const EmpresasProvider = ({ children }) => {
   const [empresas, setEmpresas] = useState([]);
   const [empresaAtual, setEmpresaAtualState] = useState(null);
@@ -23,58 +23,85 @@ export const EmpresasProvider = ({ children }) => {
   const { viewMode } = useViewMode();
   const { toast } = useToast();
 
-  // Função para atualizar a empresa atual
+  // Função para selecionar uma empresa
   const setEmpresaAtual = (empresaId) => {
-    // Verifica se a empresa selecionada existe na lista
+    if (!empresaId) {
+      setEmpresaAtualState(null);
+      localStorage.removeItem('empresaAtual');
+      return;
+    }
+
     const empresa = empresas.find(e => e.id === empresaId);
-    
     if (!empresa) {
       toast({
         title: 'Empresa não encontrada',
-        description: 'A empresa selecionada não está disponível.',
+        description: 'A empresa selecionada não existe ou você não tem acesso a ela.',
         variant: 'destructive'
       });
       return;
     }
 
-    // Atualiza o estado local
     setEmpresaAtualState(empresa);
+    localStorage.setItem('empresaAtual', empresa.id.toString());
     
-    // Salva a preferência no localStorage
-    localStorage.setItem('empresaAtual', empresaId.toString());
-    
-    // Notifica o servidor sobre a mudança (opcional)
+    // Notificar o servidor sobre a mudança de empresa
     fetch('/api/empresa-atual', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ empresaId }),
+      body: JSON.stringify({ empresaId: empresa.id }),
     }).catch(err => {
       console.error('Erro ao atualizar empresa atual no servidor:', err);
     });
 
-    // Exibe toast de confirmação
     toast({
       title: 'Empresa alterada',
-      description: `Agora você está visualizando ${empresa.nome}`,
+      description: `Você está visualizando dados da empresa ${empresa.nome}`,
     });
   };
 
-  // Carrega a lista de empresas disponíveis para o usuário
+  // Buscar lista de empresas quando o modo de visualização mudar
   useEffect(() => {
     const fetchEmpresas = async () => {
-      // Só carrega as empresas quando estiver no modo 'empresa'
+      // Apenas buscar empresas se estiver no modo empresa
       if (viewMode !== 'empresa') {
+        setEmpresas([]);
+        setEmpresaAtualState(null);
         setIsLoading(false);
         return;
       }
-      
+
       setIsLoading(true);
-      
       try {
-        const response = await fetch('/api/empresas');
+        // Para desenvolvimento, dados simulados
+        const mockEmpresas = [
+          { id: 1, nome: 'Empresa ABC Ltda', cnpj: '12.345.678/0001-90', cidade: 'São Paulo', uf: 'SP' },
+          { id: 2, nome: 'Comércio XYZ Ltda', cnpj: '98.765.432/0001-10', cidade: 'Rio de Janeiro', uf: 'RJ' },
+          { id: 3, nome: 'Indústria 123 S/A', cnpj: '45.678.912/0001-34', cidade: 'Belo Horizonte', uf: 'MG' }
+        ];
         
+        setEmpresas(mockEmpresas);
+        
+        // Verificar se há empresa salva no localStorage
+        const savedEmpresaId = localStorage.getItem('empresaAtual');
+        if (savedEmpresaId) {
+          const empresaId = parseInt(savedEmpresaId);
+          const empresa = mockEmpresas.find(e => e.id === empresaId);
+          if (empresa) {
+            setEmpresaAtualState(empresa);
+          } else if (mockEmpresas.length > 0) {
+            setEmpresaAtualState(mockEmpresas[0]);
+            localStorage.setItem('empresaAtual', mockEmpresas[0].id.toString());
+          }
+        } else if (mockEmpresas.length > 0) {
+          setEmpresaAtualState(mockEmpresas[0]);
+          localStorage.setItem('empresaAtual', mockEmpresas[0].id.toString());
+        }
+        
+        // Em produção, use a API
+        /*
+        const response = await fetch('/api/empresas');
         if (!response.ok) {
           throw new Error('Falha ao carregar empresas');
         }
@@ -82,15 +109,15 @@ export const EmpresasProvider = ({ children }) => {
         const data = await response.json();
         setEmpresas(data.empresas || []);
         
-        // Se tiver uma empresa salva no localStorage, use-a (se estiver disponível)
         const savedEmpresaId = localStorage.getItem('empresaAtual');
-        
-        if (savedEmpresaId && data.empresas.find(e => e.id === parseInt(savedEmpresaId))) {
-          setEmpresaAtual(parseInt(savedEmpresaId));
+        if (savedEmpresaId && data.empresas.some(e => e.id === parseInt(savedEmpresaId))) {
+          const empresa = data.empresas.find(e => e.id === parseInt(savedEmpresaId));
+          setEmpresaAtualState(empresa);
         } else if (data.empresas.length > 0) {
-          // Caso contrário, use a primeira empresa disponível
-          setEmpresaAtual(data.empresas[0].id);
+          setEmpresaAtualState(data.empresas[0]);
+          localStorage.setItem('empresaAtual', data.empresas[0].id.toString());
         }
+        */
       } catch (err) {
         console.error('Erro ao carregar empresas:', err);
         setError(err.message);
@@ -100,9 +127,8 @@ export const EmpresasProvider = ({ children }) => {
     };
 
     fetchEmpresas();
-  }, [viewMode]); // Recarrega quando o modo de visualização muda
+  }, [viewMode]);
 
-  // Valor do contexto
   const contextValue = {
     empresas,
     empresaAtual,
