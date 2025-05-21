@@ -34,6 +34,7 @@ import TaxCalculatorNIXCONPage from "./pages/TaxCalculatorNIXCONPage";
 
 // Páginas administrativas
 import ConfiguracoesAdminPage from "@/pages/admin/ConfiguracoesAdminPage";
+import ConfiguracoesEmpresaPage from "@/pages/admin/ConfiguracoesEmpresaPage";
 import ProdutosUniversaisPage from "./pages/admin/ProdutosUniversaisPage";
 import ImportacaoProdutosPage from "./pages/admin/ImportacaoProdutosPage";
 import PlanosAssinaturasPage from "./pages/admin/PlanosAssinaturasPage";
@@ -239,6 +240,14 @@ function Router() {
         <Route path="/admin/usuarios">
           <MainLayout>
             <UsuariosPermissoesPage />
+          </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/configuracoes-empresa">
+          <MainLayout>
+            <ConfiguracoesEmpresaPage />
           </MainLayout>
         </Route>
       )}
