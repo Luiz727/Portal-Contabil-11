@@ -1,28 +1,19 @@
 import { Request, Response, Express } from "express";
 import { storage } from "./storage";
-import { isAuthenticated } from "./replitAuth";
-import { insertHonorarioSchema } from "@shared/schema";
+import { requireAuth, requireRole, requireViewMode } from "./middleware/auth";
+import { insertHonorarioSchema, VIEW_MODES } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { honorarios, clients, nfses } from "@shared/schema";
 
 export function registerHonorariosRoutes(app: Express) {
-  // Middleware para verificar se o usuário é do escritório (admin ou contador)
-  const isEscritorioUser = (req: any, res: Response, next: Function) => {
-    const user = req.user?.claims;
-    const userRole = user?.role || "client"; // Padrão como cliente se não tiver role
-
-    if (userRole === "admin" || userRole === "accountant") {
-      return next();
-    }
-
-    return res.status(403).json({
-      message: "Acesso negado. Esta funcionalidade é restrita para funcionários do escritório."
-    });
-  };
+  // Usando os middlewares mais avançados de autenticação e permissionamento
+  const escritorioOnly = requireRole(["admin", "accountant"]);
+  const viewModeEscritorio = requireViewMode([VIEW_MODES.ESCRITORIO]);
+  
 
   // Buscar todos os honorários com dados do cliente
-  app.get("/api/honorarios", isAuthenticated, isEscritorioUser, async (req: Request, res: Response) => {
+  app.get("/api/honorarios", requireAuth, escritorioOnly, viewModeEscritorio, async (req: Request, res: Response) => {
     try {
       const result = await db.query.honorarios.findMany({
         with: {

@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { isAuthenticated } from "../replitAuth";
-import { storage } from "../storage";
+import { db } from "../db";
+import { clientUsers, users, userViewModes, VIEW_MODES } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 // Middleware para verificar se o usuário está autenticado
 export const requireAuth = isAuthenticated;
@@ -22,32 +24,6 @@ export const requireRole = (roles: string[]) => {
     return res.status(403).json({
       message: "Acesso negado. Você não tem permissão para acessar este recurso."
     });
-  };
-};
-
-// Middleware para verificar se o usuário tem uma permissão específica
-export const requirePermission = (permissionCode: string) => {
-  return async (req: any, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated() || !req.user?.claims) {
-      return res.status(401).json({ message: "Não autenticado" });
-    }
-    
-    const userId = req.user.claims.sub;
-    
-    try {
-      const hasPermission = await storage.hasPermission(userId, permissionCode);
-      
-      if (hasPermission) {
-        return next();
-      }
-      
-      return res.status(403).json({
-        message: "Acesso negado. Você não tem permissão para acessar este recurso."
-      });
-    } catch (error) {
-      console.error("Erro ao verificar permissão:", error);
-      return res.status(500).json({ message: "Erro ao verificar permissões" });
-    }
   };
 };
 
@@ -73,14 +49,14 @@ export const requireClientAccess = (accessLevel: string[] = ["admin", "standard"
       }
       
       // Busca o relacionamento do usuário com o cliente
-      const clientUsers = await db.select()
-        .from(clientUsersTable)
+      const result = await db.select()
+        .from(clientUsers)
         .where(and(
-          eq(clientUsersTable.userId, userId),
-          eq(clientUsersTable.clientId, clientId)
+          eq(clientUsers.userId, userId),
+          eq(clientUsers.clientId, clientId)
         ));
       
-      if (clientUsers.length > 0 && accessLevel.includes(clientUsers[0].accessLevel)) {
+      if (result.length > 0 && accessLevel.includes(result[0].accessLevel)) {
         return next();
       }
       
@@ -102,7 +78,7 @@ export const requireViewMode = (viewModes: string[]) => {
     }
     
     // Buscar o modo de visualização atual do usuário da sessão
-    const currentViewMode = req.session.viewMode || "escritorio"; // Valor padrão
+    const currentViewMode = req.session.viewMode || VIEW_MODES.ESCRITORIO;
     
     if (viewModes.includes(currentViewMode)) {
       return next();
@@ -113,8 +89,3 @@ export const requireViewMode = (viewModes: string[]) => {
     });
   };
 };
-
-// Cliente do middleware
-import { db } from "../db";
-import { clientUsers as clientUsersTable } from "@shared/schema";
-import { and, eq } from "drizzle-orm";

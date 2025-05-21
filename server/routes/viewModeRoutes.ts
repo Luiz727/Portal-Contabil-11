@@ -2,7 +2,7 @@ import { Request, Response, Express } from "express";
 import { storage } from "../storage";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
-import { userViewModes, VIEW_MODES } from "@shared/schema";
+import { userViewModes as userViewModesTable, VIEW_MODES } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 export function registerViewModeRoutes(app: Express) {
@@ -16,11 +16,11 @@ export function registerViewModeRoutes(app: Express) {
       }
       
       // Buscar todos os modos de visualização do usuário
-      const userViewModes = await db
+      const viewModes = await db
         .select()
-        .from(userViewModes)
-        .where(eq(userViewModes.userId, userId))
-        .orderBy(userViewModes.lastUsed);
+        .from(userViewModesTable)
+        .where(eq(userViewModesTable.userId, userId))
+        .orderBy(userViewModesTable.lastUsed);
       
       // Obter o modo de visualização atual da sessão
       const currentViewMode = req.session.viewMode || VIEW_MODES.ESCRITORIO;
