@@ -244,10 +244,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(users.firstName, users.lastName);
   }
 
-  async updateUserStatus(id: string, isActive: boolean): Promise<User | undefined> {
+  async updateUserStatus(id: string, active: boolean): Promise<User | undefined> {
     const [user] = await db
       .update(users)
-      .set({ isActive, updatedAt: new Date() })
+      .set({ active, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return user;
