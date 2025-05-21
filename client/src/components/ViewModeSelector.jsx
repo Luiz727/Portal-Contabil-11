@@ -49,7 +49,7 @@ const ViewModeSelector = () => {
       value={viewMode} 
       onValueChange={setViewMode}
     >
-      <SelectTrigger className="w-[180px] h-9">
+      <SelectTrigger className="w-[120px] md:w-[180px] h-9">
         <SelectValue>
           <div className="flex items-center">
             <ViewModeIcon mode={viewMode} />

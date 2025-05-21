@@ -49,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         {/* Logo */}
         <div className="flex items-center">
           <img
-            src="/assets/logo.svg"
+            src="/src/assets/logo-nixcon-full.png"
             alt="NIXCON"
             className="h-8 w-auto"
           />
@@ -60,9 +60,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 
         {/* View mode selector */}
         <div className="ml-auto flex items-center space-x-4">
-          <div className="hidden md:block">
-            <ViewModeSelector />
-          </div>
+          <ViewModeSelector />
 
           {/* Empresa selector (only shown when in 'empresa' view mode) */}
           <div className="hidden md:block">
