@@ -188,29 +188,111 @@ const ViewModeSelector = () => {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         
-        {/* Contador */}
-        <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.CONTADOR)}
-          className="cursor-pointer"
-        >
-          <Calculator size={16} className="text-[#d9bb42] mr-2" />
-          <span>Visão de Contador</span>
-          {viewMode === VIEW_MODES.CONTADOR && (
-            <Check className="ml-auto h-4 w-4" />
-          )}
-        </DropdownMenuItem>
+        {/* Contador - Com submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer">
+            <Calculator size={16} className="text-[#d9bb42] mr-2" />
+            <span>Visão de Contador</span>
+            {viewMode === VIEW_MODES.CONTADOR && (
+              <Check className="ml-auto h-4 w-4 mr-2" />
+            )}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-64">
+            <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            {Object.values(profiles).filter(profile => 
+              profile.id.includes('contador_')
+            ).map((profile) => (
+              <DropdownMenuItem 
+                key={profile.id}
+                className="cursor-pointer"
+                onClick={() => {
+                  changeViewMode(VIEW_MODES.CONTADOR);
+                  changeActiveProfile(profile.id);
+                }}
+              >
+                <Users size={16} className="text-[#d9bb42] mr-2" />
+                <div className="flex flex-col">
+                  <span className="text-sm">{profile.nome || 'Contador'}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {profile.permissoes?.length || 0} permissões
+                  </span>
+                </div>
+                {activeProfile && activeProfile.id === profile.id && viewMode === VIEW_MODES.CONTADOR && (
+                  <Check className="ml-auto h-4 w-4" />
+                )}
+              </DropdownMenuItem>
+            ))}
+            
+            {/* Se não houver perfis específicos, mostrar a opção padrão */}
+            {!Object.values(profiles).filter(profile => profile.id.includes('contador_')).length && (
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => changeViewMode(VIEW_MODES.CONTADOR)}
+              >
+                <Users size={16} className="text-[#d9bb42] mr-2" />
+                <span>Contador Padrão</span>
+                {viewMode === VIEW_MODES.CONTADOR && !activeProfile?.id.includes('contador_') && (
+                  <Check className="ml-auto h-4 w-4" />
+                )}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
-        {/* Usuário Externo */}
-        <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.EXTERNO)}
-          className="cursor-pointer"
-        >
-          <User size={16} className="text-[#d9bb42] mr-2" />
-          <span>Visão Externa</span>
-          {viewMode === VIEW_MODES.EXTERNO && (
-            <Check className="ml-auto h-4 w-4" />
-          )}
-        </DropdownMenuItem>
+        {/* Usuário Externo - Com submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer">
+            <User size={16} className="text-[#d9bb42] mr-2" />
+            <span>Visão Externa</span>
+            {viewMode === VIEW_MODES.EXTERNO && (
+              <Check className="ml-auto h-4 w-4 mr-2" />
+            )}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-64">
+            <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            {Object.values(profiles).filter(profile => 
+              profile.id.includes('externo_')
+            ).map((profile) => (
+              <DropdownMenuItem 
+                key={profile.id}
+                className="cursor-pointer"
+                onClick={() => {
+                  changeViewMode(VIEW_MODES.EXTERNO);
+                  changeActiveProfile(profile.id);
+                }}
+              >
+                <Users size={16} className="text-[#d9bb42] mr-2" />
+                <div className="flex flex-col">
+                  <span className="text-sm">{profile.nome || 'Usuário Externo'}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {profile.permissoes?.length || 0} permissões
+                  </span>
+                </div>
+                {activeProfile && activeProfile.id === profile.id && viewMode === VIEW_MODES.EXTERNO && (
+                  <Check className="ml-auto h-4 w-4" />
+                )}
+              </DropdownMenuItem>
+            ))}
+            
+            {/* Se não houver perfis específicos, mostrar a opção padrão */}
+            {!Object.values(profiles).filter(profile => profile.id.includes('externo_')).length && (
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => changeViewMode(VIEW_MODES.EXTERNO)}
+              >
+                <Users size={16} className="text-[#d9bb42] mr-2" />
+                <span>Usuário Externo Padrão</span>
+                {viewMode === VIEW_MODES.EXTERNO && !activeProfile?.id.includes('externo_') && (
+                  <Check className="ml-auto h-4 w-4" />
+                )}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
         <DropdownMenuSeparator />
         

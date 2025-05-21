@@ -16,31 +16,162 @@ export const VIEW_MODE_NAMES = {
   [VIEW_MODES.EXTERNO]: 'Visão Externa'
 };
 
+// Permissões padrão para cada tipo de visualização
+export const DEFAULT_PERMISSIONS = {
+  [VIEW_MODES.ESCRITORIO]: {
+    descricao: 'Acesso completo às funcionalidades do escritório contábil',
+    permissoes: {
+      'fiscal': [
+        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
+        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
+        { id: 'fiscal_ged', label: 'GED Fiscal', permissao: true },
+        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
+        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: true },
+        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
+      ],
+      'financeiro': [
+        { id: 'financeiro_honorarios', label: 'Honorários', permissao: true },
+        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: true },
+        { id: 'financeiro_pagamentos', label: 'Pagamentos', permissao: true },
+        { id: 'financeiro_recebimentos', label: 'Recebimentos', permissao: true },
+        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: true }
+      ],
+      'gerencial': [
+        { id: 'gerencial_clientes', label: 'Gestão de Clientes', permissao: true },
+        { id: 'gerencial_usuarios', label: 'Gestão de Usuários', permissao: true },
+        { id: 'gerencial_empresas', label: 'Gestão de Empresas', permissao: true },
+        { id: 'gerencial_produtos', label: 'Cadastro Universal de Produtos', permissao: true },
+        { id: 'gerencial_planos', label: 'Planos e Assinaturas', permissao: true }
+      ],
+      'admin': [
+        { id: 'admin_configuracoes', label: 'Configurações do Sistema', permissao: true },
+        { id: 'admin_perfis', label: 'Perfis de Visualização', permissao: true },
+        { id: 'admin_integracao', label: 'Integrações', permissao: true },
+        { id: 'admin_logs', label: 'Logs do Sistema', permissao: true }
+      ]
+    }
+  },
+  [VIEW_MODES.EMPRESA]: {
+    descricao: 'Visualização da empresa cliente com acesso às suas informações e operações',
+    permissoes: {
+      'fiscal': [
+        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
+        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
+        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
+        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: false },
+        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
+      ],
+      'financeiro': [
+        { id: 'financeiro_honorarios', label: 'Honorários', permissao: false },
+        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: true },
+        { id: 'financeiro_pagamentos', label: 'Pagamentos', permissao: true },
+        { id: 'financeiro_recebimentos', label: 'Recebimentos', permissao: true },
+        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: false }
+      ],
+      'estoque': [
+        { id: 'estoque_produtos', label: 'Produtos', permissao: true },
+        { id: 'estoque_movimentacoes', label: 'Movimentações', permissao: true },
+        { id: 'estoque_kits', label: 'Kits de Produtos', permissao: true },
+        { id: 'estoque_relatorios', label: 'Relatórios de Estoque', permissao: true }
+      ],
+      'documentos': [
+        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
+        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
+        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
+      ]
+    }
+  },
+  [VIEW_MODES.CONTADOR]: {
+    descricao: 'Visualização para contadores externos com acesso limitado às funções contábeis',
+    permissoes: {
+      'fiscal': [
+        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
+        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
+        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
+        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: true },
+        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
+      ],
+      'financeiro': [
+        { id: 'financeiro_honorarios', label: 'Honorários', permissao: false },
+        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: false },
+        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: true }
+      ],
+      'documentos': [
+        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
+        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
+        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
+      ]
+    }
+  },
+  [VIEW_MODES.EXTERNO]: {
+    descricao: 'Visualização para usuários externos com acesso limitado a módulos específicos',
+    permissoes: {
+      'fiscal': [
+        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: false },
+        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: false },
+        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
+        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: false },
+        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: false }
+      ],
+      'documentos': [
+        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
+        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
+        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
+      ]
+    }
+  }
+};
+
 // Perfis de visualização disponíveis
 const PERFIS_VISUALIZACAO = {
-  ADMINISTRADOR: {
+  // Perfis de Administrador
+  administrador: {
     id: 'administrador',
     nome: 'Administrador',
     descricao: 'Acesso completo ao sistema',
     permissoes: ['*'] // Todas as permissões
   },
-  CONTADOR: {
-    id: 'contador',
-    nome: 'Contador',
+  
+  // Perfis de Contador
+  contador_padrao: {
+    id: 'contador_padrao',
+    nome: 'Contador Padrão',
     descricao: 'Acesso a funções contábeis e fiscais',
     permissoes: ['fiscal', 'financeiro', 'documentos', 'relatorios']
   },
-  EMPRESA_BASICO: {
+  contador_fiscal: {
+    id: 'contador_fiscal',
+    nome: 'Contador Fiscal',
+    descricao: 'Especialista em operações fiscais',
+    permissoes: ['fiscal', 'documentos', 'relatorios_fiscal']
+  },
+  
+  // Perfis de Empresa
+  empresa_basico: {
     id: 'empresa_basico',
     nome: 'Empresa - Básico',
     descricao: 'Permissões para o plano básico de empresas usuárias',
     permissoes: ['documentos', 'fiscal_basico', 'relatorios_basico']
   },
-  EMPRESA_COMPLETO: {
+  empresa_completo: {
     id: 'empresa_completo',
     nome: 'Empresa - Completo',
     descricao: 'Permissões para o plano completo de empresas usuárias',
     permissoes: ['documentos', 'fiscal', 'financeiro', 'estoque', 'relatorios']
+  },
+  
+  // Perfis de Usuário Externo
+  externo_fiscal: {
+    id: 'externo_fiscal',
+    nome: 'Usuário Fiscal',
+    descricao: 'Acesso apenas ao módulo fiscal',
+    permissoes: ['fiscal_basico']
+  },
+  externo_contador: {
+    id: 'externo_contador',
+    nome: 'Contador Terceirizado',
+    descricao: 'Acesso a módulos contábeis específicos',
+    permissoes: ['fiscal', 'relatorios']
   }
 };
 
