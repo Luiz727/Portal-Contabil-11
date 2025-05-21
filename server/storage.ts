@@ -217,8 +217,32 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      // Seleção explícita de colunas para evitar o erro com a coluna 'active'
+      const [user] = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        role: users.role,
+        lastLogin: users.lastLogin,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt
+      }).from(users).where(eq(users.id, id));
+      
+      // Adicionar a propriedade 'active' manualmente com valor padrão
+      if (user) {
+        return {
+          ...user,
+          active: true // Valor padrão conforme definido no schema
+        };
+      }
+      return user;
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
+      throw error;
+    }
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
