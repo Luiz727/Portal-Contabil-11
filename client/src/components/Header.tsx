@@ -36,7 +36,7 @@ const NIXCONLogo = () => (
 );
 
 const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const { viewMode, viewModeName } = useViewMode();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -65,10 +65,8 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           </Button>
           
           {/* Logo */}
-          <Link href="/">
-            <a className="flex items-center">
-              <NIXCONLogo />
-            </a>
+          <Link href="/" className="flex items-center">
+            <NIXCONLogo />
           </Link>
         </div>
         
@@ -160,7 +158,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
                 <HelpCircle className="mr-2 h-4 w-4" />
                 <span>Ajuda</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={signOut}>
+              <DropdownMenuItem onClick={() => logout?.()}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>

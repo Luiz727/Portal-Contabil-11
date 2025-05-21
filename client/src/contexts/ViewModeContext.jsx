@@ -1,377 +1,115 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { VIEW_MODES } from '../../shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
-// Tipos de visualização disponíveis
-export const VIEW_MODES = {
-  ESCRITORIO: 'escritorio',  // Escritório contábil
-  EMPRESA: 'empresa',       // Empresa cliente
-  CONTADOR: 'contador',     // Contador externo
-  EXTERNO: 'externo'        // Usuário externo de módulos específicos
-};
+// Criação do contexto para o modo de visualização
+const ViewModeContext = createContext({
+  viewMode: 'escritorio', // Modo padrão
+  viewModeName: 'Escritório', // Nome amigável
+  setViewMode: () => {},
+  availableViewModes: [],
+  isLoading: true,
+  error: null
+});
 
-// Nomes amigáveis para exibição
-export const VIEW_MODE_NAMES = {
-  [VIEW_MODES.ESCRITORIO]: 'Visão do Escritório',
-  [VIEW_MODES.EMPRESA]: 'Visão da Empresa',
-  [VIEW_MODES.CONTADOR]: 'Visão de Contador',
-  [VIEW_MODES.EXTERNO]: 'Visão Externa'
-};
+// Hook personalizado para usar o contexto
+export const useViewMode = () => useContext(ViewModeContext);
 
-// Permissões padrão para cada tipo de visualização
-export const DEFAULT_PERMISSIONS = {
-  [VIEW_MODES.ESCRITORIO]: {
-    descricao: 'Acesso completo às funcionalidades do escritório contábil',
-    permissoes: {
-      'fiscal': [
-        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
-        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
-        { id: 'fiscal_ged', label: 'GED Fiscal', permissao: true },
-        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
-        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: true },
-        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
-      ],
-      'financeiro': [
-        { id: 'financeiro_honorarios', label: 'Honorários', permissao: true },
-        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: true },
-        { id: 'financeiro_pagamentos', label: 'Pagamentos', permissao: true },
-        { id: 'financeiro_recebimentos', label: 'Recebimentos', permissao: true },
-        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: true }
-      ],
-      'gerencial': [
-        { id: 'gerencial_clientes', label: 'Gestão de Clientes', permissao: true },
-        { id: 'gerencial_usuarios', label: 'Gestão de Usuários', permissao: true },
-        { id: 'gerencial_empresas', label: 'Gestão de Empresas', permissao: true },
-        { id: 'gerencial_produtos', label: 'Cadastro Universal de Produtos', permissao: true }
-      ],
-      'admin': [
-        { id: 'admin_configuracoes', label: 'Configurações do Sistema', permissao: true },
-        { id: 'admin_perfis', label: 'Perfis de Visualização', permissao: true },
-        { id: 'admin_integracao', label: 'Integrações', permissao: true },
-        { id: 'admin_logs', label: 'Logs do Sistema', permissao: true }
-      ]
-    }
-  },
-  [VIEW_MODES.EMPRESA]: {
-    descricao: 'Visualização da empresa cliente com acesso às suas informações e operações',
-    permissoes: {
-      'fiscal': [
-        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
-        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
-        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
-        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: false },
-        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
-      ],
-      'financeiro': [
-        { id: 'financeiro_honorarios', label: 'Honorários', permissao: false },
-        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: true },
-        { id: 'financeiro_pagamentos', label: 'Pagamentos', permissao: true },
-        { id: 'financeiro_recebimentos', label: 'Recebimentos', permissao: true },
-        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: false }
-      ],
-      'estoque': [
-        { id: 'estoque_produtos', label: 'Produtos', permissao: true },
-        { id: 'estoque_movimentacoes', label: 'Movimentações', permissao: true },
-        { id: 'estoque_kits', label: 'Kits de Produtos', permissao: true },
-        { id: 'estoque_relatorios', label: 'Relatórios de Estoque', permissao: true }
-      ],
-      'documentos': [
-        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
-        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
-        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
-      ]
-    }
-  },
-  [VIEW_MODES.CONTADOR]: {
-    descricao: 'Visualização para contadores externos com acesso limitado às funções contábeis',
-    permissoes: {
-      'fiscal': [
-        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: true },
-        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: true },
-        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
-        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: true },
-        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: true }
-      ],
-      'financeiro': [
-        { id: 'financeiro_honorarios', label: 'Honorários', permissao: false },
-        { id: 'financeiro_conciliacoes', label: 'Conciliações Bancárias', permissao: false },
-        { id: 'financeiro_relatorios', label: 'Relatórios Financeiros', permissao: true }
-      ],
-      'documentos': [
-        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
-        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
-        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
-      ]
-    }
-  },
-  [VIEW_MODES.EXTERNO]: {
-    descricao: 'Visualização para usuários externos com acesso limitado a módulos específicos',
-    permissoes: {
-      'fiscal': [
-        { id: 'fiscal_nfe', label: 'Notas Fiscais Eletrônicas', permissao: false },
-        { id: 'fiscal_nfse', label: 'Notas Fiscais de Serviço', permissao: false },
-        { id: 'fiscal_impostos', label: 'Cálculo de Impostos', permissao: true },
-        { id: 'fiscal_sped', label: 'SPED Fiscal', permissao: false },
-        { id: 'fiscal_impostos_retidos', label: 'Impostos Retidos', permissao: false }
-      ],
-      'documentos': [
-        { id: 'documentos_upload', label: 'Upload de Documentos', permissao: true },
-        { id: 'documentos_ged', label: 'GED Documentos', permissao: true },
-        { id: 'documentos_assinatura', label: 'Assinatura Eletrônica', permissao: false }
-      ]
-    }
-  }
-};
-
-// Perfis de visualização disponíveis
-const PERFIS_VISUALIZACAO = {
-  // Perfis de Administrador
-  administrador: {
-    id: 'administrador',
-    nome: 'Administrador',
-    descricao: 'Acesso completo ao sistema',
-    permissoes: ['*'] // Todas as permissões
-  },
-  
-  // Perfis de Contador
-  contador_padrao: {
-    id: 'contador_padrao',
-    nome: 'Contador Padrão',
-    descricao: 'Acesso a funções contábeis e fiscais',
-    permissoes: ['fiscal', 'financeiro', 'documentos', 'relatorios']
-  },
-  contador_fiscal: {
-    id: 'contador_fiscal',
-    nome: 'Contador Fiscal',
-    descricao: 'Especialista em operações fiscais',
-    permissoes: ['fiscal', 'documentos', 'relatorios_fiscal']
-  },
-  
-  // Perfis de Empresa
-  empresa_basico: {
-    id: 'empresa_basico',
-    nome: 'Empresa - Básico',
-    descricao: 'Permissões para o plano básico de empresas usuárias',
-    permissoes: ['documentos', 'fiscal_basico', 'relatorios_basico']
-  },
-  empresa_completo: {
-    id: 'empresa_completo',
-    nome: 'Empresa - Completo',
-    descricao: 'Permissões para o plano completo de empresas usuárias',
-    permissoes: ['documentos', 'fiscal', 'financeiro', 'estoque', 'relatorios']
-  },
-  
-  // Perfis de Usuário Externo
-  externo_fiscal: {
-    id: 'externo_fiscal',
-    nome: 'Usuário Fiscal',
-    descricao: 'Acesso apenas ao módulo fiscal',
-    permissoes: ['fiscal_basico']
-  },
-  externo_contador: {
-    id: 'externo_contador',
-    nome: 'Contador Terceirizado',
-    descricao: 'Acesso a módulos contábeis específicos',
-    permissoes: ['fiscal', 'relatorios']
-  }
-};
-
-// Contexto para o modo de visualização
-const ViewModeContext = createContext();
-
+// Componente provedor do contexto
 export const ViewModeProvider = ({ children }) => {
-  // Estado para armazenar o modo de visualização atual
-  const [viewMode, setViewMode] = useState(VIEW_MODES.ESCRITORIO);
-  // Estado para armazenar a empresa atual (quando estiver visualizando como empresa)
-  const [currentCompany, setCurrentCompany] = useState(null);
-  // Estado para armazenar o perfil de visualização ativo
-  const [activeProfile, setActiveProfile] = useState(PERFIS_VISUALIZACAO.administrador);
-  // Estado para armazenar todos os perfis disponíveis
-  const [profiles, setProfiles] = useState(PERFIS_VISUALIZACAO);
-  
-  // Carrega as preferências salvas ao inicializar
+  const [viewMode, setViewModeState] = useState('escritorio');
+  const [viewModeName, setViewModeName] = useState('Escritório');
+  const [availableViewModes, setAvailableViewModes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { toast } = useToast();
+
+  // Função para atualizar o modo de visualização
+  const setViewMode = (mode) => {
+    if (!availableViewModes.find(vm => vm.id === mode)) {
+      toast({
+        title: 'Acesso negado',
+        description: 'Você não tem permissão para acessar este modo de visualização.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Atualiza o estado local
+    setViewModeState(mode);
+    
+    // Atualiza o nome amigável com base no modo
+    const modeName = VIEW_MODES[mode] || 'Desconhecido';
+    setViewModeName(modeName);
+    
+    // Salva a preferência no localStorage
+    localStorage.setItem('viewMode', mode);
+    
+    // Notifica o servidor sobre a mudança (opcional)
+    fetch('/api/view-mode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ viewMode: mode }),
+    }).catch(err => {
+      console.error('Erro ao atualizar modo de visualização no servidor:', err);
+    });
+
+    // Exibe toast de confirmação
+    toast({
+      title: 'Modo de visualização alterado',
+      description: `Agora você está no modo ${modeName}`,
+    });
+  };
+
+  // Carrega os modos de visualização disponíveis para o usuário atual
   useEffect(() => {
-    const savedViewMode = localStorage.getItem('nixcon_view_mode');
-    const savedCompany = localStorage.getItem('nixcon_current_company');
-    const savedProfile = localStorage.getItem('nixcon_active_profile');
-    const savedProfiles = localStorage.getItem('nixcon_profiles');
-    
-    if (savedViewMode && Object.values(VIEW_MODES).includes(savedViewMode)) {
-      setViewMode(savedViewMode);
-    }
-    
-    if (savedCompany) {
+    const fetchAvailableViewModes = async () => {
+      setIsLoading(true);
       try {
-        setCurrentCompany(JSON.parse(savedCompany));
-      } catch (error) {
-        console.error('Erro ao carregar a empresa salva:', error);
-        localStorage.removeItem('nixcon_current_company');
-      }
-    }
-    
-    if (savedProfile) {
-      try {
-        setActiveProfile(JSON.parse(savedProfile));
-      } catch (error) {
-        console.error('Erro ao carregar o perfil salvo:', error);
-        localStorage.removeItem('nixcon_active_profile');
-      }
-    }
-    
-    if (savedProfiles) {
-      try {
-        setProfiles(JSON.parse(savedProfiles));
-      } catch (error) {
-        console.error('Erro ao carregar os perfis salvos:', error);
-        localStorage.removeItem('nixcon_profiles');
-      }
-    }
-  }, []);
-  
-  // Função para alterar o modo de visualização
-  const changeViewMode = (newMode, company = null, profile = null) => {
-    if (Object.values(VIEW_MODES).includes(newMode)) {
-      setViewMode(newMode);
-      localStorage.setItem('nixcon_view_mode', newMode);
-      
-      // Se estiver mudando para visão de empresa e tiver uma empresa específica
-      if (newMode === VIEW_MODES.EMPRESA && company) {
-        setCurrentCompany(company);
-        localStorage.setItem('nixcon_current_company', JSON.stringify(company));
+        const response = await fetch('/api/user/view-modes');
         
-        // Se a empresa tem um perfil específico definido, usá-lo
-        if (company.perfilVisualizacao) {
-          const perfilEmpresa = profiles[company.perfilVisualizacao] || 
-                               PERFIS_VISUALIZACAO.empresa_basico;
-          setActiveProfile(perfilEmpresa);
-          localStorage.setItem('nixcon_active_profile', JSON.stringify(perfilEmpresa));
-        } else if (profile) {
-          // Se um perfil específico foi passado como parâmetro
-          setActiveProfile(profile);
-          localStorage.setItem('nixcon_active_profile', JSON.stringify(profile));
-        } else {
-          // Padrão para empresas
-          setActiveProfile(PERFIS_VISUALIZACAO.empresa_basico);
-          localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.empresa_basico));
+        if (!response.ok) {
+          throw new Error('Falha ao carregar modos de visualização');
         }
-      } else if (newMode === VIEW_MODES.ESCRITORIO) {
-        // Se estiver mudando para visão de escritório, usar perfil de administrador
-        setActiveProfile(PERFIS_VISUALIZACAO.administrador);
-        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.administrador));
-      } else if (newMode === VIEW_MODES.CONTADOR) {
-        // Se estiver mudando para visão de contador, usar perfil de contador padrão
-        setActiveProfile(PERFIS_VISUALIZACAO.contador_padrao);
-        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.contador_padrao));
-      } else if (newMode === VIEW_MODES.EXTERNO) {
-        // Se estiver mudando para visão externa, usar perfil externo padrão
-        setActiveProfile(PERFIS_VISUALIZACAO.externo_fiscal);
-        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.externo_fiscal));
-      }
-    }
-  };
-  
-  // Função para adicionar um novo perfil
-  const addProfile = (profile) => {
-    // Validar perfil
-    if (!profile || !profile.id || !profile.nome || !profile.permissoes) {
-      throw new Error('Perfil inválido');
-    }
-    
-    // Atualizar perfis
-    const updatedProfiles = {
-      ...profiles,
-      [profile.id]: profile
-    };
-    
-    setProfiles(updatedProfiles);
-    localStorage.setItem('nixcon_profiles', JSON.stringify(updatedProfiles));
-  };
-  
-  // Função para atualizar um perfil existente
-  const updateProfile = (profileId, updatedProfile) => {
-    if (!profiles[profileId]) {
-      throw new Error(`Perfil com ID ${profileId} não encontrado`);
-    }
-    
-    const newProfiles = {
-      ...profiles,
-      [profileId]: {
-        ...profiles[profileId],
-        ...updatedProfile
+        
+        const data = await response.json();
+        setAvailableViewModes(data.viewModes || []);
+        
+        // Se tiver um modo salvo no localStorage, use-o (se estiver disponível)
+        const savedMode = localStorage.getItem('viewMode');
+        if (savedMode && data.viewModes.find(vm => vm.id === savedMode)) {
+          setViewMode(savedMode);
+        } else if (data.viewModes.length > 0) {
+          // Caso contrário, use o primeiro modo disponível
+          setViewMode(data.viewModes[0].id);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar modos de visualização:', err);
+        setError(err.message);
+        
+        // Fallback para modo padrão se não conseguir carregar
+        setViewModeState('escritorio');
+        setViewModeName('Escritório');
+      } finally {
+        setIsLoading(false);
       }
     };
-    
-    setProfiles(newProfiles);
-    localStorage.setItem('nixcon_profiles', JSON.stringify(newProfiles));
-    
-    // Se o perfil ativo for o que está sendo atualizado, atualizar também
-    if (activeProfile.id === profileId) {
-      const updatedActiveProfile = {
-        ...activeProfile,
-        ...updatedProfile
-      };
-      setActiveProfile(updatedActiveProfile);
-      localStorage.setItem('nixcon_active_profile', JSON.stringify(updatedActiveProfile));
-    }
-  };
-  
-  // Função para remover um perfil
-  const removeProfile = (profileId) => {
-    // Não permitir remover perfis padrão
-    if (
-      profileId === 'administrador' || 
-      profileId === 'contador_padrao' ||
-      profileId === 'empresa_basico' ||
-      profileId === 'empresa_completo'
-    ) {
-      throw new Error('Não é possível remover perfis padrão do sistema');
-    }
-    
-    const { [profileId]: removedProfile, ...remainingProfiles } = profiles;
-    
-    if (!removedProfile) {
-      throw new Error(`Perfil com ID ${profileId} não encontrado`);
-    }
-    
-    setProfiles(remainingProfiles);
-    localStorage.setItem('nixcon_profiles', JSON.stringify(remainingProfiles));
-    
-    // Se o perfil ativo for o que está sendo removido, voltar para o perfil padrão
-    if (activeProfile.id === profileId) {
-      setActiveProfile(PERFIS_VISUALIZACAO.administrador);
-      localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.administrador));
-    }
-  };
-  
-  // Função para verificar se o usuário tem uma permissão específica
-  const hasPermission = (permission) => {
-    if (!activeProfile || !activeProfile.permissoes) {
-      return false;
-    }
-    
-    // Se tiver permissão '*', tem acesso a tudo
-    if (activeProfile.permissoes.includes('*')) {
-      return true;
-    }
-    
-    return activeProfile.permissoes.includes(permission);
-  };
-  
-  // Valor do contexto que será disponibilizado
+
+    fetchAvailableViewModes();
+  }, []);
+
+  // Valor do contexto
   const contextValue = {
     viewMode,
-    currentCompany,
-    changeViewMode,
-    setCurrentCompany,
-    viewModeName: VIEW_MODE_NAMES[viewMode],
-    activeProfile,
-    setActiveProfile,
-    profiles,
-    addProfile,
-    updateProfile,
-    removeProfile,
-    hasPermission,
-    PERFIS_PADRAO: PERFIS_VISUALIZACAO
+    viewModeName,
+    setViewMode,
+    availableViewModes,
+    isLoading,
+    error
   };
-  
+
   return (
     <ViewModeContext.Provider value={contextValue}>
       {children}
@@ -379,14 +117,4 @@ export const ViewModeProvider = ({ children }) => {
   );
 };
 
-// Hook personalizado para usar o contexto
-export const useViewMode = () => {
-  const context = useContext(ViewModeContext);
-  if (!context) {
-    throw new Error('useViewMode deve ser usado dentro de um ViewModeProvider');
-  }
-  return context;
-};
-
-export { ViewModeContext };
-export default ViewModeProvider;
+export default ViewModeContext;

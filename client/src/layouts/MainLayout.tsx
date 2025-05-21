@@ -1,118 +1,63 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
-import { cn } from "@/lib/utils";
-import Header from "@/components/Header";
-import EnhancedSidebar from "@/components/EnhancedSidebar";
+import React, { useState, useEffect } from 'react';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
 
-type MainLayoutProps = {
+interface MainLayoutProps {
   children: React.ReactNode;
-};
+}
 
-export default function MainLayout({ children }: MainLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { isAuthenticated, isLoading } = useAuth();
-  const [location, navigate] = useLocation();
-  const isFiscalModule = location.startsWith('/fiscal');
+const MainLayout = ({ children }: MainLayoutProps) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Verifica a rota atual para determinar se precisa de autenticação
-  const isCalculatorPage = location === '/tax-calculator' || location === '/calculadora-nixcon';
-  const isCalendarPage = location === '/calendar';
-  
-  useEffect(() => {
-    // Não redireciona se for a página da calculadora de impostos
-    if (!isLoading && !isAuthenticated && !isCalculatorPage) {
-      navigate("/");
-    }
-  }, [isAuthenticated, isLoading, navigate, isCalculatorPage]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  // Função para verificar se a tela é mobile
+  const checkIfMobile = () => {
+    setIsMobile(window.innerWidth < 1024);
   };
 
-  // Handle mobile sidebar display
+  // Inicializa e configura o listener para redimensionamento
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsSidebarOpen(false);
-      }
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
     };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Mantemos o mesmo layout para todas as páginas, incluindo a calculadora
-  // Não precisamos mais de um layout especial para a calculadora
+  // Função para alternar a visibilidade da sidebar
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen w-screen bg-background">
-        <div className="animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent"></div>
-      </div>
-    );
-  }
+  // Função para fechar a sidebar
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
 
-  // Para outras páginas, exige autenticação
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Layout unificado para todas as páginas, incluindo calculadora e módulo fiscal
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Sidebar default */}
-      <div className="hidden md:block">
-        <EnhancedSidebar />
-      </div>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Header toggleSidebar={toggleSidebar} />
       
-      {/* Mobile sidebar overlay */}
-      {isSidebarOpen && (
+      <main className="flex flex-1">
+        {/* Sidebar fixa no desktop, modal no mobile */}
+        <Sidebar 
+          isMobile={isMobile} 
+          isOpen={isMobile ? sidebarOpen : true} 
+          closeSidebar={closeSidebar} 
+        />
+        
+        {/* Área de conteúdo principal */}
         <div 
-          className="fixed inset-0 z-40 bg-gray-500/50 md:hidden backdrop-blur-sm" 
-          onClick={toggleSidebar}
-        ></div>
-      )}
-      
-      {/* Main content */}
-      <main className="flex-grow flex flex-col overflow-hidden hide-scrollbar">
-        <style>
-          {`
-          /* Ocultar barras de rolagem em toda a aplicação */
-          .hide-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-          }
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
-          }
-          `}
-        </style>
-        
-        {/* Header padrão */}
-        <Header onMenuToggle={toggleSidebar} />
-        
-        <div className="flex-grow overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8 hide-scrollbar">
-          <div className="mx-auto max-w-7xl">
+          className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : 'ml-64'}`}
+        >
+          <div className="container mx-auto p-6">
             {children}
           </div>
         </div>
-        
-        {/* Footer com informações de copyright */}
-        <footer className="bg-white border-t border-gray-200 py-2 px-6 text-sm text-gray-500">
-          <div className="flex justify-between items-center">
-            <div>
-              <span className="font-medium">
-                <span className="text-[#d9bb42]">NIX</span>
-                <span className="text-[#4a4a4a]">CON</span>
-              </span> © {new Date().getFullYear()} Todos os direitos reservados.
-            </div>
-            <div className="text-xs">
-              v1.0.0
-            </div>
-          </div>
-        </footer>
       </main>
     </div>
   );
-}
+};
+
+export default MainLayout;

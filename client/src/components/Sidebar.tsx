@@ -192,16 +192,15 @@ const Sidebar = ({ isMobile, isOpen, closeSidebar }: SidebarProps) => {
         key={item.href} 
         href={item.href}
         onClick={() => isMobile && closeSidebar()}
-      >
-        <a className={cn(
+        className={cn(
           "flex items-center px-4 py-2.5 text-sm rounded-md transition-colors",
           isActive 
             ? "bg-primary text-white font-medium" 
             : "text-gray-700 hover:bg-gray-100"
-        )}>
-          <span className="mr-3">{item.icon}</span>
-          <span>{item.label}</span>
-        </a>
+        )}
+      >
+        <span className="mr-3">{item.icon}</span>
+        <span>{item.label}</span>
       </Link>
     );
   };
