@@ -366,6 +366,33 @@ export const insertEmpresaUsuariaSchema = createInsertSchema(empresasUsuarias)
 export type InsertEmpresaUsuaria = z.infer<typeof insertEmpresaUsuariaSchema>;
 export type EmpresaUsuaria = typeof empresasUsuarias.$inferSelect;
 
+// Tabela de vinculação entre usuários e empresas
+export const usuariosEmpresas = pgTable(
+  "usuarios_empresas",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").notNull().references(() => users.id),
+    empresaId: integer("empresa_id").notNull().references(() => empresasUsuarias.id),
+    permissionLevel: varchar("permission_level", { length: 50 }).notNull().default("viewer"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => {
+    return {
+      // Índice único para evitar duplicação de vinculações
+      userEmpresaIdx: uniqueIndex("user_empresa_idx").on(table.userId, table.empresaId),
+    };
+  }
+);
+
+export const insertUsuarioEmpresaSchema = createInsertSchema(usuariosEmpresas)
+  .extend({
+    permissionLevel: z.enum(["admin", "editor", "viewer"]).default("viewer")
+  });
+
+export type InsertUsuarioEmpresa = z.infer<typeof insertUsuarioEmpresaSchema>;
+export type UsuarioEmpresa = typeof usuariosEmpresas.$inferSelect;
+
 // API integrations
 export const apiIntegrations = pgTable("api_integrations", {
   id: serial("id").primaryKey(),
