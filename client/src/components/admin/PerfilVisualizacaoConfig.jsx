@@ -424,18 +424,18 @@ const VisualizacoesBase = () => {
                 <div className="border rounded-md p-3 mb-4">
                   <h3 className="font-medium">Descrição</h3>
                   <p className="text-sm text-muted-foreground">
-                    {visualizacoes[VIEW_MODES[key]].descricao}
+                    {visualizacoes[VIEW_MODES[key]]?.descricao || `Descrição da visualização ${VIEW_MODE_NAMES[VIEW_MODES[key]]}`}
                   </p>
                 </div>
                 
                 <div className="space-y-4">
-                  {Object.keys(visualizacoes[VIEW_MODES[key]].permissoes).map(categoria => (
+                  {visualizacoes[VIEW_MODES[key]]?.permissoes && Object.keys(visualizacoes[VIEW_MODES[key]].permissoes).map(categoria => (
                     <div key={categoria} className="border rounded-md p-3">
                       <h3 className="font-medium mb-2 capitalize">
                         {categoria}
                       </h3>
                       <div className="space-y-2">
-                        {visualizacoes[VIEW_MODES[key]].permissoes[categoria].map(item => (
+                        {visualizacoes[VIEW_MODES[key]]?.permissoes?.[categoria]?.map(item => (
                           <div 
                             key={item.id} 
                             className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 rounded-md"
