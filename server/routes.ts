@@ -102,6 +102,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+  
+  // Rota para listar todos os usuários (para administração)
+  app.get('/api/users', isAuthenticated, async (req: any, res) => {
+    try {
+      // Verificar se o usuário é admin
+      const userRole = req.user?.claims?.role;
+      const userId = req.user?.claims?.sub;
+      
+      // Se não for admin, retorna apenas o próprio usuário
+      if (userRole !== 'admin') {
+        const user = await storage.getUser(userId);
+        return res.json([user].filter(Boolean));
+      }
+      
+      const allUsers = await storage.getAllUsers();
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Erro ao buscar lista de usuários:", error);
+      res.status(500).json({ message: "Erro ao buscar lista de usuários" });
+    }
+  });
 
   // Dashboard routes
   app.get('/api/dashboard/stats', isAuthenticated, async (req, res) => {
