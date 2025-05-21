@@ -1,263 +1,118 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
+import { isAuthenticated } from "../replitAuth";
 
-// Definindo os modos de visualização diretamente aqui para evitar problemas de importação
-export type ViewMode = 'escritorio' | 'empresa' | 'contador' | 'externo';
-
-// Interface extendida do Express Request para incluir o usuário e o modo de visualização
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-      viewMode?: ViewMode;
-      empresa?: any;
-    }
-  }
+// Definição dos tipos de modos de visualização
+export enum ViewMode {
+  ESCRITORIO = 'escritorio',
+  EMPRESA = 'empresa',
+  CONTADOR = 'contador',
+  EXTERNO = 'externo'
 }
 
-// Middleware para verificar se o usuário está autenticado
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({ 
-      error: 'Não autorizado',
-      message: 'Você precisa estar autenticado para acessar este recurso'
-    });
+// Definição das funções de autorização baseadas em modos de visualização
+export function viewModeEscritorio(req: Request, res: Response, next: NextFunction) {
+  const viewMode = req.session?.viewMode as string;
+  
+  if (viewMode !== ViewMode.ESCRITORIO) {
+    return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Escritório." });
   }
+  
   next();
-};
+}
 
-// Middleware para verificar o modo de visualização do usuário
-export const checkViewMode = (allowedModes: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.viewMode) {
-      return res.status(400).json({ 
-        error: 'Modo de visualização não definido',
-        message: 'É necessário especificar um modo de visualização'
-      });
-    }
-    
-    if (!allowedModes.includes(req.viewMode)) {
-      return res.status(403).json({ 
-        error: 'Modo de visualização não permitido',
-        message: `O acesso a este recurso não é permitido no modo de visualização ${req.viewMode}`
-      });
-    }
-    
-    next();
-  };
-};
+export function viewModeEmpresa(req: Request, res: Response, next: NextFunction) {
+  const viewMode = req.session?.viewMode as string;
+  
+  if (viewMode !== ViewMode.EMPRESA) {
+    return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Empresa." });
+  }
+  
+  next();
+}
 
-// Middleware para exigir um modo de visualização específico
-export const requireViewMode = (mode: ViewMode | ViewMode[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.viewMode) {
-      return res.status(400).json({ 
-        error: 'Modo de visualização não definido',
-        message: 'É necessário especificar um modo de visualização'
-      });
-    }
-    
-    const modes = Array.isArray(mode) ? mode : [mode];
-    
-    if (!modes.includes(req.viewMode as ViewMode)) {
-      return res.status(403).json({ 
-        error: 'Modo de visualização não permitido',
-        message: `O acesso a este recurso não é permitido no modo de visualização ${req.viewMode}`
-      });
-    }
-    
-    next();
-  };
-};
+export function viewModeContador(req: Request, res: Response, next: NextFunction) {
+  const viewMode = req.session?.viewMode as string;
+  
+  if (viewMode !== ViewMode.CONTADOR) {
+    return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Contador." });
+  }
+  
+  next();
+}
 
-// Middleware para verificar se o usuário tem uma permissão específica
-export const requirePermission = (permission: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export function viewModeExterno(req: Request, res: Response, next: NextFunction) {
+  const viewMode = req.session?.viewMode as string;
+  
+  if (viewMode !== ViewMode.EXTERNO) {
+    return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Externo." });
+  }
+  
+  next();
+}
+
+// Middleware que verifica se o usuário está autenticado e tem o papel requerido
+export function checkRole(role: string) {
+  return (req: any, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Não autorizado',
-        message: 'Você precisa estar autenticado para acessar este recurso'
-      });
+      return res.status(401).json({ message: "Usuário não autenticado" });
     }
     
-    // Verificar se o usuário tem a permissão necessária
-    // Isso depende de como as permissões estão estruturadas no seu sistema
-    const userPermissions = req.user.permissions || [];
+    const userRole = req.user.role;
     
-    if (!userPermissions.includes(permission) && !userPermissions.includes('*')) {
-      return res.status(403).json({ 
-        error: 'Permissão negada',
-        message: `Você não tem a permissão necessária (${permission}) para acessar este recurso`
-      });
+    if (userRole !== role) {
+      return res.status(403).json({ message: `Acesso negado. Este recurso requer o papel de ${role}.` });
     }
     
     next();
   };
-};
+}
 
-// Middleware para verificar o papel (role) do usuário
-export const requireRole = (role: string | string[]) => {
+// Combinação de middlewares para verificação de autenticação e papel
+export const isAdmin = [isAuthenticated, checkRole('admin')];
+export const isAccountant = [isAuthenticated, checkRole('accountant')];
+export const isClient = [isAuthenticated, checkRole('client')];
+export const isExternalUser = [isAuthenticated, checkRole('external')];
+export const isEscritorioUser = [isAuthenticated, checkRole('escritorio')];
+
+// Middleware que verifica se o usuário está autenticado e tem acesso à empresa específica
+export function checkCompanyAccess(req: any, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ message: "Usuário não autenticado" });
+  }
+  
+  const companyId = parseInt(req.params.companyId || req.query.companyId || req.body.companyId);
+  
+  if (isNaN(companyId)) {
+    return res.status(400).json({ message: "ID de empresa inválido" });
+  }
+  
+  // Em um sistema real, você verificaria se o usuário tem acesso a esta empresa
+  // através de uma consulta ao banco de dados ou verificando permissões armazenadas na sessão
+  
+  // Simulando verificação para este exemplo
+  const userCompanies = req.user.companies || [];
+  
+  if (!userCompanies.includes(companyId)) {
+    return res.status(403).json({ message: "Acesso negado. Você não tem permissão para acessar esta empresa." });
+  }
+  
+  next();
+}
+
+// Middleware que permite acesso com base no modo de visualização
+export function allowViewModes(allowedModes: ViewMode[]) {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Não autorizado',
-        message: 'Você precisa estar autenticado para acessar este recurso'
-      });
-    }
+    const viewMode = req.session?.viewMode as string;
     
-    const roles = Array.isArray(role) ? role : [role];
-    
-    if (!roles.includes(req.user.role)) {
+    if (!viewMode || !allowedModes.includes(viewMode as ViewMode)) {
       return res.status(403).json({ 
-        error: 'Papel não autorizado',
-        message: `Esta ação requer o papel de ${roles.join(' ou ')}`
+        message: `Acesso negado. Este recurso requer um dos seguintes modos de visualização: ${allowedModes.join(', ')}.` 
       });
     }
     
     next();
   };
-};
+}
 
-// Middleware para o modo de visualização Escritório
-export const requireEscritorioMode = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.viewMode || req.viewMode !== 'escritorio') {
-    return res.status(403).json({ 
-      error: 'Modo de visualização não permitido',
-      message: 'Este recurso só pode ser acessado no modo de visualização do Escritório'
-    });
-  }
-  next();
-};
-
-// Middleware para o modo de visualização Empresa
-export const requireEmpresaMode = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.viewMode || req.viewMode !== 'empresa') {
-    return res.status(403).json({ 
-      error: 'Modo de visualização não permitido',
-      message: 'Este recurso só pode ser acessado no modo de visualização da Empresa'
-    });
-  }
-  
-  // Verificar se há uma empresa selecionada
-  if (!req.empresa) {
-    return res.status(400).json({ 
-      error: 'Empresa não selecionada',
-      message: 'É necessário selecionar uma empresa para acessar este recurso'
-    });
-  }
-  
-  next();
-};
-
-// Middleware para o modo de visualização Contador
-export const requireContadorMode = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.viewMode || req.viewMode !== 'contador') {
-    return res.status(403).json({ 
-      error: 'Modo de visualização não permitido',
-      message: 'Este recurso só pode ser acessado no modo de visualização de Contador'
-    });
-  }
-  next();
-};
-
-// Middleware para o modo de visualização Externo
-export const requireExternoMode = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.viewMode || req.viewMode !== 'externo') {
-    return res.status(403).json({ 
-      error: 'Modo de visualização não permitido',
-      message: 'Este recurso só pode ser acessado no modo de visualização Externo'
-    });
-  }
-  next();
-};
-
-// Middleware para verificar se o usuário é administrador
-export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({ 
-      error: 'Não autorizado',
-      message: 'Você precisa estar autenticado para acessar este recurso'
-    });
-  }
-  
-  // Verificar se o usuário é um administrador
-  // Isso depende de como os papéis estão estruturados no seu sistema
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ 
-      error: 'Permissão negada',
-      message: 'Este recurso só pode ser acessado por administradores'
-    });
-  }
-  
-  next();
-};
-
-// Combinação de middlewares para escritório com permissões de administrador
-export const requireEscritorioAdmin = [requireEscritorioMode, requireAdmin];
-
-// Função para extrair o modo de visualização do cabeçalho
-export const extractViewMode = (req: Request, res: Response, next: NextFunction) => {
-  const viewMode = req.headers['x-view-mode'] as string;
-  
-  if (viewMode) {
-    req.viewMode = viewMode as ViewMode;
-  }
-  
-  next();
-};
-
-// Função para extrair a empresa selecionada (quando no modo empresa)
-export const extractEmpresa = (req: Request, res: Response, next: NextFunction) => {
-  const empresaId = req.headers['x-empresa-id'] as string;
-  
-  if (empresaId && req.viewMode === 'empresa') {
-    // Aqui você poderia buscar a empresa no banco de dados
-    // Por enquanto, apenas definimos o ID
-    req.empresa = { id: empresaId };
-  }
-  
-  next();
-};
-
-// Middleware para configurar o contexto de visualização
-export const setupViewContext = [extractViewMode, extractEmpresa];
-
-// Middleware para verificar acesso a um cliente específico
-export const requireClientAccess = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({ 
-      error: 'Não autorizado',
-      message: 'Você precisa estar autenticado para acessar este recurso'
-    });
-  }
-
-  const clientId = req.params.clientId || req.body.clientId;
-  
-  if (!clientId) {
-    return res.status(400).json({ 
-      error: 'Cliente não especificado',
-      message: 'É necessário especificar um cliente para acessar este recurso'
-    });
-  }
-  
-  // Usuários com papel 'admin' ou 'escritorio' têm acesso a todos os clientes
-  if (req.user.role === 'admin' || req.user.role === 'escritorio') {
-    return next();
-  }
-  
-  // Para outros papéis, verificamos se o usuário tem acesso a este cliente específico
-  // Isso depende de como as relações entre usuários e clientes estão estruturadas no seu sistema
-  const userClientAccess = req.user.clientAccess || [];
-  
-  if (!userClientAccess.includes(clientId)) {
-    return res.status(403).json({ 
-      error: 'Acesso negado',
-      message: 'Você não tem acesso a este cliente'
-    });
-  }
-  
-  next();
-};
-
-// Helpers para facilitar o uso nos routes
-export const isAuthenticated = requireAuth;
-export const isEscritorioUser = requireViewMode('escritorio');
+// Middleware que requer autenticação - exportando o isAuthenticated do replitAuth como requireAuth
+export const requireAuth = isAuthenticated;
