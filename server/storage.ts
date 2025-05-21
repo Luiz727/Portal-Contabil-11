@@ -213,16 +213,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria> {
-    const [newEmpresa] = await db.insert(empresasUsuarias).values(empresa).returning();
+    // Nós precisamos contornar problemas de tipagem adicionando os valores 
+    // diretamente na consulta para que o Drizzle faça o casting correto
+    const [newEmpresa] = await db.insert(empresasUsuarias).values([{
+      id: empresa.id,
+      nome: empresa.nome,
+      cnpj: empresa.cnpj,
+      email: empresa.email ?? null,
+      telefone: empresa.telefone ?? null,
+      contato: empresa.contato ?? null,
+      status: empresa.status ?? "Ativo",
+      regime: empresa.regime ?? null,
+      honorarios: empresa.honorarios ?? null,
+      vencimento: empresa.vencimento ?? null,
+      inicioContrato: empresa.inicioContrato ?? null,
+      fimContrato: empresa.fimContrato ?? null,
+      cep: empresa.cep ?? null,
+      logradouro: empresa.logradouro ?? null,
+      numero: empresa.numero ?? null,
+      complemento: empresa.complemento ?? null,
+      bairro: empresa.bairro ?? null,
+      cidade: empresa.cidade ?? null,
+      estado: empresa.estado ?? null,
+      cpfResponsavel: empresa.cpfResponsavel ?? null
+    }]).returning();
+    
     return newEmpresa;
   }
 
   async updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined> {
+    // Primeiro buscamos a empresa existente para ter um objeto completo
+    const existingEmpresa = await this.getEmpresaUsuaria(id);
+    if (!existingEmpresa) return undefined;
+    
+    // Construímos um objeto com os valores atualizados
+    const updatedValues = {
+      ...existingEmpresa,
+      // Atualizamos apenas os campos fornecidos
+      ...(empresa.nome !== undefined && { nome: empresa.nome }),
+      ...(empresa.cnpj !== undefined && { cnpj: empresa.cnpj }),
+      ...(empresa.email !== undefined && { email: empresa.email }),
+      ...(empresa.telefone !== undefined && { telefone: empresa.telefone }),
+      ...(empresa.contato !== undefined && { contato: empresa.contato }),
+      ...(empresa.status !== undefined && { status: empresa.status }),
+      ...(empresa.regime !== undefined && { regime: empresa.regime }),
+      ...(empresa.honorarios !== undefined && { honorarios: empresa.honorarios }),
+      ...(empresa.vencimento !== undefined && { vencimento: empresa.vencimento }),
+      ...(empresa.inicioContrato !== undefined && { inicioContrato: empresa.inicioContrato }),
+      ...(empresa.fimContrato !== undefined && { fimContrato: empresa.fimContrato }),
+      ...(empresa.cep !== undefined && { cep: empresa.cep }),
+      ...(empresa.logradouro !== undefined && { logradouro: empresa.logradouro }),
+      ...(empresa.numero !== undefined && { numero: empresa.numero }),
+      ...(empresa.complemento !== undefined && { complemento: empresa.complemento }),
+      ...(empresa.bairro !== undefined && { bairro: empresa.bairro }),
+      ...(empresa.cidade !== undefined && { cidade: empresa.cidade }),
+      ...(empresa.estado !== undefined && { estado: empresa.estado }),
+      ...(empresa.cpfResponsavel !== undefined && { cpfResponsavel: empresa.cpfResponsavel }),
+      // Sempre atualizamos a data de atualização
+      updatedAt: new Date()
+    };
+    
+    // Fazemos o update com o objeto completo
     const [updatedEmpresa] = await db
       .update(empresasUsuarias)
-      .set({ ...empresa, updatedAt: new Date() })
+      .set(updatedValues)
       .where(eq(empresasUsuarias.id, id))
       .returning();
+    
     return updatedEmpresa;
   }
 

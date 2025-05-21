@@ -343,24 +343,25 @@ export const empresasUsuarias = pgTable("empresas_usuarias", {
 });
 
 // Tipos e esquemas para as empresas usuárias
-export const insertEmpresaUsuariaSchema = createInsertSchema(empresasUsuarias, {
-  honorarios: (schema) => schema.honorarios.optional(),
-  vencimento: (schema) => schema.vencimento.optional(),
-  inicioContrato: (schema) => schema.inicioContrato.optional(),
-  fimContrato: (schema) => schema.fimContrato.optional(),
-  email: (schema) => schema.email.optional(),
-  telefone: (schema) => schema.telefone.optional(),
-  contato: (schema) => schema.contato.optional(),
-  regime: (schema) => schema.regime.optional(),
-  cep: (schema) => schema.cep.optional(),
-  logradouro: (schema) => schema.logradouro.optional(),
-  numero: (schema) => schema.numero.optional(),
-  complemento: (schema) => schema.complemento.optional(),
-  bairro: (schema) => schema.bairro.optional(),
-  cidade: (schema) => schema.cidade.optional(),
-  estado: (schema) => schema.estado.optional(),
-  cpfResponsavel: (schema) => schema.cpfResponsavel.optional(),
-});
+export const insertEmpresaUsuariaSchema = createInsertSchema(empresasUsuarias)
+  .extend({
+    honorarios: z.number().optional().nullable(),
+    vencimento: z.number().optional().nullable(),
+    inicioContrato: z.date().optional().nullable(),
+    fimContrato: z.date().optional().nullable(),
+    email: z.string().optional().nullable(),
+    telefone: z.string().optional().nullable(),
+    contato: z.string().optional().nullable(),
+    regime: z.string().optional().nullable(),
+    cep: z.string().optional().nullable(),
+    logradouro: z.string().optional().nullable(),
+    numero: z.string().optional().nullable(),
+    complemento: z.string().optional().nullable(),
+    bairro: z.string().optional().nullable(),
+    cidade: z.string().optional().nullable(),
+    estado: z.string().optional().nullable(),
+    cpfResponsavel: z.string().optional().nullable(),
+  });
 
 export type InsertEmpresaUsuaria = z.infer<typeof insertEmpresaUsuariaSchema>;
 export type EmpresaUsuaria = typeof empresasUsuarias.$inferSelect;
