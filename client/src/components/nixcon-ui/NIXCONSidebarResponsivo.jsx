@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation } from 'wouter';
 import { 
   LayoutDashboard, 
@@ -25,6 +25,7 @@ import {
 import logoNixconFull from '../../assets/logo-nixcon-full.png';
 import logoNixconIcon from '../../assets/logo-nixcon-icon.png';
 import { useAuth } from '@/hooks/useAuth';
+import { ViewModeContext } from '@/contexts/ViewModeContext';
 
 // Componente para os itens do menu lateral
 const SidebarItem = ({ icon: Icon, label, to, active, hasSubmenu, collapsed, onClick }) => {
@@ -63,7 +64,8 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
   const [location, navigate] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [keepCollapsed, setKeepCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user, hasPermission, shouldShowComponent, isAdmin, isSuperAdmin } = useAuth();
+  const viewModeContext = useContext(ViewModeContext);
   
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -167,6 +169,7 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
       )}
       
       <div className="px-2 py-4">
+        {/* Item Dashboard - Acessível a todos */}
         <SidebarItem 
           icon={LayoutDashboard} 
           label="Dashboard" 
@@ -176,167 +179,229 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
           onClick={handleItemClick} 
         />
         
-        <SidebarItem 
-          icon={Users} 
-          label="Clientes" 
-          to="/clients" 
-          active={location === "/clients"} 
-          collapsed={collapsed}
-          onClick={handleItemClick} 
-        />
-        
-        <SidebarItem 
-          icon={FileText} 
-          label="Documentos" 
-          to="/documents" 
-          active={location === "/documents"} 
-          collapsed={collapsed}
-          onClick={handleItemClick} 
-        />
-        
-        <SidebarItem 
-          icon={ReceiptText} 
-          label="Notas Fiscais" 
-          to="/invoices" 
-          active={location === "/invoices"} 
-          collapsed={collapsed}
-          onClick={handleItemClick} 
-        />
-        
-        <SidebarItem 
-          icon={Calendar} 
-          label="Calendário" 
-          to="/calendar" 
-          active={location === "/calendar"} 
-          collapsed={collapsed}
-          onClick={handleItemClick} 
-        />
-        
-        <SidebarSection title="Módulos" collapsed={collapsed}>
-          <SidebarItem 
-            icon={Calculator} 
-            label="Módulo Fiscal" 
-            to="/fiscal" 
-            active={location.startsWith("/fiscal")} 
-            hasSubmenu 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={Calculator} 
-            label="Calculadora" 
-            to="/tax-calculator" 
-            active={location === "/tax-calculator" || location === "/calculadora-nixcon"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={CreditCard} 
-            label="Impostômetro" 
-            to="/impostometro" 
-            active={location === "/impostometro"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={LineChart} 
-            label="Financeiro" 
-            to="/financial" 
-            active={location === "/financial"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={FileCheck} 
-            label="Conciliação" 
-            to="/reconciliation" 
-            active={location === "/reconciliation"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={PackageOpen} 
-            label="Estoque" 
-            to="/inventory" 
-            active={location === "/inventory"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={BarChart3} 
-            label="Relatórios" 
-            to="/reports" 
-            active={location === "/reports"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-        </SidebarSection>
-        
-        <SidebarSection title="Comunicação" collapsed={collapsed}>
-          <SidebarItem 
-            icon={MessageSquare} 
-            label="WhatsApp" 
-            to="/whatsapp" 
-            active={location === "/whatsapp"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={Wrench} 
-            label="Integrações" 
-            to="/integrations" 
-            active={location === "/integrations"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-        </SidebarSection>
-        
-        <SidebarSection title="Administração" collapsed={collapsed}>
+        {/* Item Clientes - Verifica permissão */}
+        {shouldShowComponent(['ver_clientes', 'gerenciar_clientes']) && (
           <SidebarItem 
             icon={Users} 
-            label="Empresas Usuárias" 
-            to="/admin/empresas-usuarias" 
-            active={location === "/admin/empresas-usuarias"} 
+            label="Clientes" 
+            to="/clients" 
+            active={location === "/clients"} 
             collapsed={collapsed}
             onClick={handleItemClick} 
           />
-          
-          <SidebarItem 
-            icon={PackageOpen} 
-            label="Produtos Universais" 
-            to="/admin/produtos-universais" 
-            active={location === "/admin/produtos-universais"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={Truck} 
-            label="Importar Produtos" 
-            to="/admin/importar-produtos" 
-            active={location === "/admin/importar-produtos"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-          
-          <SidebarItem 
-            icon={CreditCard} 
-            label="Planos e Assinaturas" 
-            to="/admin/planos" 
-            active={location === "/admin/planos"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
-        </SidebarSection>
+        )}
         
+        {/* Item Documentos - Verifica permissão */}
+        {shouldShowComponent(['ver_documentos', 'gerenciar_documentos']) && (
+          <SidebarItem 
+            icon={FileText} 
+            label="Documentos" 
+            to="/documents" 
+            active={location === "/documents"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+        )}
+        
+        {/* Item Notas Fiscais - Verifica permissão */}
+        {shouldShowComponent(['ver_notas', 'emitir_notas', 'gerenciar_notas']) && (
+          <SidebarItem 
+            icon={ReceiptText} 
+            label="Notas Fiscais" 
+            to="/invoices" 
+            active={location === "/invoices"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+        )}
+        
+        {/* Item Calendário - Verifica permissão */}
+        {shouldShowComponent(['ver_calendario', 'gerenciar_calendario']) && (
+          <SidebarItem 
+            icon={Calendar} 
+            label="Calendário" 
+            to="/calendar" 
+            active={location === "/calendar"} 
+            collapsed={collapsed}
+            onClick={handleItemClick} 
+          />
+        )}
+        
+        {/* Seção Módulos - Verificar se pelo menos um item tem permissão */}
+        {shouldShowComponent([
+          'acessar_modulo_fiscal', 
+          'usar_calculadora', 
+          'ver_impostometro', 
+          'acessar_financeiro', 
+          'acessar_conciliacao', 
+          'gerenciar_estoque', 
+          'ver_relatorios'
+        ]) && (
+          <SidebarSection title="Módulos" collapsed={collapsed}>
+            {/* Módulo Fiscal */}
+            {shouldShowComponent(['acessar_modulo_fiscal']) && (
+              <SidebarItem 
+                icon={Calculator} 
+                label="Módulo Fiscal" 
+                to="/fiscal" 
+                active={location.startsWith("/fiscal")} 
+                hasSubmenu 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Calculadora de Impostos */}
+            {shouldShowComponent(['usar_calculadora']) && (
+              <SidebarItem 
+                icon={Calculator} 
+                label="Calculadora" 
+                to="/tax-calculator" 
+                active={location === "/tax-calculator" || location === "/calculadora-nixcon"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Impostômetro */}
+            {shouldShowComponent(['ver_impostometro']) && (
+              <SidebarItem 
+                icon={CreditCard} 
+                label="Impostômetro" 
+                to="/impostometro" 
+                active={location === "/impostometro"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Financeiro */}
+            {shouldShowComponent(['acessar_financeiro']) && (
+              <SidebarItem 
+                icon={LineChart} 
+                label="Financeiro" 
+                to="/financial" 
+                active={location === "/financial"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Conciliação */}
+            {shouldShowComponent(['acessar_conciliacao']) && (
+              <SidebarItem 
+                icon={FileCheck} 
+                label="Conciliação" 
+                to="/reconciliation" 
+                active={location === "/reconciliation"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Estoque */}
+            {shouldShowComponent(['gerenciar_estoque']) && (
+              <SidebarItem 
+                icon={PackageOpen} 
+                label="Estoque" 
+                to="/inventory" 
+                active={location === "/inventory"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Relatórios */}
+            {shouldShowComponent(['ver_relatorios']) && (
+              <SidebarItem 
+                icon={BarChart3} 
+                label="Relatórios" 
+                to="/reports" 
+                active={location === "/reports"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+          </SidebarSection>
+        )}
+        
+        {/* Seção Comunicação - Verificar se pelo menos um item tem permissão */}
+        {shouldShowComponent(['acessar_whatsapp', 'gerenciar_integracoes']) && (
+          <SidebarSection title="Comunicação" collapsed={collapsed}>
+            {/* WhatsApp */}
+            {shouldShowComponent(['acessar_whatsapp']) && (
+              <SidebarItem 
+                icon={MessageSquare} 
+                label="WhatsApp" 
+                to="/whatsapp" 
+                active={location === "/whatsapp"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+            
+            {/* Integrações */}
+            {shouldShowComponent(['gerenciar_integracoes']) && (
+              <SidebarItem 
+                icon={Wrench} 
+                label="Integrações" 
+                to="/integrations" 
+                active={location === "/integrations"} 
+                collapsed={collapsed}
+                onClick={handleItemClick} 
+              />
+            )}
+          </SidebarSection>
+        )}
+        
+        {/* Seção Administração - Apenas para admin e superadmin */}
+        {(isAdmin || isSuperAdmin) && (
+          <SidebarSection title="Administração" collapsed={collapsed}>
+            {/* Empresas Usuárias - Apenas para admin e superadmin */}
+            <SidebarItem 
+              icon={Users} 
+              label="Empresas Usuárias" 
+              to="/admin/empresas-usuarias" 
+              active={location === "/admin/empresas-usuarias"} 
+              collapsed={collapsed}
+              onClick={handleItemClick} 
+            />
+            
+            {/* Produtos Universais - Apenas para admin e superadmin */}
+            <SidebarItem 
+              icon={PackageOpen} 
+              label="Produtos Universais" 
+              to="/admin/produtos-universais" 
+              active={location === "/admin/produtos-universais"} 
+              collapsed={collapsed}
+              onClick={handleItemClick} 
+            />
+            
+            {/* Importar Produtos - Apenas para admin e superadmin */}
+            <SidebarItem 
+              icon={Truck} 
+              label="Importar Produtos" 
+              to="/admin/importar-produtos" 
+              active={location === "/admin/importar-produtos"} 
+              collapsed={collapsed}
+              onClick={handleItemClick} 
+            />
+            
+            {/* Planos e Assinaturas - Apenas para admin e superadmin */}
+            <SidebarItem 
+              icon={CreditCard} 
+              label="Planos e Assinaturas" 
+              to="/admin/planos" 
+              active={location === "/admin/planos"} 
+              collapsed={collapsed}
+              onClick={handleItemClick} 
+            />
+          </SidebarSection>
+        )}
+        
+        {/* Seção Sistema - Configurações básicas podem ser acessadas por todos */}
         <SidebarSection title="Sistema" collapsed={collapsed}>
+          {/* Configurações - Acessível a todos */}
           <SidebarItem 
             icon={Settings} 
             label="Configurações" 
@@ -346,14 +411,17 @@ export default function NIXCONSidebarResponsivo({ onToggle }) {
             onClick={handleItemClick} 
           />
           
-          <SidebarItem 
-            icon={Settings} 
-            label="Painel Administrativo" 
-            to="/admin/painel" 
-            active={location === "/admin/painel"} 
-            collapsed={collapsed}
-            onClick={handleItemClick} 
-          />
+          {/* Painel Administrativo - Apenas para admin e superadmin */}
+          {(isAdmin || isSuperAdmin) && (
+            <SidebarItem 
+              icon={Settings} 
+              label="Painel Administrativo" 
+              to="/admin/painel" 
+              active={location === "/admin/painel"} 
+              collapsed={collapsed}
+              onClick={handleItemClick} 
+            />
+          )}
           
           {user && user.id && (
             <div className={`mt-6 px-4 py-2 ${collapsed ? 'text-center' : ''}`}>

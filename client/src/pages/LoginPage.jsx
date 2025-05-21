@@ -58,7 +58,10 @@ const LoginPage = () => {
             description: `Bem-vindo, ${user.name}!`,
           });
           
-          navigate('/');
+          // Redirecionamento imediato após o login
+          window.location.href = '/';
+          // Não usamos navigate() porque queremos recarregar a página por completo
+          // para garantir que todos os contextos sejam recarregados
         } else {
           toast({
             title: "Falha no login",
