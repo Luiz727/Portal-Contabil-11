@@ -54,7 +54,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: text("role").default("client").notNull(), // admin, accountant, client
-  active: boolean("active").default(true), // Renomeado de isActive para active
+  isActive: boolean("is_active").default(true),
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
