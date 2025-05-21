@@ -40,6 +40,7 @@ import PlanosAssinaturasPage from "./pages/admin/PlanosAssinaturasPage";
 import EmpresasUsuariasPage from "./pages/admin/EmpresasUsuariasPage";
 import PainelAdministrativoPage from "./pages/admin/PainelAdministrativoPage";
 import UsuariosPermissoesPage from "./pages/admin/UsuariosPermissoesPage";
+import SuperAdminPage from "./pages/admin/SuperAdminPage";
 
 // Contextos
 import { EmpresasProvider } from "@/contexts/EmpresasContext";
@@ -238,6 +239,12 @@ function Router() {
           <MainLayout>
             <UsuariosPermissoesPage />
           </MainLayout>
+        </Route>
+      )}
+      
+      {isAuthenticated && (
+        <Route path="/admin/superadmin">
+          <SuperAdminPage />
         </Route>
       )}
 
