@@ -239,6 +239,109 @@ export class DatabaseStorage implements IStorage {
   async getUsersByRole(role: string): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, role));
   }
+  
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.firstName, users.lastName);
+  }
+
+  async updateUserStatus(id: string, isActive: boolean): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserLastLogin(id: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ lastLogin: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+  
+  // Role operations
+  async getRole(id: number): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.id, id));
+    return role;
+  }
+  
+  async getRoleByName(name: string): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.name, name));
+    return role;
+  }
+  
+  async getAllRoles(): Promise<Role[]> {
+    return await db.select().from(roles).orderBy(roles.name);
+  }
+  
+  async createRole(roleData: InsertRole): Promise<Role> {
+    const [role] = await db
+      .insert(roles)
+      .values(roleData)
+      .returning();
+    return role;
+  }
+  
+  async updateRole(id: number, roleData: Partial<Role>): Promise<Role | undefined> {
+    // Não permite alteração de roles do sistema
+    const [existingRole] = await db.select().from(roles).where(eq(roles.id, id));
+    if (existingRole?.isSystem) {
+      throw new Error("Cannot modify system roles");
+    }
+    
+    const [role] = await db
+      .update(roles)
+      .set({ ...roleData, updatedAt: new Date() })
+      .where(eq(roles.id, id))
+      .returning();
+    return role;
+  }
+  
+  async deleteRole(id: number): Promise<boolean> {
+    // Não permite exclusão de roles do sistema
+    const [existingRole] = await db.select().from(roles).where(eq(roles.id, id));
+    if (existingRole?.isSystem) {
+      throw new Error("Cannot delete system roles");
+    }
+    
+    const result = await db.delete(roles).where(eq(roles.id, id));
+    return result.rowCount > 0;
+  }
+  
+  // Permission operations
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission;
+  }
+  
+  async getPermissionByCode(code: string): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.code, code));
+    return permission;
+  }
+  
+  async getAllPermissions(): Promise<Permission[]> {
+    return await db.select().from(permissions).orderBy(permissions.module, permissions.name);
+  }
+  
+  async getPermissionsByModule(module: string): Promise<Permission[]> {
+    return await db.select().from(permissions).where(eq(permissions.module, module)).orderBy(permissions.name);
+  }
+  
+  async createPermission(permissionData: InsertPermission): Promise<Permission> {
+    const [permission] = await db
+      .insert(permissions)
+      .values(permissionData)
+      .returning();
+    return permission;
+  }
+  
+  async deletePermission(id: number): Promise<boolean> {
+    const result = await db.delete(permissions).where(eq(permissions.id, id));
+    return result.rowCount > 0;
+  }
 
   // Client operations
   async getClient(id: number): Promise<Client | undefined> {

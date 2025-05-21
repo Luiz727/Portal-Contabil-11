@@ -942,6 +942,7 @@ export type InsertProductKit = typeof productKits.$inferInsert;
 export type ProductKit = typeof productKits.$inferSelect;
 
 // Esquemas e tipos para o sistema de autenticação e autorização
+// Reaproveitando as definições de tipos já existentes: UpsertUser e User
 
 export const insertRoleSchema = createInsertSchema(roles, {
   name: z.string().min(3).max(50),
