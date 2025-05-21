@@ -8,6 +8,7 @@ import { registerHonorariosRoutes } from "./honorariosRoutes";
 import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
 import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
+import { registerUsuariosEmpresasRoutes } from "./routes/usuariosEmpresasRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -83,6 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerIntegraNfRoutes(app);
   registerHonorariosRoutes(app);
   registerTaxCalculatorRoutes(app);
+  registerUsuariosEmpresasRoutes(app);
   try {
     registerXmlVaultRoutes(app);
   } catch (error) {
