@@ -18,10 +18,8 @@ import {
   importExportLogs,
   whatsappMessages,
   notifications,
-  usuariosEmpresas, type UsuarioEmpresa, type InsertUsuarioEmpresa,
   honorarios,
   documentPatterns,
-  empresasUsuarias,
   type User,
   type Client,
   type Task,
@@ -42,8 +40,6 @@ import {
   type InsertHonorario,
   type DocumentPattern,
   type InsertDocumentPattern,
-  type EmpresaUsuaria,
-  type InsertEmpresaUsuaria,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, desc, sql, lt, or, like, not, isNull } from "drizzle-orm";
@@ -54,22 +50,6 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
-  getAllUsers(): Promise<User[]>;
-
-  // Empresas Usuárias operations
-  getEmpresaUsuaria(id: number): Promise<EmpresaUsuaria | undefined>;
-  getEmpresasUsuarias(): Promise<EmpresaUsuaria[]>;
-  getEmpresasUsuariasByStatus(status: string): Promise<EmpresaUsuaria[]>;
-  createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria>;
-  updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined>;
-  
-  // Vinculação Usuários-Empresas
-  vincularUsuarioEmpresa(vinculo: InsertUsuarioEmpresa): Promise<UsuarioEmpresa>;
-  desvincularUsuarioEmpresa(userId: string, empresaId: number): Promise<void>;
-  atualizarNivelPermissaoUsuarioEmpresa(userId: string, empresaId: number, permissionLevel: string): Promise<UsuarioEmpresa | undefined>;
-  getEmpresasDoUsuario(userId: string): Promise<EmpresaUsuaria[]>;
-  getUsuariosDaEmpresa(empresaId: number): Promise<{ user: User, permissionLevel: string }[]>;
-  verificarVinculoUsuarioEmpresa(userId: string, empresaId: number): Promise<UsuarioEmpresa | undefined>;
   
   // Client operations
   getClient(id: number): Promise<Client | undefined>;
@@ -206,100 +186,6 @@ export class DatabaseStorage implements IStorage {
 
   async getUsersByRole(role: string): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, role));
-  }
-  
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(users.firstName);
-  }
-  
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
-  }
-
-  // Empresas Usuárias operations
-  async getEmpresaUsuaria(id: number): Promise<EmpresaUsuaria | undefined> {
-    const [empresa] = await db.select().from(empresasUsuarias).where(eq(empresasUsuarias.id, id));
-    return empresa;
-  }
-
-  async getEmpresasUsuarias(): Promise<EmpresaUsuaria[]> {
-    return await db.select().from(empresasUsuarias).orderBy(empresasUsuarias.nome);
-  }
-
-  async getEmpresasUsuariasByStatus(status: string): Promise<EmpresaUsuaria[]> {
-    return await db.select().from(empresasUsuarias).where(eq(empresasUsuarias.status, status));
-  }
-
-  async createEmpresaUsuaria(empresa: InsertEmpresaUsuaria): Promise<EmpresaUsuaria> {
-    // Nós precisamos contornar problemas de tipagem adicionando os valores 
-    // diretamente na consulta para que o Drizzle faça o casting correto
-    const [newEmpresa] = await db.insert(empresasUsuarias).values([{
-      id: empresa.id,
-      nome: empresa.nome,
-      cnpj: empresa.cnpj,
-      email: empresa.email ?? null,
-      telefone: empresa.telefone ?? null,
-      contato: empresa.contato ?? null,
-      status: empresa.status ?? "Ativo",
-      regime: empresa.regime ?? null,
-      honorarios: empresa.honorarios ?? null,
-      vencimento: empresa.vencimento ?? null,
-      inicioContrato: empresa.inicioContrato ?? null,
-      fimContrato: empresa.fimContrato ?? null,
-      cep: empresa.cep ?? null,
-      logradouro: empresa.logradouro ?? null,
-      numero: empresa.numero ?? null,
-      complemento: empresa.complemento ?? null,
-      bairro: empresa.bairro ?? null,
-      cidade: empresa.cidade ?? null,
-      estado: empresa.estado ?? null,
-      cpfResponsavel: empresa.cpfResponsavel ?? null
-    }]).returning();
-    
-    return newEmpresa;
-  }
-
-  async updateEmpresaUsuaria(id: number, empresa: Partial<InsertEmpresaUsuaria>): Promise<EmpresaUsuaria | undefined> {
-    // Primeiro buscamos a empresa existente para ter um objeto completo
-    const existingEmpresa = await this.getEmpresaUsuaria(id);
-    if (!existingEmpresa) return undefined;
-    
-    // Construímos um objeto com os valores atualizados
-    const updatedValues = {
-      ...existingEmpresa,
-      // Atualizamos apenas os campos fornecidos
-      ...(empresa.nome !== undefined && { nome: empresa.nome }),
-      ...(empresa.cnpj !== undefined && { cnpj: empresa.cnpj }),
-      ...(empresa.email !== undefined && { email: empresa.email }),
-      ...(empresa.telefone !== undefined && { telefone: empresa.telefone }),
-      ...(empresa.contato !== undefined && { contato: empresa.contato }),
-      ...(empresa.status !== undefined && { status: empresa.status }),
-      ...(empresa.regime !== undefined && { regime: empresa.regime }),
-      ...(empresa.honorarios !== undefined && { honorarios: empresa.honorarios }),
-      ...(empresa.vencimento !== undefined && { vencimento: empresa.vencimento }),
-      ...(empresa.inicioContrato !== undefined && { inicioContrato: empresa.inicioContrato }),
-      ...(empresa.fimContrato !== undefined && { fimContrato: empresa.fimContrato }),
-      ...(empresa.cep !== undefined && { cep: empresa.cep }),
-      ...(empresa.logradouro !== undefined && { logradouro: empresa.logradouro }),
-      ...(empresa.numero !== undefined && { numero: empresa.numero }),
-      ...(empresa.complemento !== undefined && { complemento: empresa.complemento }),
-      ...(empresa.bairro !== undefined && { bairro: empresa.bairro }),
-      ...(empresa.cidade !== undefined && { cidade: empresa.cidade }),
-      ...(empresa.estado !== undefined && { estado: empresa.estado }),
-      ...(empresa.cpfResponsavel !== undefined && { cpfResponsavel: empresa.cpfResponsavel }),
-      // Sempre atualizamos a data de atualização
-      updatedAt: new Date()
-    };
-    
-    // Fazemos o update com o objeto completo
-    const [updatedEmpresa] = await db
-      .update(empresasUsuarias)
-      .set(updatedValues)
-      .where(eq(empresasUsuarias.id, id))
-      .returning();
-    
-    return updatedEmpresa;
   }
 
   // Client operations
@@ -887,81 +773,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(documentPatterns.id, id))
       .returning();
     return result;
-  }
-
-  // Implementação das funções de gerenciamento de usuários por empresa
-  async vincularUsuarioEmpresa(vinculo: InsertUsuarioEmpresa): Promise<UsuarioEmpresa> {
-    const [novoVinculo] = await db.insert(usuariosEmpresas)
-      .values([vinculo])
-      .returning();
-    return novoVinculo;
-  }
-  
-  async desvincularUsuarioEmpresa(userId: string, empresaId: number): Promise<void> {
-    await db.delete(usuariosEmpresas)
-      .where(
-        and(
-          eq(usuariosEmpresas.userId, userId),
-          eq(usuariosEmpresas.empresaId, empresaId)
-        )
-      );
-  }
-  
-  async atualizarNivelPermissaoUsuarioEmpresa(
-    userId: string, 
-    empresaId: number, 
-    permissionLevel: string
-  ): Promise<UsuarioEmpresa | undefined> {
-    const [vinculoAtualizado] = await db.update(usuariosEmpresas)
-      .set({ 
-        permissionLevel,
-        updatedAt: new Date() 
-      })
-      .where(
-        and(
-          eq(usuariosEmpresas.userId, userId),
-          eq(usuariosEmpresas.empresaId, empresaId)
-        )
-      )
-      .returning();
-    
-    return vinculoAtualizado;
-  }
-  
-  async getEmpresasDoUsuario(userId: string): Promise<EmpresaUsuaria[]> {
-    const vinculos = await db.select({
-      empresa: empresasUsuarias
-    })
-    .from(usuariosEmpresas)
-    .innerJoin(empresasUsuarias, eq(usuariosEmpresas.empresaId, empresasUsuarias.id))
-    .where(eq(usuariosEmpresas.userId, userId));
-    
-    return vinculos.map(v => v.empresa);
-  }
-  
-  async getUsuariosDaEmpresa(empresaId: number): Promise<{ user: User, permissionLevel: string }[]> {
-    const vinculos = await db.select({
-      user: users,
-      permissionLevel: usuariosEmpresas.permissionLevel
-    })
-    .from(usuariosEmpresas)
-    .innerJoin(users, eq(usuariosEmpresas.userId, users.id))
-    .where(eq(usuariosEmpresas.empresaId, empresaId));
-    
-    return vinculos;
-  }
-  
-  async verificarVinculoUsuarioEmpresa(userId: string, empresaId: number): Promise<UsuarioEmpresa | undefined> {
-    const [vinculo] = await db.select()
-      .from(usuariosEmpresas)
-      .where(
-        and(
-          eq(usuariosEmpresas.userId, userId),
-          eq(usuariosEmpresas.empresaId, empresaId)
-        )
-      );
-    
-    return vinculo;
   }
 }
 

@@ -19,10 +19,10 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    if (!username) {
+    if (!username || !password) {
       toast({
-        title: "Campo obrigatório",
-        description: "Por favor, preencha o campo de e-mail",
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos",
         variant: "destructive",
       });
       return;
@@ -31,46 +31,47 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      // Usar a rota de desenvolvimento para login
-      const response = await fetch('/api/auth/dev-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: username,
-          // Definir role com base no nome de usuário para facilitar os testes
-          role: username.includes('admin') ? 'admin' : 
-                username.includes('contador') ? 'accountant' : 
-                username.includes('empresa') ? 'client' : 'user'
-        })
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
+      // Neste momento estamos usando login simulado
+      // Posteriormente isso será substituído por uma chamada à API
+      setTimeout(() => {
+        // Usuários mock para testes
+        const users = [
+          { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador' },
+          { username: 'contador', password: 'contador123', role: 'accountant', name: 'Contador' },
+          { username: 'empresa', password: 'empresa123', role: 'client', name: 'Empresa' }
+        ];
         
-        // Salvar no localStorage apenas como backup
-        localStorage.setItem('nixcon_user', JSON.stringify({
-          ...userData,
-          isAuthenticated: true
-        }));
+        const user = users.find(u => u.username === username && u.password === password);
         
-        toast({
-          title: "Login realizado com sucesso",
-          description: `Bem-vindo, ${userData.firstName || userData.email}!`,
-        });
+        if (user) {
+          // Em produção, aqui seria o token JWT recebido do backend
+          localStorage.setItem('nixcon_user', JSON.stringify({
+            id: Math.random().toString(36).substr(2, 9),
+            username: user.username,
+            name: user.name,
+            role: user.role,
+            isAuthenticated: true
+          }));
+          
+          toast({
+            title: "Login realizado com sucesso",
+            description: `Bem-vindo, ${user.name}!`,
+          });
+          
+          // Redirecionamento imediato após o login
+          window.location.href = '/';
+          // Não usamos navigate() porque queremos recarregar a página por completo
+          // para garantir que todos os contextos sejam recarregados
+        } else {
+          toast({
+            title: "Falha no login",
+            description: "Usuário ou senha incorretos",
+            variant: "destructive",
+          });
+        }
         
-        // Redirecionamento imediato após o login
-        window.location.href = '/';
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        toast({
-          title: "Falha no login",
-          description: errorData.message || "Erro na autenticação. Tente novamente.",
-          variant: "destructive",
-        });
-      }
+        setIsLoading(false);
+      }, 1000);
     } catch (error) {
       console.error('Erro no login:', error);
       toast({
@@ -78,7 +79,6 @@ const LoginPage = () => {
         description: "Ocorreu um erro ao tentar fazer login. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -113,34 +113,54 @@ const LoginPage = () => {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Email para desenvolvimento</Label>
+                <Label htmlFor="username">Usuário</Label>
                 <Input
                   id="username"
-                  type="email"
-                  placeholder="Digite seu email"
+                  placeholder="Digite seu usuário"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Dica: Para testar diferentes funções, inclua "admin", "contador" ou "empresa" no email.
-                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Digite sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <Button 
                 type="submit" 
                 className="w-full bg-[#d9bb42] hover:bg-[#c2a73a]"
                 disabled={isLoading}
               >
-                {isLoading ? "Entrando..." : "Entrar para Desenvolvimento"}
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center text-sm text-gray-500">
             <div className="text-center">
               <p>Para testes, use:</p>
-              <p>Email: admin@nixcon.com (para administrador)</p>
-              <p>Email: contador@nixcon.com (para contador)</p>
-              <p>Email: empresa@nixcon.com (para empresa)</p>
+              <p>Usuário: admin | Senha: admin123</p>
+              <p>Usuário: contador | Senha: contador123</p>
+              <p>Usuário: empresa | Senha: empresa123</p>
             </div>
           </CardFooter>
         </Card>

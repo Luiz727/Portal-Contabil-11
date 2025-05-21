@@ -46,45 +46,40 @@ export function useAuth() {
       }
     };
     
-    // Prioriza buscar os dados da API para garantir a sessão ativa
+    // Primeiro, verifica se há usuário no localStorage
+    const storedUser = localStorage.getItem('nixcon_user');
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setupUserContext(parsedUser);
+      } catch (error) {
+        console.error('Erro ao analisar usuário armazenado:', error);
+        localStorage.removeItem('nixcon_user');
+      }
+    }
+    
+    setIsLoading(false);
+    
+    // Como backup, também tenta buscar do API (para sistemas de produção real)
     const fetchFromApi = async () => {
       try {
-        setIsLoading(true);
-        const response = await fetch('/api/auth/user', {
-          credentials: 'include' // Importante para enviar cookies de sessão
-        });
-        
+        const response = await fetch('/api/auth/user');
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
-          // Salva no localStorage como cache apenas
-          localStorage.setItem('nixcon_user', JSON.stringify(userData));
           setupUserContext(userData);
-        } else if (response.status === 401) {
-          // Se não estiver autenticado, limpa o localStorage
-          localStorage.removeItem('nixcon_user');
-          setUser(null);
         }
       } catch (error) {
         console.error('Erro ao buscar dados de usuário da API:', error);
-        // Tenta usar o cache local como fallback
-        const storedUser = localStorage.getItem('nixcon_user');
-        if (storedUser) {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-            setupUserContext(parsedUser);
-          } catch (e) {
-            console.error('Erro ao analisar usuário armazenado:', e);
-            localStorage.removeItem('nixcon_user');
-          }
-        }
-      } finally {
-        setIsLoading(false);
       }
     };
     
-    fetchFromApi();
+    // Tenta buscar da API apenas se não tiver encontrado no localStorage
+    if (!storedUser) {
+      fetchFromApi();
+    }
   }, [viewModeContext]);
 
   // Função para realizar logout

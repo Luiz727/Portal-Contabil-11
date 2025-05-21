@@ -8,7 +8,6 @@ import { registerHonorariosRoutes } from "./honorariosRoutes";
 import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
 import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
-import { registerUsuariosEmpresasRoutes } from "./routes/usuariosEmpresasRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -27,8 +26,7 @@ import {
   insertSupplierSchema,
   insertProductCategorySchema,
   insertApiIntegrationSchema,
-  insertImportExportLogSchema,
-  insertEmpresaUsuariaSchema
+  insertImportExportLogSchema
 } from "@shared/schema";
 import { xml2js, js2xml } from "xml-js";
 
@@ -84,7 +82,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerIntegraNfRoutes(app);
   registerHonorariosRoutes(app);
   registerTaxCalculatorRoutes(app);
-  registerUsuariosEmpresasRoutes(app);
   try {
     registerXmlVaultRoutes(app);
   } catch (error) {
@@ -100,75 +97,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-  
-  // Rota temporária para desenvolvimento - simula um login
-  app.post('/api/auth/dev-login', async (req, res) => {
-    try {
-      const { email, role = 'admin' } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ message: "Email é obrigatório" });
-      }
-      
-      // Buscar usuário por e-mail ou criar um usuário temporário
-      let user = await storage.getUserByEmail(email);
-      
-      if (!user) {
-        // Criar um usuário temporário para testes
-        const userData = {
-          id: `dev-${Date.now()}`,
-          email,
-          firstName: "Usuário",
-          lastName: "Desenvolvimento",
-          role,
-          profileImageUrl: null,
-        };
-        
-        user = await storage.upsertUser(userData);
-      }
-      
-      // Configurar uma sessão para o usuário
-      if (req.session) {
-        req.session.user = {
-          claims: {
-            sub: user.id,
-            email: user.email,
-            first_name: user.firstName,
-            last_name: user.lastName,
-            role: user.role,
-            profile_image_url: user.profileImageUrl
-          }
-        };
-        await new Promise((resolve) => req.session.save(resolve));
-      }
-      
-      return res.status(200).json(user);
-    } catch (error) {
-      console.error("Erro no login de desenvolvimento:", error);
-      return res.status(500).json({ message: "Erro interno no servidor" });
-    }
-  });
-  
-  // Rota para listar todos os usuários (para administração)
-  app.get('/api/users', isAuthenticated, async (req: any, res) => {
-    try {
-      // Verificar se o usuário é admin
-      const userRole = req.user?.claims?.role;
-      const userId = req.user?.claims?.sub;
-      
-      // Se não for admin, retorna apenas o próprio usuário
-      if (userRole !== 'admin') {
-        const user = await storage.getUser(userId);
-        return res.json([user].filter(Boolean));
-      }
-      
-      const allUsers = await storage.getAllUsers();
-      res.json(allUsers);
-    } catch (error) {
-      console.error("Erro ao buscar lista de usuários:", error);
-      res.status(500).json({ message: "Erro ao buscar lista de usuários" });
     }
   });
 
