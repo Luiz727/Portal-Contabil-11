@@ -1,17 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useAuth } from "../hooks/useAuth";
-
-// Interface do usuário autenticado
-interface User {
-  id: string;
-  email: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  profileImageUrl: string | null;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useAuth, User } from "../hooks/useAuth";
 
 export function LoginButton() {
   const { user, isAuthenticated, isLoading } = useAuth();

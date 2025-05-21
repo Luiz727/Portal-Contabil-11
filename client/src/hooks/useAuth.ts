@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 // Interface do usuário autenticado
-interface User {
+export interface User {
   id: string;
   email: string | null;
   firstName: string | null;
