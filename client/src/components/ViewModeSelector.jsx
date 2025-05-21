@@ -62,7 +62,7 @@ const ViewModeSelector = () => {
           <SelectItem key={vm.id} value={vm.id}>
             <div className="flex items-center">
               <ViewModeIcon mode={vm.id} />
-              <span>{vm.nome}</span>
+              <span>{vm.name}</span>
             </div>
           </SelectItem>
         ))}

@@ -1,271 +1,200 @@
-import React from 'react';
-import { Link, useLocation } from 'wouter';
-import { useViewMode, VIEW_MODES } from '../contexts/ViewModeContext';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Link, useLocation } from "wouter";
+import { useViewMode } from '../contexts/ViewModeContext';
+import { cn } from "@/lib/utils";
 import {
   Home,
-  BarChart2,
-  FileText,
   Users,
-  ShoppingCart,
-  Calendar,
-  Settings,
-  FileCheck,
-  Wallet,
   DollarSign,
-  Upload,
-  GanttChart,
-  Building,
-  Calculator,
-  BookOpen
-} from 'lucide-react';
-
-interface MenuItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-  viewModes: string[];
-  permissions: string[];
-}
-
-const mainMenuItems: MenuItem[] = [
-  {
-    label: 'Dashboard',
-    href: '/',
-    icon: <Home className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-    permissions: []
-  },
-  {
-    label: 'Clientes',
-    href: '/clients',
-    icon: <Users className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['gerencial_clientes']
-  },
-  {
-    label: 'Fiscal',
-    href: '/fiscal',
-    icon: <FileCheck className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
-    permissions: ['fiscal_nfe', 'fiscal_nfse']
-  },
-  {
-    label: 'Documentos',
-    href: '/documents',
-    icon: <FileText className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-    permissions: ['documentos_upload', 'documentos_ged']
-  },
-  {
-    label: 'Financeiro',
-    href: '/financial',
-    icon: <Wallet className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
-    permissions: ['financeiro_honorarios', 'financeiro_conciliacoes', 'financeiro_pagamentos', 'financeiro_recebimentos']
-  },
-  {
-    label: 'Honorários',
-    href: '/invoices',
-    icon: <DollarSign className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['financeiro_honorarios']
-  },
-  {
-    label: 'Conciliações',
-    href: '/reconciliation',
-    icon: <BarChart2 className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
-    permissions: ['financeiro_conciliacoes']
-  },
-  {
-    label: 'Estoque',
-    href: '/inventory',
-    icon: <ShoppingCart className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.EMPRESA],
-    permissions: ['estoque_produtos', 'estoque_movimentacoes']
-  },
-  {
-    label: 'Relatórios',
-    href: '/reports',
-    icon: <GanttChart className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
-    permissions: ['financeiro_relatorios']
-  },
-  {
-    label: 'Agenda',
-    href: '/calendar',
-    icon: <Calendar className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
-    permissions: []
-  },
-  {
-    label: 'Calculadora Fiscal',
-    href: '/tax-calculator',
-    icon: <Calculator className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-    permissions: ['fiscal_impostos']
-  }
-];
-
-const adminMenuItems: MenuItem[] = [
-  {
-    label: 'Painel Administrativo',
-    href: '/admin/painel',
-    icon: <Building className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['admin_configuracoes']
-  },
-  {
-    label: 'Configurações',
-    href: '/admin/configuracoes',
-    icon: <Settings className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
-    permissions: ['admin_configuracoes']
-  },
-  {
-    label: 'Empresas',
-    href: '/admin/empresas-usuarias',
-    icon: <Building className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['gerencial_empresas']
-  },
-  {
-    label: 'Usuários e Permissões',
-    href: '/admin/usuarios',
-    icon: <Users className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['gerencial_usuarios', 'admin_perfis']
-  },
-  {
-    label: 'Produtos Universais',
-    href: '/admin/produtos-universais',
-    icon: <ShoppingCart className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['gerencial_produtos']
-  },
-  {
-    label: 'Integrações',
-    href: '/integrations',
-    icon: <Upload className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO],
-    permissions: ['admin_integracao']
-  }
-];
-
-const helpMenuItems: MenuItem[] = [
-  {
-    label: 'Documentação',
-    href: '/help/docs',
-    icon: <BookOpen className="h-5 w-5" />,
-    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
-    permissions: []
-  }
-];
+  FileText,
+  Calendar,
+  Folder,
+  CheckSquare,
+  BarChart2,
+  Settings,
+  Shield,
+  FileIcon,
+  Layout,
+} from "lucide-react";
 
 interface SidebarProps {
-  isMobile: boolean;
   isOpen: boolean;
-  closeSidebar: () => void;
+  onClose: () => void;
 }
 
-const Sidebar = ({ isMobile, isOpen, closeSidebar }: SidebarProps) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const [location] = useLocation();
-  const { viewMode, hasPermission } = useViewMode();
+  const { viewMode, isLoading } = useViewMode();
 
-  // Filtrar menus com base no modo de visualização e permissões
-  const filteredMainMenu = mainMenuItems.filter(item => 
-    item.viewModes.includes(viewMode) && 
-    (item.permissions.length === 0 || item.permissions.some(p => hasPermission(p)))
-  );
-  
-  const filteredAdminMenu = adminMenuItems.filter(item => 
-    item.viewModes.includes(viewMode) && 
-    (item.permissions.length === 0 || item.permissions.some(p => hasPermission(p)))
-  );
+  // Function to get menu items based on current view mode
+  const getMenuItems = () => {
+    // Base menu items for all view modes
+    const baseItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/' }
+    ];
 
-  const renderMenuItem = (item: MenuItem) => {
-    const isActive = location === item.href;
-    
-    return (
-      <Link 
-        key={item.href} 
-        href={item.href}
-        onClick={() => isMobile && closeSidebar()}
-        className={cn(
-          "flex items-center px-4 py-2.5 text-sm rounded-md transition-colors",
-          isActive 
-            ? "bg-primary text-white font-medium" 
-            : "text-gray-700 hover:bg-gray-100"
-        )}
-      >
-        <span className="mr-3">{item.icon}</span>
-        <span>{item.label}</span>
-      </Link>
-    );
+    // Menu items specific to each view mode
+    const viewModeItems: Record<string, Array<{ id: string, label: string, icon: any, path: string }>> = {
+      'escritorio': [
+        { id: 'clients', label: 'Clientes', icon: Users, path: '/clients' },
+        { id: 'financial', label: 'Financeiro', icon: DollarSign, path: '/financial' },
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'calendar', label: 'Calendário', icon: Calendar, path: '/calendar' },
+        { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
+        { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
+        { id: 'reports', label: 'Relatórios', icon: BarChart2, path: '/reports' },
+        { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
+        { id: 'admin', label: 'Administração', icon: Shield, path: '/admin' }
+      ],
+      'empresa': [
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'financial', label: 'Financeiro', icon: DollarSign, path: '/financial' },
+        { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
+        { id: 'invoices', label: 'Notas Fiscais', icon: FileIcon, path: '/invoices' },
+        { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
+        { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' }
+      ],
+      'contador': [
+        { id: 'clients', label: 'Clientes', icon: Users, path: '/clients' },
+        { id: 'fiscal', label: 'Módulo Fiscal', icon: FileText, path: '/fiscal' },
+        { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
+        { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
+        { id: 'calendar', label: 'Calendário', icon: Calendar, path: '/calendar' }
+      ],
+      'externo': [
+        { id: 'documents', label: 'Documentos', icon: Folder, path: '/documents' },
+        { id: 'tasks', label: 'Tarefas', icon: CheckSquare, path: '/tasks' },
+        { id: 'client-portal', label: 'Portal do Cliente', icon: Layout, path: '/client-portal' }
+      ]
+    };
+
+    // Combine base items with view mode specific items
+    return [
+      ...baseItems,
+      ...(viewModeItems[viewMode] || [])
+    ];
   };
 
-  const sidebarClass = cn(
-    "flex flex-col h-full overflow-y-auto bg-white border-r border-gray-200",
-    "w-64 fixed top-14 bottom-0 left-0 z-30 transition-transform duration-300",
-    isMobile && !isOpen && "-translate-x-full",
-    isMobile && isOpen && "translate-x-0"
-  );
+  const menuItems = getMenuItems();
 
-  return (
-    <>
-      {/* Overlay para dispositivos móveis */}
-      {isMobile && isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
-          onClick={closeSidebar}
-        />
-      )}
-      
-      <div className={sidebarClass}>
-        <div className="py-4 flex-1">
-          {/* Menus principais */}
-          <div className="px-3 mb-6">
-            <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Principal
-            </h2>
-            <div className="space-y-1">
-              {filteredMainMenu.map(renderMenuItem)}
-            </div>
-          </div>
-          
-          {/* Menu administrativo - apenas exibido se houver itens filtrados */}
-          {filteredAdminMenu.length > 0 && (
-            <div className="px-3 mb-6">
-              <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Administração
-              </h2>
-              <div className="space-y-1">
-                {filteredAdminMenu.map(renderMenuItem)}
-              </div>
-            </div>
-          )}
-          
-          {/* Menu de ajuda */}
-          <div className="px-3">
-            <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Ajuda e Suporte
-            </h2>
-            <div className="space-y-1">
-              {helpMenuItems.map(renderMenuItem)}
-            </div>
-          </div>
-        </div>
-        
-        {/* Rodapé fixo no fundo do sidebar */}
-        <div className="p-3 border-t border-gray-200">
-          <div className="flex items-center px-4 py-2 text-sm text-gray-600">
-            <div className="flex-1">
-              Versão 1.0.0
+  if (isLoading) {
+    return (
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="p-4">
+          <div className="animate-pulse flex flex-col space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-32"></div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div key={item} className="h-10 bg-gray-200 rounded w-full"></div>
+              ))}
             </div>
           </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+        ></div>
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar header with logo */}
+          <div className="h-16 border-b border-gray-200 flex items-center px-4">
+            <img
+              src="/assets/logo.svg"
+              alt="NIXCON"
+              className="h-8 w-auto"
+            />
+            <span className="ml-2 text-lg font-bold text-gray-900">
+              NIXCON
+            </span>
+          </div>
+
+          {/* View mode indicator */}
+          <div className="px-4 py-3 border-b border-gray-200">
+            <div className={`px-3 py-1.5 rounded-md ${
+              viewMode === 'escritorio' 
+                ? 'bg-primary/10 text-primary' 
+                : viewMode === 'empresa'
+                  ? 'bg-blue-100 text-blue-800'
+                  : viewMode === 'contador'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-purple-100 text-purple-800'
+            }`}>
+              <span className="text-xs font-medium">
+                {viewMode === 'escritorio' 
+                  ? 'Visão Escritório' 
+                  : viewMode === 'empresa'
+                    ? 'Visão Empresa'
+                    : viewMode === 'contador'
+                      ? 'Visão Contador'
+                      : 'Visão Externa'}
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation menu */}
+          <nav className="flex-1 overflow-y-auto py-4 px-3">
+            <ul className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = location === item.path;
+                const Icon = item.icon;
+                
+                return (
+                  <li key={item.id}>
+                    <Link href={item.path}>
+                      <a
+                        className={cn(
+                          "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-gray-700 hover:bg-gray-100"
+                        )}
+                        onClick={() => {
+                          if (window.innerWidth < 768) {
+                            onClose();
+                          }
+                        }}
+                      >
+                        <Icon className={cn(
+                          "mr-3 h-5 w-5",
+                          isActive ? "text-primary" : "text-gray-500"
+                        )} />
+                        {item.label}
+                      </a>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Footer with version info */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="text-xs text-gray-500">
+              <p>NIXCON Portal Contábil</p>
+              <p>Versão 1.0.0</p>
+            </div>
+          </div>
+        </div>
+      </aside>
     </>
   );
 };
