@@ -34,20 +34,21 @@ type HeaderProps = {
 export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
   const { user } = useAuth();
   const { actingAsEmpresa, userType } = useEmpresas();
+  const { viewMode, changeViewMode } = useViewMode();
   const [isEscritorioView, setIsEscritorioView] = useState(false);
   
   useEffect(() => {
-    // Carregar modo de visualização salvo, com valor padrão baseado no tipo de usuário
-    const savedVisualizationMode = localStorage.getItem('visualizationMode');
-    if (savedVisualizationMode === 'escritorio') {
-      setIsEscritorioView(true);
-    } else if (savedVisualizationMode === 'empresa') {
-      setIsEscritorioView(false);
-    } else {
-      // Default é escritório para usuários do escritório sem preferência salva
-      setIsEscritorioView(userType === 'Escritorio' && !actingAsEmpresa);
+    // Atualiza o estado isEscritorioView com base no modo de visualização atual
+    setIsEscritorioView(viewMode === VIEW_MODES.ACCOUNTING_OFFICE);
+    
+    // Verifica transições de página quando o modo de visualização muda
+    if (viewMode === VIEW_MODES.CLIENT_COMPANY) {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/admin/')) {
+        window.location.href = "/";
+      }
     }
-  }, [userType, actingAsEmpresa]);
+  }, [viewMode]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -146,69 +147,8 @@ export default function Header({ toggleSidebar, fiscalModule = false, onVisualiz
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Seletor de empresas funcional com o estilo da imagem de referência */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="hidden sm:flex sm:items-center sm:border sm:border-gray-200 sm:rounded-md sm:px-3 sm:py-1.5 sm:bg-white cursor-pointer hover:bg-gray-50">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium px-2 py-0.5 bg-gray-100 rounded text-gray-700">
-                    {isEscritorioView ? "NX" : "CA"}
-                  </span>
-                  <span className="text-sm text-gray-700">
-                    {isEscritorioView ? "NIXCON" : "Comércio ABC"}
-                  </span>
-                </div>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Alterar Visualização</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => {
-                if (onVisualizationChange) onVisualizationChange("escritorio");
-                setIsEscritorioView(true);
-                localStorage.setItem('visualizationMode', 'escritorio');
-                // Permanecer na mesma página
-              }}>
-                <User2 className="mr-2 h-4 w-4 text-[#d9bb42]" />
-                <span>Visão do Escritório</span>
-                {isEscritorioView && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Empresas</DropdownMenuLabel>
-              <DropdownMenuItem 
-                className={!isEscritorioView ? "bg-gray-50" : ""}
-                onClick={() => {
-                  if (onVisualizationChange) onVisualizationChange("empresa");
-                  setIsEscritorioView(false);
-                  localStorage.setItem('visualizationMode', 'empresa');
-                  // Verificar se está em uma página exclusiva do escritório
-                  const currentPath = window.location.pathname;
-                  if (currentPath.startsWith('/admin/')) {
-                    window.location.href = "/";
-                  }
-                  // Caso contrário, permanecer na mesma página
-                }}
-              >
-                <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
-                <span>Comércio ABC</span>
-                {!isEscritorioView && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                if (onVisualizationChange) onVisualizationChange("empresa");
-                window.location.href = "/";
-              }}>
-                <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
-                <span>Grupo Aurora</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                if (onVisualizationChange) onVisualizationChange("empresa");
-                window.location.href = "/";
-              }}>
-                <Building className="mr-2 h-4 w-4 text-[#d9bb42]" />
-                <span>Holding XYZ</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Novo seletor de visualização usando o componente ViewModeSelector */}
+          <ViewModeSelector />
 
           {/* Notifications */}
           <DropdownMenu>
