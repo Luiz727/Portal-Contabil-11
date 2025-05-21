@@ -17,6 +17,14 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Tipos de visualização disponíveis
+export const VIEW_MODES = {
+  ESCRITORIO: 'escritorio',
+  EMPRESA: 'empresa',
+  CONTADOR: 'contador',
+  EXTERNO: 'externo'
+};
+
 // Session storage table for Replit Auth
 export const sessions = pgTable(
   "sessions",
@@ -36,6 +44,57 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: text("role").default("client").notNull(), // admin, accountant, client
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Roles table for role-based access control
+export const roles = pgTable("roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").unique().notNull(),
+  description: text("description"),
+  isSystem: boolean("is_system").default(false), // System roles cannot be modified
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Permissions table to define granular permissions
+export const permissions = pgTable("permissions", {
+  id: serial("id").primaryKey(),
+  code: text("code").unique().notNull(), // A unique code for the permission (e.g., "manage_users")
+  name: text("name").notNull(),
+  description: text("description"),
+  module: text("module").notNull(), // The module this permission belongs to (e.g., "users", "fiscal", "finance")
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Role permissions - many-to-many relationship between roles and permissions
+export const rolePermissions = pgTable("role_permissions", {
+  roleId: integer("role_id").notNull().references(() => roles.id, { onDelete: 'cascade' }),
+  permissionId: integer("permission_id").notNull().references(() => permissions.id, { onDelete: 'cascade' }),
+}, (table) => ({
+  pk: primaryKey(table.roleId, table.permissionId),
+}));
+
+// User roles - many-to-many relationship between users and roles
+export const userRoles = pgTable("user_roles", {
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  roleId: integer("role_id").notNull().references(() => roles.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  pk: primaryKey(table.userId, table.roleId),
+}));
+
+// User view modes - stores the active view mode configuration for each user
+export const userViewModes = pgTable("user_view_modes", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  viewMode: text("view_mode").notNull(), // escritorio, empresa, contador, externo
+  activeProfile: text("active_profile"), // ID of the active profile within this view mode
+  clientId: integer("client_id").references(() => clients.id, { onDelete: 'set null' }),
+  lastUsed: timestamp("last_used").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
