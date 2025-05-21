@@ -1,29 +1,33 @@
 import { useAuth } from "../hooks/useAuth";
 import { useLocation } from "wouter";
 import { Spinner } from "../components/ui/spinner";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
+import { ViewModeContext } from "@/contexts/ViewModeContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   allowedRoles?: string[];
+  requiredFeatures?: string[];
 }
 
 export function ProtectedRoute({ 
   children, 
   requireAuth = true, 
-  allowedRoles = [] 
+  allowedRoles = [],
+  requiredFeatures = []
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const { viewMode, activeProfile } = useContext(ViewModeContext);
 
   useEffect(() => {
     // Se autenticação é requerida e o usuário não está autenticado
     if (!isLoading && requireAuth && !isAuthenticated) {
-      window.location.href = "/api/login";
+      window.location.href = "/login";
     }
 
-    // Se existem roles permitidas e o usuário não tem a role necessária
+    // Verifica perfil do usuário logado contra roles permitidas
     // Superadmin tem acesso a todas as áreas
     if (
       !isLoading &&
@@ -35,7 +39,25 @@ export function ProtectedRoute({
     ) {
       setLocation("/sem-permissao");
     }
-  }, [isLoading, isAuthenticated, user, requireAuth, allowedRoles, setLocation]);
+
+    // Verifica se o perfil de visualização ativo tem permissão para as funcionalidades requeridas
+    if (
+      !isLoading &&
+      isAuthenticated &&
+      requiredFeatures.length > 0 &&
+      activeProfile && 
+      viewMode === 'empresa' // Apenas verifica quando está no modo empresa
+    ) {
+      // Verifica se todas as funcionalidades requeridas estão disponíveis no perfil ativo
+      const hasAllRequiredFeatures = requiredFeatures.every(feature => 
+        activeProfile.permissoes?.includes(feature)
+      );
+      
+      if (!hasAllRequiredFeatures) {
+        setLocation("/sem-permissao");
+      }
+    }
+  }, [isLoading, isAuthenticated, user, requireAuth, allowedRoles, requiredFeatures, setLocation, viewMode, activeProfile]);
 
   // Mostra um spinner durante o carregamento
   if (isLoading) {
@@ -51,8 +73,7 @@ export function ProtectedRoute({
     return null; // Vai redirecionar no useEffect
   }
 
-  // Verificações de permissão
-  // Superadmin tem acesso a todas as áreas
+  // Verificações de permissão de perfil do usuário
   if (
     isAuthenticated && 
     allowedRoles.length > 0 && 
@@ -61,6 +82,23 @@ export function ProtectedRoute({
     !allowedRoles.includes(user.role)
   ) {
     return null; // Vai redirecionar no useEffect
+  }
+
+  // Verificações de permissão baseada no perfil ativo de visualização
+  if (
+    isAuthenticated &&
+    requiredFeatures.length > 0 &&
+    activeProfile && 
+    viewMode === 'empresa'
+  ) {
+    // Verifica se todas as funcionalidades requeridas estão disponíveis no perfil ativo
+    const hasAllRequiredFeatures = requiredFeatures.every(feature => 
+      activeProfile.permissoes?.includes(feature)
+    );
+    
+    if (!hasAllRequiredFeatures) {
+      return null; // Vai redirecionar no useEffect
+    }
   }
 
   // Renderiza os componentes filhos se todas as verificações passarem

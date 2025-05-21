@@ -43,9 +43,31 @@ const Toast = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
+  const { id } = props;
+  
+  // Função para fechar o toast ao clicar em qualquer lugar da tela
+  React.useEffect(() => {
+    const handleClick = () => {
+      if (props.onOpenChange) {
+        props.onOpenChange(false);
+      }
+    };
+    
+    // Adicionamos um timeout para não fechar imediatamente quando o toast é criado
+    const timeout = setTimeout(() => {
+      document.addEventListener('click', handleClick);
+    }, 300);
+    
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener('click', handleClick);
+    };
+  }, [props.onOpenChange]);
+
   return (
     <ToastPrimitives.Root
       ref={ref}
+      id={`toast-${id}`}
       className={cn(toastVariants({ variant }), className)}
       {...props}
     />
