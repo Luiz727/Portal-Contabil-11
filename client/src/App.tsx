@@ -60,212 +60,214 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated && <Route path="/" component={LoginPage} />}
-      {!isAuthenticated && <Route path="/login" component={LoginPage} />}
+    <ViewModeProvider>
+      <Switch>
+        {!isAuthenticated && <Route path="/" component={LoginPage} />}
+        {!isAuthenticated && <Route path="/login" component={LoginPage} />}
 
-      {isAuthenticated && (
-        <Route path="/">
-          <MainLayout>
-            <NIXCONDashboard />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/">
+            <MainLayout>
+              <NIXCONDashboard />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/tasks">
-          <MainLayout>
-            <Tasks />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/tasks">
+            <MainLayout>
+              <Tasks />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/clients">
-          <MainLayout>
-            <Clients />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/clients">
+            <MainLayout>
+              <Clients />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/documents">
-          <MainLayout>
-            <Documents />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/documents">
+            <MainLayout>
+              <Documents />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Página de invoices foi removida conforme solicitado */}
+        {/* Página de invoices foi removida conforme solicitado */}
 
-      {/* A calculadora agora só é acessível com autenticação */}
-      {isAuthenticated && (
-        <Route path="/tax-calculator">
-          <MainLayout>
-            <TaxCalculatorPage />
-          </MainLayout>
-        </Route>
-      )}
+        {/* A calculadora agora só é acessível com autenticação */}
+        {isAuthenticated && (
+          <Route path="/tax-calculator">
+            <MainLayout>
+              <TaxCalculatorPage />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Nova rota NIXCON da calculadora com autenticação */}
-      {isAuthenticated && (
-        <Route path="/calculadora-nixcon">
-          <TaxCalculatorNIXCONPage />
-        </Route>
-      )}
+        {/* Nova rota NIXCON da calculadora com autenticação */}
+        {isAuthenticated && (
+          <Route path="/calculadora-nixcon">
+            <TaxCalculatorNIXCONPage />
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/financial">
-          <MainLayout>
-            <Financial />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/financial">
+            <MainLayout>
+              <Financial />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/inventory">
-          <MainLayout>
-            <Inventory />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/inventory">
+            <MainLayout>
+              <Inventory />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/reconciliation">
-          <MainLayout>
-            <Reconciliation />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/reconciliation">
+            <MainLayout>
+              <Reconciliation />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/reports">
-          <MainLayout>
-            <Reports />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/reports">
+            <MainLayout>
+              <Reports />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/settings">
-          <MainLayout>
-            <Settings />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/settings">
+            <MainLayout>
+              <Settings />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/integrations">
-          <MainLayout>
-            <Integrations />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/integrations">
+            <MainLayout>
+              <Integrations />
+            </MainLayout>
+          </Route>
+        )}
 
-      {isAuthenticated && (
-        <Route path="/whatsapp">
-          <MainLayout>
-            <WhatsApp />
-          </MainLayout>
-        </Route>
-      )}
+        {isAuthenticated && (
+          <Route path="/whatsapp">
+            <MainLayout>
+              <WhatsApp />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Impostômetro */}
-      {isAuthenticated && (
-        <Route path="/impostometro">
-          <MainLayout>
-            <ImpostometroPage />
-          </MainLayout>
-        </Route>
-      )}
+        {/* Impostômetro */}
+        {isAuthenticated && (
+          <Route path="/impostometro">
+            <MainLayout>
+              <ImpostometroPage />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Módulo Fiscal Integrado - Versão Responsiva */}
-      {isAuthenticated && (
-        <Route path="/fiscal">
-          <MainLayout>
-            <FiscalPageResponsivo />
-          </MainLayout>
-        </Route>
-      )}
+        {/* Módulo Fiscal Integrado - Versão Responsiva */}
+        {isAuthenticated && (
+          <Route path="/fiscal">
+            <MainLayout>
+              <FiscalPageResponsivo />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Páginas Administrativas */}
-      {isAuthenticated && (
-        <Route path="/admin/configuracoes">
-          <MainLayout>
-            <ConfiguracoesAdminPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/painel">
-          <MainLayout>
-            <PainelAdministrativoPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/empresas-usuarias">
-          <MainLayout>
-            <EmpresasUsuariasPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/produtos-universais">
-          <MainLayout>
-            <ProdutosUniversaisPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/importar-produtos">
-          <MainLayout>
-            <ImportacaoProdutosPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/planos">
-          <MainLayout>
-            <PlanosAssinaturasPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/usuarios">
-          <MainLayout>
-            <UsuariosPermissoesPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/configuracoes-empresa">
-          <MainLayout>
-            <ConfiguracoesEmpresaPage />
-          </MainLayout>
-        </Route>
-      )}
-      
-      {isAuthenticated && (
-        <Route path="/admin/superadmin">
-          <SuperAdminPage />
-        </Route>
-      )}
+        {/* Páginas Administrativas */}
+        {isAuthenticated && (
+          <Route path="/admin/configuracoes">
+            <MainLayout>
+              <ConfiguracoesAdminPage />
+            </MainLayout>
+          </Route>
+        )}
 
-      {/* Página de acesso negado/sem permissão */}
-      <Route path="/sem-permissao">
-        <SemPermissaoPage />
-      </Route>
+        {isAuthenticated && (
+          <Route path="/admin/painel">
+            <MainLayout>
+              <PainelAdministrativoPage />
+            </MainLayout>
+          </Route>
+        )}
 
-      <Route component={NotFound} />
-    </Switch>
+        {isAuthenticated && (
+          <Route path="/admin/empresas-usuarias">
+            <MainLayout>
+              <EmpresasUsuariasPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/produtos-universais">
+            <MainLayout>
+              <ProdutosUniversaisPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/importar-produtos">
+            <MainLayout>
+              <ImportacaoProdutosPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/planos">
+            <MainLayout>
+              <PlanosAssinaturasPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/usuarios">
+            <MainLayout>
+              <UsuariosPermissoesPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/configuracoes-empresa">
+            <MainLayout>
+              <ConfiguracoesEmpresaPage />
+            </MainLayout>
+          </Route>
+        )}
+
+        {isAuthenticated && (
+          <Route path="/admin/superadmin">
+            <SuperAdminPage />
+          </Route>
+        )}
+
+        {/* Página de acesso negado/sem permissão */}
+        <Route path="/sem-permissao">
+          <SemPermissaoPage />
+        </Route>
+
+        <Route component={NotFound} />
+      </Switch>
+    </ViewModeProvider>
   );
 }
 
@@ -274,14 +276,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <ViewModeProvider>
+          
             <EmpresasProvider>
               <ProdutosProvider>
                 <Toaster />
                 <Router />
               </ProdutosProvider>
             </EmpresasProvider>
-          </ViewModeProvider>
+          
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

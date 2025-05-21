@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 <span>Configurações</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => useAuth().logout()}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
