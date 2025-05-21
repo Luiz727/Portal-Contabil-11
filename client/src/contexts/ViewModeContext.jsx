@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Tipos de visualização simplificados
+// Tipos de visualização disponíveis
 export const VIEW_MODES = {
   ESCRITORIO: 'escritorio',  // Escritório contábil
   EMPRESA: 'empresa',       // Empresa cliente
@@ -40,8 +40,7 @@ export const DEFAULT_PERMISSIONS = {
         { id: 'gerencial_clientes', label: 'Gestão de Clientes', permissao: true },
         { id: 'gerencial_usuarios', label: 'Gestão de Usuários', permissao: true },
         { id: 'gerencial_empresas', label: 'Gestão de Empresas', permissao: true },
-        { id: 'gerencial_produtos', label: 'Cadastro Universal de Produtos', permissao: true },
-        { id: 'gerencial_planos', label: 'Planos e Assinaturas', permissao: true }
+        { id: 'gerencial_produtos', label: 'Cadastro Universal de Produtos', permissao: true }
       ],
       'admin': [
         { id: 'admin_configuracoes', label: 'Configurações do Sistema', permissao: true },
@@ -184,7 +183,7 @@ export const ViewModeProvider = ({ children }) => {
   // Estado para armazenar a empresa atual (quando estiver visualizando como empresa)
   const [currentCompany, setCurrentCompany] = useState(null);
   // Estado para armazenar o perfil de visualização ativo
-  const [activeProfile, setActiveProfile] = useState(PERFIS_VISUALIZACAO.ADMINISTRADOR);
+  const [activeProfile, setActiveProfile] = useState(PERFIS_VISUALIZACAO.administrador);
   // Estado para armazenar todos os perfis disponíveis
   const [profiles, setProfiles] = useState(PERFIS_VISUALIZACAO);
   
@@ -241,7 +240,7 @@ export const ViewModeProvider = ({ children }) => {
         // Se a empresa tem um perfil específico definido, usá-lo
         if (company.perfilVisualizacao) {
           const perfilEmpresa = profiles[company.perfilVisualizacao] || 
-                               PERFIS_VISUALIZACAO.EMPRESA_BASICO;
+                               PERFIS_VISUALIZACAO.empresa_basico;
           setActiveProfile(perfilEmpresa);
           localStorage.setItem('nixcon_active_profile', JSON.stringify(perfilEmpresa));
         } else if (profile) {
@@ -250,17 +249,21 @@ export const ViewModeProvider = ({ children }) => {
           localStorage.setItem('nixcon_active_profile', JSON.stringify(profile));
         } else {
           // Padrão para empresas
-          setActiveProfile(PERFIS_VISUALIZACAO.EMPRESA_BASICO);
-          localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.EMPRESA_BASICO));
+          setActiveProfile(PERFIS_VISUALIZACAO.empresa_basico);
+          localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.empresa_basico));
         }
       } else if (newMode === VIEW_MODES.ESCRITORIO) {
         // Se estiver mudando para visão de escritório, usar perfil de administrador
-        setActiveProfile(PERFIS_VISUALIZACAO.ADMINISTRADOR);
-        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.ADMINISTRADOR));
+        setActiveProfile(PERFIS_VISUALIZACAO.administrador);
+        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.administrador));
       } else if (newMode === VIEW_MODES.CONTADOR) {
-        // Se estiver mudando para visão de contador, usar perfil de contador
-        setActiveProfile(PERFIS_VISUALIZACAO.CONTADOR);
-        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.CONTADOR));
+        // Se estiver mudando para visão de contador, usar perfil de contador padrão
+        setActiveProfile(PERFIS_VISUALIZACAO.contador_padrao);
+        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.contador_padrao));
+      } else if (newMode === VIEW_MODES.EXTERNO) {
+        // Se estiver mudando para visão externa, usar perfil externo padrão
+        setActiveProfile(PERFIS_VISUALIZACAO.externo_fiscal);
+        localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.externo_fiscal));
       }
     }
   };
@@ -314,10 +317,10 @@ export const ViewModeProvider = ({ children }) => {
   const removeProfile = (profileId) => {
     // Não permitir remover perfis padrão
     if (
-      profileId === PERFIS_VISUALIZACAO.ADMINISTRADOR.id || 
-      profileId === PERFIS_VISUALIZACAO.CONTADOR.id ||
-      profileId === PERFIS_VISUALIZACAO.EMPRESA_BASICO.id ||
-      profileId === PERFIS_VISUALIZACAO.EMPRESA_COMPLETO.id
+      profileId === 'administrador' || 
+      profileId === 'contador_padrao' ||
+      profileId === 'empresa_basico' ||
+      profileId === 'empresa_completo'
     ) {
       throw new Error('Não é possível remover perfis padrão do sistema');
     }
@@ -333,8 +336,8 @@ export const ViewModeProvider = ({ children }) => {
     
     // Se o perfil ativo for o que está sendo removido, voltar para o perfil padrão
     if (activeProfile.id === profileId) {
-      setActiveProfile(PERFIS_VISUALIZACAO.ADMINISTRADOR);
-      localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.ADMINISTRADOR));
+      setActiveProfile(PERFIS_VISUALIZACAO.administrador);
+      localStorage.setItem('nixcon_active_profile', JSON.stringify(PERFIS_VISUALIZACAO.administrador));
     }
   };
   
@@ -386,3 +389,4 @@ export const useViewMode = () => {
 };
 
 export { ViewModeContext };
+export default ViewModeProvider;

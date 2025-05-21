@@ -1,201 +1,253 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
-// Contexto que gerencia a seleção de empresas para o escritório poder atuar como se fosse uma empresa usuária
-const EmpresasContext = createContext({});
+// Criar o contexto
+const EmpresasContext = createContext();
+
+// Dados iniciais de empresas para fins de demonstração
+const empresasIniciais = [
+  { 
+    id: 'emp1', 
+    nome: 'Comércio ABC', 
+    cnpj: '12.345.678/0001-90',
+    responsavel: 'Carlos Silva',
+    telefone: '(11) 98765-4321',
+    email: 'comercio.abc@email.com',
+    endereco: 'Av. Paulista, 1000',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    cep: '01310-100',
+    regime: 'Simples Nacional',
+    perfilVisualizacao: 'empresa_completo'
+  },
+  { 
+    id: 'emp2', 
+    nome: 'Grupo Aurora', 
+    cnpj: '09.876.543/0001-21',
+    responsavel: 'Maria Oliveira',
+    telefone: '(11) 91234-5678',
+    email: 'contato@aurora.com.br',
+    endereco: 'Rua Augusta, 500',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    cep: '01305-000',
+    regime: 'Lucro Presumido',
+    perfilVisualizacao: 'empresa_basico'
+  },
+  { 
+    id: 'emp3', 
+    nome: 'Holding XYZ', 
+    cnpj: '65.432.109/0001-87',
+    responsavel: 'Roberto Pereira',
+    telefone: '(11) 97890-1234',
+    email: 'diretoria@holdingxyz.com',
+    endereco: 'Av. Faria Lima, 2000',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    cep: '05426-100',
+    regime: 'Lucro Real',
+    perfilVisualizacao: 'empresa_completo'
+  }
+];
 
 export const EmpresasProvider = ({ children }) => {
-  // Lista de empresas cadastradas (em produção viria da API)
-  const [empresas, setEmpresas] = useState([
-    {
-      id: 1,
-      nome: 'Tech Solutions Ltda',
-      documento: '12.345.678/0001-90',
-      regime_tributario: 'Simples Nacional',
-      config_fiscal_padrao: {
-        icms: 18,
-        pis: 1.65,
-        cofins: 7.6,
-        ipi: 5,
-        iss: 5,
-        simplesNacionalAliquota: 6
-      }
-    },
-    {
-      id: 2,
-      nome: 'Comércio ABC Eireli',
-      documento: '98.765.432/0001-10',
-      regime_tributario: 'Lucro Presumido',
-      config_fiscal_padrao: {
-        icms: 18,
-        pis: 1.65,
-        cofins: 7.6,
-        ipi: 10,
-        iss: 5,
-        simplesNacionalAliquota: 0
-      }
-    },
-    {
-      id: 3,
-      nome: 'Consultoria Silva ME',
-      documento: '11.222.333/0001-44',
-      regime_tributario: 'Simples Nacional',
-      config_fiscal_padrao: {
-        icms: 18,
-        pis: 1.65,
-        cofins: 7.6,
-        ipi: 0,
-        iss: 5,
-        simplesNacionalAliquota: 4.5
-      }
-    }
-  ]);
+  // Estados do contexto
+  const [empresas, setEmpresas] = useState(empresasIniciais);
+  const [empresaAtual, setEmpresaAtual] = useState(null);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState(null);
 
-  // Empresa selecionada no momento pelo usuário do escritório
-  const [selectedEmpresa, setSelectedEmpresa] = useState(null);
-  
-  // Indica se o usuário do escritório está atuando como uma empresa
-  const [actingAsEmpresa, setActingAsEmpresa] = useState(null);
-  
-  // Perfil do usuário atual (em produção viria do serviço de autenticação)
-  const [userType, setUserType] = useState('Escritorio'); // Pode ser 'Escritorio', 'EmpresaUsuaria', 'UsuarioCalculadora'
-  
+  // Carregar dados iniciais e verificar localStorage
   useEffect(() => {
-    // Verificar permissões e configurações salvas ao iniciar
-    const savedEmpresaId = localStorage.getItem('selectedEmpresaId');
-    if (savedEmpresaId && empresas.length > 0) {
-      const empresa = empresas.find(e => e.id === parseInt(savedEmpresaId));
-      if (empresa) {
-        setSelectedEmpresa(empresa);
+    const empresaSalva = localStorage.getItem('nixcon_empresa_atual');
+    
+    if (empresaSalva) {
+      try {
+        const empresa = JSON.parse(empresaSalva);
+        setEmpresaAtual(empresa);
+      } catch (error) {
+        console.error('Erro ao carregar empresa salva:', error);
+        localStorage.removeItem('nixcon_empresa_atual');
       }
     }
     
-    const actingAsId = localStorage.getItem('actingAsEmpresaId');
-    if (actingAsId && empresas.length > 0) {
-      const empresa = empresas.find(e => e.id === parseInt(actingAsId));
-      if (empresa) {
-        setActingAsEmpresa(empresa);
-      }
-    }
-    
-    // Simular perfil de usuário obtido da autenticação
-    // Em produção isso viria do sistema de autenticação
-    const storedUserType = localStorage.getItem('userType');
-    if (storedUserType) {
-      setUserType(storedUserType);
-    }
-  }, [empresas]);
-  
-  // Alterna para agir como uma empresa específica
-  const actAsEmpresa = (empresa) => {
-    setActingAsEmpresa(empresa);
-    if (empresa) {
-      localStorage.setItem('actingAsEmpresaId', empresa.id);
-    } else {
-      localStorage.removeItem('actingAsEmpresaId');
-    }
-  };
-  
-  // Seleciona uma empresa no contexto
-  const selectEmpresa = (empresa) => {
-    setSelectedEmpresa(empresa);
-    if (empresa) {
-      localStorage.setItem('selectedEmpresaId', empresa.id);
-    } else {
-      localStorage.removeItem('selectedEmpresaId');
-    }
-  };
-  
-  // Simula alteração no tipo de usuário (apenas para demonstração)
-  const changeUserType = (type) => {
-    if (['Escritorio', 'EmpresaUsuaria', 'UsuarioCalculadora'].includes(type)) {
-      setUserType(type);
-      localStorage.setItem('userType', type);
-      
-      // Limpar acting as ao mudar tipo
-      if (type !== 'Escritorio') {
-        setActingAsEmpresa(null);
-        localStorage.removeItem('actingAsEmpresaId');
-      }
-    }
-  };
-  
-  // Adiciona uma nova empresa (em produção enviaria para API)
-  const addEmpresa = (novaEmpresa) => {
-    // Gera ID automático para demonstração
-    const newId = Math.max(0, ...empresas.map(e => e.id)) + 1;
-    const empresaCompleta = {
-      ...novaEmpresa,
-      id: newId,
-      config_fiscal_padrao: novaEmpresa.config_fiscal_padrao || {
-        icms: 18,
-        pis: 1.65,
-        cofins: 7.6,
-        ipi: 5,
-        iss: 5,
-        simplesNacionalAliquota: novaEmpresa.regime_tributario === 'Simples Nacional' ? 6 : 0
+    // Carregar empresas da API (quando estiver disponível)
+    const carregarEmpresas = async () => {
+      try {
+        setCarregando(true);
+        setErro(null);
+        
+        // Comentado até a API estar pronta
+        /*
+        const resposta = await axios.get('/api/clients');
+        if (resposta.data) {
+          setEmpresas(resposta.data);
+        }
+        */
+        
+        // Por enquanto, usamos dados iniciais
+        setEmpresas(empresasIniciais);
+        
+      } catch (error) {
+        console.error('Erro ao carregar empresas:', error);
+        setErro('Não foi possível carregar a lista de empresas.');
+      } finally {
+        setCarregando(false);
       }
     };
     
-    setEmpresas([...empresas, empresaCompleta]);
-    return empresaCompleta;
+    carregarEmpresas();
+  }, []);
+  
+  // Mudar a empresa atual
+  const changeEmpresa = (id) => {
+    const empresa = empresas.find(e => e.id === id);
+    if (empresa) {
+      setEmpresaAtual(empresa);
+      localStorage.setItem('nixcon_empresa_atual', JSON.stringify(empresa));
+      return empresa;
+    }
+    return null;
   };
   
-  // Atualiza dados de uma empresa existente
-  const updateEmpresa = (id, dadosAtualizados) => {
-    const updatedEmpresas = empresas.map(empresa => 
-      empresa.id === id ? { ...empresa, ...dadosAtualizados } : empresa
-    );
-    
-    setEmpresas(updatedEmpresas);
-    
-    // Atualizar também a empresa selecionada/agindo como, se for a mesma
-    if (selectedEmpresa && selectedEmpresa.id === id) {
-      const empresaAtualizada = updatedEmpresas.find(e => e.id === id);
-      setSelectedEmpresa(empresaAtualizada);
-    }
-    
-    if (actingAsEmpresa && actingAsEmpresa.id === id) {
-      const empresaAtualizada = updatedEmpresas.find(e => e.id === id);
-      setActingAsEmpresa(empresaAtualizada);
+  // Adicionar uma nova empresa
+  const adicionarEmpresa = async (novaEmpresa) => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      
+      // Comentado até a API estar pronta
+      /*
+      const resposta = await axios.post('/api/clients', novaEmpresa);
+      const empresaAdicionada = resposta.data;
+      
+      setEmpresas(prev => [...prev, empresaAdicionada]);
+      return empresaAdicionada;
+      */
+      
+      // Simulação local
+      const empresaAdicionada = {
+        ...novaEmpresa,
+        id: `emp${empresas.length + 1}`
+      };
+      
+      setEmpresas(prev => [...prev, empresaAdicionada]);
+      return empresaAdicionada;
+    } catch (error) {
+      console.error('Erro ao adicionar empresa:', error);
+      setErro('Não foi possível adicionar a empresa.');
+      return null;
+    } finally {
+      setCarregando(false);
     }
   };
   
-  // Remove uma empresa
-  const removeEmpresa = (id) => {
-    setEmpresas(empresas.filter(empresa => empresa.id !== id));
-    
-    // Limpar seleções se necessário
-    if (selectedEmpresa && selectedEmpresa.id === id) {
-      setSelectedEmpresa(null);
-      localStorage.removeItem('selectedEmpresaId');
+  // Atualizar uma empresa existente
+  const atualizarEmpresa = async (id, dadosAtualizados) => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      
+      // Comentado até a API estar pronta
+      /*
+      const resposta = await axios.put(`/api/clients/${id}`, dadosAtualizados);
+      const empresaAtualizada = resposta.data;
+      
+      setEmpresas(prev => prev.map(emp => 
+        emp.id === id ? empresaAtualizada : emp
+      ));
+      
+      // Se for a empresa atual, atualizar também
+      if (empresaAtual && empresaAtual.id === id) {
+        setEmpresaAtual(empresaAtualizada);
+        localStorage.setItem('nixcon_empresa_atual', JSON.stringify(empresaAtualizada));
+      }
+      
+      return empresaAtualizada;
+      */
+      
+      // Simulação local
+      const empresaAtualizada = {
+        ...empresas.find(emp => emp.id === id),
+        ...dadosAtualizados
+      };
+      
+      setEmpresas(prev => prev.map(emp => 
+        emp.id === id ? empresaAtualizada : emp
+      ));
+      
+      // Se for a empresa atual, atualizar também
+      if (empresaAtual && empresaAtual.id === id) {
+        setEmpresaAtual(empresaAtualizada);
+        localStorage.setItem('nixcon_empresa_atual', JSON.stringify(empresaAtualizada));
+      }
+      
+      return empresaAtualizada;
+    } catch (error) {
+      console.error('Erro ao atualizar empresa:', error);
+      setErro('Não foi possível atualizar a empresa.');
+      return null;
+    } finally {
+      setCarregando(false);
     }
-    
-    if (actingAsEmpresa && actingAsEmpresa.id === id) {
-      setActingAsEmpresa(null);
-      localStorage.removeItem('actingAsEmpresaId');
+  };
+  
+  // Remover uma empresa
+  const removerEmpresa = async (id) => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      
+      // Comentado até a API estar pronta
+      /*
+      await axios.delete(`/api/clients/${id}`);
+      */
+      
+      // Remover do estado
+      setEmpresas(prev => prev.filter(emp => emp.id !== id));
+      
+      // Se for a empresa atual, remover também
+      if (empresaAtual && empresaAtual.id === id) {
+        setEmpresaAtual(null);
+        localStorage.removeItem('nixcon_empresa_atual');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Erro ao remover empresa:', error);
+      setErro('Não foi possível remover a empresa.');
+      return false;
+    } finally {
+      setCarregando(false);
     }
+  };
+  
+  // Definir o valor do contexto que será disponibilizado
+  const value = {
+    empresas,
+    empresaAtual,
+    carregando,
+    erro,
+    changeEmpresa,
+    adicionarEmpresa,
+    atualizarEmpresa,
+    removerEmpresa
   };
   
   return (
-    <EmpresasContext.Provider
-      value={{
-        empresas,
-        selectedEmpresa,
-        selectEmpresa,
-        actingAsEmpresa,
-        actAsEmpresa,
-        userType,
-        changeUserType,
-        addEmpresa,
-        updateEmpresa,
-        removeEmpresa
-      }}
-    >
+    <EmpresasContext.Provider value={value}>
       {children}
     </EmpresasContext.Provider>
   );
 };
 
-export const useEmpresas = () => useContext(EmpresasContext);
+// Hook personalizado para usar o contexto
+export const useEmpresas = () => {
+  const context = useContext(EmpresasContext);
+  if (!context) {
+    throw new Error('useEmpresas deve ser usado dentro de um EmpresasProvider');
+  }
+  return context;
+};
 
-export default EmpresasContext;
+export default EmpresasProvider;

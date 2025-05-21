@@ -1,330 +1,175 @@
-import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "../hooks/useAuth";
-import { LoginButton } from "./LoginButton";
-import { Link } from "wouter";
-import { cn } from "@/lib/utils";
-import EmpresaSelector from "@/components/EmpresaSelector";
-import { useEmpresas } from "@/contexts/EmpresasContext";
-import ViewModeSelector from "@/components/ViewModeSelector";
-import { useViewMode, VIEW_MODES } from "@/contexts/ViewModeContext";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu";
+import React, { useState } from 'react';
+import { Link } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
+import { useViewMode } from '../contexts/ViewModeContext';
+import ViewModeSelector from './ViewModeSelector';
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { User2, Building, Check } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Bell, 
+  LogOut, 
+  Menu, 
+  MessageCircle, 
+  Settings, 
+  User,
+  Calendar,
+  FileText,
+  HelpCircle,
+  ChevronDown
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-type HeaderProps = {
-  toggleSidebar: () => void;
-  fiscalModule?: boolean;
-  onVisualizationChange?: (type: "escritorio" | "empresa") => void;
-};
+// Logo do NIXCON (pode ser substituído por uma imagem real)
+const NIXCONLogo = () => (
+  <div className="flex items-center">
+    <div className="font-bold text-xl text-primary mr-1">NIX</div>
+    <div className="font-bold text-xl text-gray-700">CON</div>
+  </div>
+);
 
-export default function Header({ toggleSidebar, fiscalModule = false, onVisualizationChange }: HeaderProps) {
-  const { user } = useAuth();
-  const { actingAsEmpresa, userType } = useEmpresas();
-  const { viewMode, changeViewMode } = useViewMode();
-  const [isEscritorioView, setIsEscritorioView] = useState(false);
-  
-  useEffect(() => {
-    // Atualiza o estado isEscritorioView com base no modo de visualização atual
-    setIsEscritorioView(viewMode === VIEW_MODES.ACCOUNTING_OFFICE);
-    
-    // Verifica transições de página quando o modo de visualização muda
-    if (viewMode === VIEW_MODES.CLIENT_COMPANY) {
-      const currentPath = window.location.pathname;
-      if (currentPath.startsWith('/admin/')) {
-        window.location.href = "/";
-      }
-    }
-  }, [viewMode]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const avatarUrl = user?.profileImageUrl || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
+  const { user, signOut } = useAuth();
+  const { viewMode, viewModeName } = useViewMode();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Searching for:", searchQuery);
+  // Iniciais do usuário para o Avatar
+  const getInitials = () => {
+    if (!user) return "U";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Fechar a pesquisa expandida quando clicar fora
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsSearchExpanded(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // Notificações de exemplo
+  const notifications = [
+    { id: 1, title: "Nota Fiscal Rejeitada", message: "A NF-e 12345 foi rejeitada pela SEFAZ", time: "15 minutos atrás", type: "error" },
+    { id: 2, title: "Novo Documento", message: "Cliente ABC enviou um novo documento", time: "1 hora atrás", type: "info" },
+    { id: 3, title: "Lembrete", message: "Reunião com o contador às 15h", time: "3 horas atrás", type: "warning" },
+  ];
 
   return (
-    <header className="sticky top-0 bg-white border-b border-primary/10 shadow-sm z-40 backdrop-blur-sm bg-white/95">
-      <div className="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        {isEscritorioView ? (
-          <div className="flex items-center">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mr-2 text-primary hover:bg-primary/5"
-              >
-                <span className="material-icons">arrow_back</span>
-              </Button>
-            </Link>
-            <div className="flex items-center">
-              <h2 className="text-lg font-semibold text-gray-800">{isEscritorioView ? "Escritório Contábil" : "Empresa Usuária"}</h2>
-              <Badge variant="default" className="ml-2 bg-primary text-primary-foreground">v1.0</Badge>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Mobile View */}
-            <div className="flex items-center md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mr-2 inline-flex items-center"
-                onClick={toggleSidebar}
-              >
-                <span className="material-icons mr-1">menu</span>
-                <span className="text-sm">Menu</span>
-              </Button>
-              
-              <div className="ml-2">
-                <h1 className="text-xl font-bold">
-                  <span style={{color: "#d9bb42"}}>NIX</span>
-                  <span className="text-gray-600">CON</span>
-                </h1>
-              </div>
-            </div>
-
-            {/* Desktop View */}
-            <div className="hidden md:flex md:items-center">
-              <h1 className="text-2xl font-bold mr-8">
-                <span className="text-[#d9bb42]">NIX</span>
-                <span className="text-[#4a4a4a]">CON</span>
-              </h1>
-              
-              <div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-gray-500 hover:text-[#d9bb42]"
-                >
-                  <span className="material-icons">filter_list</span>
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Mobile Search Button */}
-        {!fiscalModule && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-          >
-            <span className="material-icons">search</span>
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="flex justify-between items-center px-4 py-2">
+        <div className="flex items-center space-x-4">
+          {/* Menu hamburguer para dispositivos móveis */}
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="lg:hidden">
+            <Menu className="h-5 w-5" />
           </Button>
-        )}
-
-        {/* Right Side Actions */}
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Novo seletor de visualização usando o componente ViewModeSelector */}
-          <ViewModeSelector />
-
-          {/* Notifications */}
+          
+          {/* Logo */}
+          <Link href="/">
+            <a className="flex items-center">
+              <NIXCONLogo />
+            </a>
+          </Link>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          {/* Seletor de modo de visualização */}
+          <div className="hidden md:block">
+            <ViewModeSelector />
+          </div>
+          
+          {/* Notificações */}
+          <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
+                    {notifications.length}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Notificações</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                {notifications.length === 0 ? (
+                  <p className="text-center text-gray-500">Nenhuma notificação</p>
+                ) : (
+                  <div className="space-y-4">
+                    {notifications.map((notification) => (
+                      <div 
+                        key={notification.id} 
+                        className={`p-3 rounded-lg border ${
+                          notification.type === 'error' 
+                            ? 'border-red-200 bg-red-50' 
+                            : notification.type === 'warning'
+                            ? 'border-amber-200 bg-amber-50'
+                            : 'border-blue-200 bg-blue-50'
+                        }`}
+                      >
+                        <div className="font-semibold">{notification.title}</div>
+                        <div className="text-sm text-gray-600">{notification.message}</div>
+                        <div className="text-xs text-gray-500 mt-1">{notification.time}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+          
+          {/* Menu do usuário */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="relative h-10 w-10 rounded-full hover:bg-primary/5"
-              >
-                <span className="material-icons text-muted-foreground">notifications</span>
-                <span className="absolute top-1 right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
-                </span>
+              <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.profileImageUrl} />
+                  <AvatarFallback className="bg-primary text-white">{getInitials()}</AvatarFallback>
+                </Avatar>
+                <ChevronDown className="h-4 w-4 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <div className="px-4 py-3 font-medium border-b">
-                Notificações (3)
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                {[1, 2, 3].map((_, i) => (
-                  <div key={i} className="px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/40">
-                    <div className="flex">
-                      <div className="flex-shrink-0 mr-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="material-icons text-primary text-sm">description</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Novo documento recebido</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Nota fiscal de serviço recebida de cliente XYZ
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          há 30 minutos
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-2 border-t">
-                <Button variant="ghost" size="sm" className="w-full justify-center text-primary hover:text-primary">
-                  Ver todas as notificações
-                </Button>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Chat/WhatsApp */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="relative h-10 w-10 rounded-full hover:bg-primary/5"
-              >
-                <span className="material-icons text-muted-foreground">chat</span>
-                <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-white flex items-center justify-center">
-                  5
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
-              <div className="px-4 py-3 font-medium border-b">
-                Mensagens Recentes
-              </div>
-              <Link href="/whatsapp">
-                <DropdownMenuItem>
-                  <div className="flex items-center">
-                    <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src="/whatsapp-logo.png" />
-                      <AvatarFallback className="bg-green-500 text-white">
-                        <span className="material-icons text-sm">whatsapp</span>
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">WhatsApp</p>
-                      <p className="text-xs text-muted-foreground">5 mensagens não lidas</p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              </Link>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Configurações</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center">
-                <span className="text-primary text-sm">Ver todas as mensagens</span>
+              <DropdownMenuItem>
+                <Calendar className="mr-2 h-4 w-4" />
+                <span>Agenda</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Documentos</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                <span>Mensagens</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Ajuda</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Botão de Login/Perfil do Usuário */}
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 p-0 ml-1">
-                  <Avatar className="h-9 w-9 border-2 border-primary/10">
-                    <AvatarImage src={avatarUrl} alt={user?.firstName || "Usuário"} />
-                    <AvatarFallback className="bg-muted">
-                      <span className="material-icons">person</span>
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-1">
-                <div className="px-4 pt-3 pb-2">
-                  <p className="font-medium">{user?.firstName || "Usuário"}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
-                  <p className="text-xs mt-1 bg-gray-100 text-gray-600 rounded px-2 py-0.5 inline-block">
-                    {user.role === "admin" ? "Administrador" : 
-                     user.role === "accountant" ? "Contador" : "Cliente"}
-                  </p>
-                </div>
-                <DropdownMenuSeparator />
-                <Link href="/settings/profile">
-                  <DropdownMenuItem>
-                    <span className="material-icons mr-2 text-sm">person</span>
-                    <span>Meu Perfil</span>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/settings">
-                  <DropdownMenuItem>
-                    <span className="material-icons mr-2 text-sm">settings</span>
-                    <span>Configurações</span>
-                  </DropdownMenuItem>
-                </Link>
-                
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/superadmin">
-                    <span className="material-icons mr-2 text-sm">shield</span>
-                    <span>Configurar SuperAdmin</span>
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
-                  <span className="material-icons mr-2 text-sm">logout</span>
-                  <span>Sair</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <LoginButton />
-          )}
         </div>
       </div>
-      
-      {/* Mobile Search Bar - Expanded */}
-      {!fiscalModule && isSearchExpanded && (
-        <div className="px-4 pb-3 md:hidden">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="material-icons text-muted-foreground text-sm">search</span>
-              </span>
-              <Input
-                type="text"
-                placeholder="Buscar..."
-                className="pl-10 pr-4 py-2 h-10 border-primary/20 rounded-full w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute inset-y-0 right-0 flex items-center"
-                onClick={() => setIsSearchExpanded(false)}
-              >
-                <span className="material-icons text-muted-foreground">close</span>
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
     </header>
   );
-}
+};
+
+export default Header;

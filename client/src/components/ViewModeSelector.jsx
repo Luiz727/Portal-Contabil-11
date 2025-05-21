@@ -1,37 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger,
-  DropdownMenuGroup,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { 
-  User, 
-  Building, 
-  Calculator, 
-  Store, 
-  ChevronsUpDown, 
-  Check, 
-  Eye,
-  ChevronRight,
-  Settings,
-  Shield,
-  Users
-} from "lucide-react";
-import { useViewMode, VIEW_MODES, VIEW_MODE_NAMES } from '@/contexts/ViewModeContext';
-import { useEmpresas } from '@/contexts/EmpresasContext';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState } from 'react';
+import { useViewMode, VIEW_MODES, VIEW_MODE_NAMES } from '../contexts/ViewModeContext';
+import { useEmpresas } from '../contexts/EmpresasContext';
 
 const ViewModeSelector = () => {
   const { 
@@ -39,39 +8,16 @@ const ViewModeSelector = () => {
     changeViewMode, 
     viewModeName, 
     currentCompany, 
-    activeProfile, 
-    profiles,
-    setActiveProfile
+    activeProfile,
+    profiles
   } = useViewMode();
-  const { isAdmin, isSuperAdmin } = useAuth();
+  
   const { empresas, empresaAtual, changeEmpresa } = useEmpresas();
-  const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Verifique se o usuário é administrador ou superadmin
-  const canChangeViewMode = isAdmin || isSuperAdmin;
-  
-  // Lista de empresas para seleção
-  const [empresasList, setEmpresasList] = useState([
-    { id: 'emp1', nome: 'Comércio ABC', cnpj: '12.345.678/0001-90' },
-    { id: 'emp2', nome: 'Grupo Aurora', cnpj: '09.876.543/0001-21' },
-    { id: 'emp3', nome: 'Holding XYZ', cnpj: '65.432.109/0001-87' }
-  ]);
-  
-  useEffect(() => {
-    // Se existir empresas no contexto, usa elas
-    if (empresas && empresas.length > 0) {
-      setEmpresasList(empresas);
-    }
-  }, [empresas]);
-  
-  // Ícones para cada modo de visualização
-  const viewModeIcons = {
-    [VIEW_MODES.ESCRITORIO]: <Building size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.EMPRESA]: <Store size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.CONTADOR]: <Calculator size={16} className="text-[#d9bb42] mr-2" />,
-    [VIEW_MODES.EXTERNO]: <User size={16} className="text-[#d9bb42] mr-2" />
-  };
-  
+  // Simplificação para demo: considera admin qualquer usuário no modo escritório
+  const isAdmin = viewMode === VIEW_MODES.ESCRITORIO;
+
   // Função para mudar a empresa e o modo de visualização
   const changeEmpresaAndMode = (empresa, mode = VIEW_MODES.EMPRESA) => {
     if (changeEmpresa) {
@@ -80,269 +26,146 @@ const ViewModeSelector = () => {
     
     // Passa a empresa selecionada para o changeViewMode
     changeViewMode(mode, empresa);
-    setOpen(false);
-  };
-  
-  // Função para alterar apenas o perfil ativo
-  const changeActiveProfile = (profileId) => {
-    if (profiles[profileId]) {
-      setActiveProfile(profiles[profileId]);
-      localStorage.setItem('nixcon_active_profile', JSON.stringify(profiles[profileId]));
-    }
-    setOpen(false);
+    setDropdownOpen(false);
   };
 
-  // Se não é admin, mostrar apenas o modo atual
-  if (!canChangeViewMode) {
+  // Ícones para cada modo de visualização (simplificados para texto)
+  const getViewModeIcon = (mode) => {
+    switch(mode) {
+      case VIEW_MODES.ESCRITORIO: return "🏢";
+      case VIEW_MODES.EMPRESA: return "🏭";
+      case VIEW_MODES.CONTADOR: return "🧮";
+      case VIEW_MODES.EXTERNO: return "👤";
+      default: return "👁️";
+    }
+  };
+
+  // Versão simplificada para dispositivos móveis ou usuários sem permissão
+  if (!isAdmin || window.innerWidth < 768) {
     return (
-      <div className="flex items-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center px-3 py-2 rounded-md bg-gray-100 text-sm">
-                {viewModeIcons[viewMode]}
-                <span className="mr-1">{viewModeName}</span>
-                {activeProfile && (
-                  <Badge variant="outline" className="ml-2 bg-amber-50 text-xs">
-                    {activeProfile.nome}
-                  </Badge>
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Seu modo de visualização atual</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <div className="nixcon-flex nixcon-items-center">
+        <div className="nixcon-px-4 nixcon-py-2 nixcon-bg-primary nixcon-text-white nixcon-rounded-md">
+          <span className="mr-2">{getViewModeIcon(viewMode)}</span>
+          <span>{viewModeName}</span>
+          {activeProfile && viewMode !== VIEW_MODES.ESCRITORIO && (
+            <span className="nixcon-badge nixcon-badge-primary nixcon-ml-2">
+              {activeProfile.nome}
+            </span>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="border-dashed border-muted-foreground">
-          <Eye className="mr-2 h-4 w-4 text-[#d9bb42]" />
-          <span className="mr-1">{viewModeName}</span>
-          {activeProfile && (
-            <Badge variant="outline" className="ml-2 bg-amber-50 text-xs">
-              {activeProfile.nome}
-            </Badge>
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel>Mudar Modo de Visualização</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        {/* Escritório Contábil */}
-        <DropdownMenuItem 
-          onClick={() => changeViewMode(VIEW_MODES.ESCRITORIO)}
-          className="cursor-pointer"
-        >
-          <Building size={16} className="text-[#d9bb42] mr-2" />
-          <span>Visão do Escritório</span>
-          {viewMode === VIEW_MODES.ESCRITORIO && (
-            <Check className="ml-auto h-4 w-4" />
-          )}
-        </DropdownMenuItem>
-        
-        {/* Submenu para empresas clientes */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer">
-            <Store size={16} className="text-[#d9bb42] mr-2" />
-            <span>Visão da Empresa</span>
-            {viewMode === VIEW_MODES.EMPRESA && (
-              <Check className="ml-auto h-4 w-4 mr-2" />
+    <div className="nixcon-relative">
+      <button 
+        className="nixcon-btn nixcon-btn-primary nixcon-flex nixcon-items-center"
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+      >
+        <span className="mr-2">{getViewModeIcon(viewMode)}</span>
+        <span>{viewModeName}</span>
+        {activeProfile && viewMode !== VIEW_MODES.ESCRITORIO && (
+          <span className="nixcon-badge nixcon-badge-primary nixcon-ml-2 nixcon-bg-amber-50 nixcon-text-primary">
+            {activeProfile.nome}
+          </span>
+        )}
+        <span className="ml-2">▼</span>
+      </button>
+
+      {/* Dropdown menu */}
+      {dropdownOpen && (
+        <div className="nixcon-absolute nixcon-z-50 nixcon-mt-2 nixcon-w-64 nixcon-rounded-md nixcon-bg-white nixcon-shadow-lg nixcon-p-2 nixcon-right-0 nixcon-border nixcon-border-gray-200">
+          <div className="nixcon-p-2 nixcon-font-semibold nixcon-border-b nixcon-border-gray-200">
+            Mudar Modo de Visualização
+          </div>
+          
+          {/* Opção de Escritório */}
+          <div 
+            className={`nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100 ${viewMode === VIEW_MODES.ESCRITORIO ? 'nixcon-bg-amber-50' : ''}`}
+            onClick={() => changeViewMode(VIEW_MODES.ESCRITORIO)}
+          >
+            <span className="mr-2">{getViewModeIcon(VIEW_MODES.ESCRITORIO)}</span>
+            <span>Visão do Escritório</span>
+            {viewMode === VIEW_MODES.ESCRITORIO && (
+              <span className="ml-auto">✓</span>
             )}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-72">
-            <DropdownMenuLabel>Selecione a Empresa</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            
-            {empresasList.map((empresa) => (
-              <DropdownMenuItem 
+          </div>
+          
+          {/* Opção de Empresa - com submenu */}
+          <div 
+            className={`nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100 ${viewMode === VIEW_MODES.EMPRESA ? 'nixcon-bg-amber-50' : ''}`}
+            onClick={() => {
+              // Toggle submenu de empresas
+              document.getElementById('empresa-submenu').classList.toggle('nixcon-hidden');
+            }}
+          >
+            <span className="mr-2">{getViewModeIcon(VIEW_MODES.EMPRESA)}</span>
+            <span>Visão da Empresa</span>
+            <span className="ml-auto">▶</span>
+          </div>
+          
+          {/* Submenu de Empresas */}
+          <div id="empresa-submenu" className="nixcon-hidden nixcon-ml-4 nixcon-mt-1 nixcon-border-l nixcon-border-gray-200 nixcon-pl-2">
+            {empresas.map((empresa) => (
+              <div 
                 key={empresa.id}
-                className="cursor-pointer"
+                className={`nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100 ${empresaAtual?.id === empresa.id && viewMode === VIEW_MODES.EMPRESA ? 'nixcon-bg-amber-50' : ''}`}
                 onClick={() => changeEmpresaAndMode(empresa, VIEW_MODES.EMPRESA)}
               >
-                <Store size={16} className="text-[#d9bb42] mr-2" />
-                <div className="flex flex-col">
-                  <span className="text-sm">{empresa.nome}</span>
-                  <span className="text-xs text-muted-foreground">{empresa.cnpj}</span>
+                <span className="mr-2">🏭</span>
+                <div className="nixcon-flex nixcon-flex-col">
+                  <span className="nixcon-text-sm">{empresa.nome}</span>
+                  <span className="nixcon-text-xs nixcon-text-gray-500">{empresa.cnpj}</span>
                 </div>
-                {empresaAtual && empresaAtual.id === empresa.id && viewMode === VIEW_MODES.EMPRESA && (
-                  <Check className="ml-auto h-4 w-4" />
+                {empresaAtual?.id === empresa.id && viewMode === VIEW_MODES.EMPRESA && (
+                  <span className="ml-auto">✓</span>
                 )}
-              </DropdownMenuItem>
+              </div>
             ))}
-            
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a href="/admin/configuracoes-empresa" className="cursor-pointer">
-                <Settings size={16} className="text-[#d9bb42] mr-2" />
-                <span>Configurar Empresas</span>
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        
-        {/* Contador - Com submenu */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer">
-            <Calculator size={16} className="text-[#d9bb42] mr-2" />
+          </div>
+          
+          {/* Opção de Contador */}
+          <div 
+            className={`nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100 ${viewMode === VIEW_MODES.CONTADOR ? 'nixcon-bg-amber-50' : ''}`}
+            onClick={() => changeViewMode(VIEW_MODES.CONTADOR)}
+          >
+            <span className="mr-2">{getViewModeIcon(VIEW_MODES.CONTADOR)}</span>
             <span>Visão de Contador</span>
             {viewMode === VIEW_MODES.CONTADOR && (
-              <Check className="ml-auto h-4 w-4 mr-2" />
+              <span className="ml-auto">✓</span>
             )}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-64">
-            <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            
-            {Object.values(profiles).filter(profile => 
-              profile.id.includes('contador_')
-            ).map((profile) => (
-              <DropdownMenuItem 
-                key={profile.id}
-                className="cursor-pointer"
-                onClick={() => {
-                  changeViewMode(VIEW_MODES.CONTADOR);
-                  changeActiveProfile(profile.id);
-                }}
-              >
-                <Users size={16} className="text-[#d9bb42] mr-2" />
-                <div className="flex flex-col">
-                  <span className="text-sm">{profile.nome || 'Contador'}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {profile.permissoes?.length || 0} permissões
-                  </span>
-                </div>
-                {activeProfile && activeProfile.id === profile.id && viewMode === VIEW_MODES.CONTADOR && (
-                  <Check className="ml-auto h-4 w-4" />
-                )}
-              </DropdownMenuItem>
-            ))}
-            
-            {/* Se não houver perfis específicos, mostrar a opção padrão */}
-            {!Object.values(profiles).filter(profile => profile.id.includes('contador_')).length && (
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={() => changeViewMode(VIEW_MODES.CONTADOR)}
-              >
-                <Users size={16} className="text-[#d9bb42] mr-2" />
-                <span>Contador Padrão</span>
-                {viewMode === VIEW_MODES.CONTADOR && !activeProfile?.id.includes('contador_') && (
-                  <Check className="ml-auto h-4 w-4" />
-                )}
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        
-        {/* Usuário Externo - Com submenu */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer">
-            <User size={16} className="text-[#d9bb42] mr-2" />
+          </div>
+          
+          {/* Opção de Usuário Externo */}
+          <div 
+            className={`nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100 ${viewMode === VIEW_MODES.EXTERNO ? 'nixcon-bg-amber-50' : ''}`}
+            onClick={() => changeViewMode(VIEW_MODES.EXTERNO)}
+          >
+            <span className="mr-2">{getViewModeIcon(VIEW_MODES.EXTERNO)}</span>
             <span>Visão Externa</span>
             {viewMode === VIEW_MODES.EXTERNO && (
-              <Check className="ml-auto h-4 w-4 mr-2" />
+              <span className="ml-auto">✓</span>
             )}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-64">
-            <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            
-            {Object.values(profiles).filter(profile => 
-              profile.id.includes('externo_')
-            ).map((profile) => (
-              <DropdownMenuItem 
-                key={profile.id}
-                className="cursor-pointer"
-                onClick={() => {
-                  changeViewMode(VIEW_MODES.EXTERNO);
-                  changeActiveProfile(profile.id);
-                }}
-              >
-                <Users size={16} className="text-[#d9bb42] mr-2" />
-                <div className="flex flex-col">
-                  <span className="text-sm">{profile.nome || 'Usuário Externo'}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {profile.permissoes?.length || 0} permissões
-                  </span>
-                </div>
-                {activeProfile && activeProfile.id === profile.id && viewMode === VIEW_MODES.EXTERNO && (
-                  <Check className="ml-auto h-4 w-4" />
-                )}
-              </DropdownMenuItem>
-            ))}
-            
-            {/* Se não houver perfis específicos, mostrar a opção padrão */}
-            {!Object.values(profiles).filter(profile => profile.id.includes('externo_')).length && (
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={() => changeViewMode(VIEW_MODES.EXTERNO)}
-              >
-                <Users size={16} className="text-[#d9bb42] mr-2" />
-                <span>Usuário Externo Padrão</span>
-                {viewMode === VIEW_MODES.EXTERNO && !activeProfile?.id.includes('externo_') && (
-                  <Check className="ml-auto h-4 w-4" />
-                )}
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        
-        <DropdownMenuSeparator />
-        
-        {/* Submenu para perfis de visualização */}
-        {viewMode === VIEW_MODES.EMPRESA && currentCompany && (
-          <>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="cursor-pointer">
-                <Shield size={16} className="text-[#d9bb42] mr-2" />
-                <span>Perfil de Visualização</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-64">
-                <DropdownMenuLabel>Selecione o Perfil</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                {Object.values(profiles).filter(profile => 
-                  profile.id.includes('empresa_')
-                ).map((profile) => (
-                  <DropdownMenuItem 
-                    key={profile.id}
-                    className="cursor-pointer"
-                    onClick={() => changeActiveProfile(profile.id)}
-                  >
-                    <Users size={16} className="text-[#d9bb42] mr-2" />
-                    <div className="flex flex-col">
-                      <span className="text-sm">{profile.nome}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {profile.permissoes.length} permissões
-                      </span>
-                    </div>
-                    {activeProfile && activeProfile.id === profile.id && (
-                      <Check className="ml-auto h-4 w-4" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        
-        {/* Link para configurações de perfil e visualização */}
-        <DropdownMenuItem asChild>
-          <a href="/admin/configuracoes?tab=visualizacoes" className="cursor-pointer">
-            <Settings size={16} className="text-[#d9bb42] mr-2" />
-            <span>Configurar Perfis de Visualização</span>
-          </a>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </div>
+          
+          {/* Rodapé com configurações */}
+          <div className="nixcon-mt-2 nixcon-pt-2 nixcon-border-t nixcon-border-gray-200">
+            <div 
+              className="nixcon-p-2 nixcon-flex nixcon-items-center nixcon-cursor-pointer nixcon-rounded hover:nixcon-bg-gray-100"
+              onClick={() => {
+                // Link para página de configurações
+                window.location.href = "/admin/configuracoes?tab=visualizacoes";
+                setDropdownOpen(false);
+              }}
+            >
+              <span className="mr-2">⚙️</span>
+              <span>Configurar Perfis de Visualização</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

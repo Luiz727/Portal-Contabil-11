@@ -1,207 +1,274 @@
-import { useState, useEffect } from "react";
-import { useLocation, Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import React from 'react';
+import { Link, useLocation } from 'wouter';
+import { useViewMode, VIEW_MODES } from '../contexts/ViewModeContext';
+import { cn } from '@/lib/utils';
+import {
+  Home,
+  BarChart2,
+  FileText,
+  Users,
+  ShoppingCart,
+  Calendar,
+  Settings,
+  FileCheck,
+  Wallet,
+  DollarSign,
+  Upload,
+  GanttChart,
+  Building,
+  Calculator,
+  BookOpen
+} from 'lucide-react';
 
-type NavItemProps = {
-  icon: string;
+interface MenuItem {
   label: string;
   href: string;
-  active: boolean;
-};
-
-const NavItem = ({ icon, label, href, active }: NavItemProps) => {
-  return (
-    <Link href={href}>
-      <div 
-        className={`nav-link d-flex align-items-center px-3 py-2 rounded-2 mb-1 ${active ? 'active text-secondary' : 'text-white-50'}`}
-        style={{ 
-          textDecoration: 'none', 
-          cursor: 'pointer',
-          backgroundColor: active ? '#d9bb42' : 'transparent'
-        }}
-      >
-        <span className="material-icons me-2 small">{icon}</span>
-        <span>{label}</span>
-      </div>
-    </Link>
-  );
-};
-
-type NavSectionProps = {
-  title: string;
-  children: React.ReactNode;
-};
-
-const NavSection = ({ title, children }: NavSectionProps) => {
-  return (
-    <div className="mb-4">
-      <h6 className="text-uppercase fw-light text-white-50 fs-7 px-3 mb-2 mt-4">{title}</h6>
-      <div className="nav flex-column">
-        {children}
-      </div>
-    </div>
-  );
-};
-
-export default function Sidebar() {
-  const [location] = useLocation();
-  const { user } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    // Close mobile menu when route changes
-    setIsMobileMenuOpen(false);
-  }, [location]);
-
-  return (
-    <aside className="flex-shrink-0">
-      <div className="d-flex flex-column bg-secondary text-white h-100 overflow-auto" style={{ width: '250px', backgroundColor: '#4a4a4a' }}>
-        {/* Logo NIXCON */}
-        <div className="p-3 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="d-flex align-items-center">
-            <h1 className="fs-5 fw-semibold mb-0">
-              <span style={{ color: '#d9bb42' }}>NIX</span>
-              <span className="text-white">CON</span>
-            </h1>
-          </div>
-        </div>
-
-        {/* Main Navigation */}
-        <nav className="flex-grow-1 p-3 overflow-auto">
-          <NavSection title="Principal">
-            <NavItem 
-              href="/" 
-              icon="dashboard" 
-              label="Dashboard" 
-              active={location === "/" || location === ""} 
-            />
-            
-            <NavItem 
-              href="/tasks" 
-              icon="assignment" 
-              label="Tarefas" 
-              active={location === "/tasks"} 
-            />
-            
-            <NavItem 
-              href="/clients" 
-              icon="people" 
-              label="Clientes" 
-              active={location === "/clients"} 
-            />
-          </NavSection>
-
-          <NavSection title="Documentos">
-            <NavItem 
-              href="/documents" 
-              icon="folder" 
-              label="Gerenciador" 
-              active={location === "/documents"} 
-            />
-            
-            <NavItem 
-              href="/invoices" 
-              icon="receipt" 
-              label="Calculadora de Impostos" 
-              active={location === "/invoices"} 
-            />
-            
-            <NavItem 
-              href="/fiscal" 
-              icon="receipt_long" 
-              label="Módulo Fiscal" 
-              active={location.startsWith("/fiscal")} 
-            />
-          </NavSection>
-
-          <NavSection title="Comunicação">
-            <NavItem 
-              href="/whatsapp" 
-              icon="chat" 
-              label="WhatsApp" 
-              active={location === "/whatsapp"} 
-            />
-          </NavSection>
-
-          <NavSection title="Financeiro">
-            <NavItem 
-              href="/financial" 
-              icon="account_balance_wallet" 
-              label="Fluxo de Caixa" 
-              active={location === "/financial"} 
-            />
-            
-            <NavItem 
-              href="/inventory" 
-              icon="inventory" 
-              label="Controle de Estoque" 
-              active={location === "/inventory"} 
-            />
-            
-            <NavItem 
-              href="/reconciliation" 
-              icon="compare_arrows" 
-              label="Conciliação Bancária" 
-              active={location === "/reconciliation"} 
-            />
-          </NavSection>
-
-          <NavSection title="Sistema">
-            <NavItem 
-              href="/reports" 
-              icon="bar_chart" 
-              label="Relatórios" 
-              active={location === "/reports"} 
-            />
-            
-            <NavItem 
-              href="/integrations" 
-              icon="extension" 
-              label="Integrações" 
-              active={location === "/integrations"} 
-            />
-            
-            <NavItem 
-              href="/settings" 
-              icon="settings" 
-              label="Configurações" 
-              active={location === "/settings"} 
-            />
-          </NavSection>
-        </nav>
-
-        {/* User Profile */}
-        <div className="border-top p-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="d-flex align-items-center">
-            <img 
-              className="rounded-circle object-fit-cover"
-              style={{ width: '32px', height: '32px', border: '2px solid #d9bb42' }}
-              src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} 
-              alt="Foto de perfil do usuário" 
-            />
-            <div className="ms-2">
-              <p className="mb-0 small fw-medium text-white">
-                {"Usuário"}
-              </p>
-              <p className="mb-0 small" style={{ color: '#d9bb42' }}>{"Cliente"}</p>
-            </div>
-            <a href="/api/logout" className="ms-auto text-white-50 btn btn-link p-0">
-              <span className="material-icons small">logout</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
+  icon: React.ReactNode;
+  viewModes: string[];
+  permissions: string[];
 }
+
+const mainMenuItems: MenuItem[] = [
+  {
+    label: 'Dashboard',
+    href: '/',
+    icon: <Home className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
+    permissions: []
+  },
+  {
+    label: 'Clientes',
+    href: '/clients',
+    icon: <Users className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['gerencial_clientes']
+  },
+  {
+    label: 'Fiscal',
+    href: '/fiscal',
+    icon: <FileCheck className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
+    permissions: ['fiscal_nfe', 'fiscal_nfse']
+  },
+  {
+    label: 'Documentos',
+    href: '/documents',
+    icon: <FileText className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
+    permissions: ['documentos_upload', 'documentos_ged']
+  },
+  {
+    label: 'Financeiro',
+    href: '/financial',
+    icon: <Wallet className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
+    permissions: ['financeiro_honorarios', 'financeiro_conciliacoes', 'financeiro_pagamentos', 'financeiro_recebimentos']
+  },
+  {
+    label: 'Honorários',
+    href: '/invoices',
+    icon: <DollarSign className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['financeiro_honorarios']
+  },
+  {
+    label: 'Conciliações',
+    href: '/reconciliation',
+    icon: <BarChart2 className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
+    permissions: ['financeiro_conciliacoes']
+  },
+  {
+    label: 'Estoque',
+    href: '/inventory',
+    icon: <ShoppingCart className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.EMPRESA],
+    permissions: ['estoque_produtos', 'estoque_movimentacoes']
+  },
+  {
+    label: 'Relatórios',
+    href: '/reports',
+    icon: <GanttChart className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
+    permissions: ['financeiro_relatorios']
+  },
+  {
+    label: 'Agenda',
+    href: '/calendar',
+    icon: <Calendar className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR],
+    permissions: []
+  },
+  {
+    label: 'Calculadora Fiscal',
+    href: '/tax-calculator',
+    icon: <Calculator className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
+    permissions: ['fiscal_impostos']
+  }
+];
+
+const adminMenuItems: MenuItem[] = [
+  {
+    label: 'Painel Administrativo',
+    href: '/admin/painel',
+    icon: <Building className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['admin_configuracoes']
+  },
+  {
+    label: 'Configurações',
+    href: '/admin/configuracoes',
+    icon: <Settings className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA],
+    permissions: ['admin_configuracoes']
+  },
+  {
+    label: 'Empresas',
+    href: '/admin/empresas-usuarias',
+    icon: <Building className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['gerencial_empresas']
+  },
+  {
+    label: 'Usuários e Permissões',
+    href: '/admin/usuarios',
+    icon: <Users className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['gerencial_usuarios', 'admin_perfis']
+  },
+  {
+    label: 'Produtos Universais',
+    href: '/admin/produtos-universais',
+    icon: <ShoppingCart className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['gerencial_produtos']
+  },
+  {
+    label: 'Integrações',
+    href: '/integrations',
+    icon: <Upload className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO],
+    permissions: ['admin_integracao']
+  }
+];
+
+const helpMenuItems: MenuItem[] = [
+  {
+    label: 'Documentação',
+    href: '/help/docs',
+    icon: <BookOpen className="h-5 w-5" />,
+    viewModes: [VIEW_MODES.ESCRITORIO, VIEW_MODES.EMPRESA, VIEW_MODES.CONTADOR, VIEW_MODES.EXTERNO],
+    permissions: []
+  }
+];
+
+interface SidebarProps {
+  isMobile: boolean;
+  isOpen: boolean;
+  closeSidebar: () => void;
+}
+
+const Sidebar = ({ isMobile, isOpen, closeSidebar }: SidebarProps) => {
+  const [location] = useLocation();
+  const { viewMode, hasPermission } = useViewMode();
+
+  // Filtrar menus com base no modo de visualização e permissões
+  const filteredMainMenu = mainMenuItems.filter(item => 
+    item.viewModes.includes(viewMode) && 
+    (item.permissions.length === 0 || item.permissions.some(p => hasPermission(p)))
+  );
+  
+  const filteredAdminMenu = adminMenuItems.filter(item => 
+    item.viewModes.includes(viewMode) && 
+    (item.permissions.length === 0 || item.permissions.some(p => hasPermission(p)))
+  );
+
+  const renderMenuItem = (item: MenuItem) => {
+    const isActive = location === item.href;
+    
+    return (
+      <Link 
+        key={item.href} 
+        href={item.href}
+        onClick={() => isMobile && closeSidebar()}
+      >
+        <a className={cn(
+          "flex items-center px-4 py-2.5 text-sm rounded-md transition-colors",
+          isActive 
+            ? "bg-primary text-white font-medium" 
+            : "text-gray-700 hover:bg-gray-100"
+        )}>
+          <span className="mr-3">{item.icon}</span>
+          <span>{item.label}</span>
+        </a>
+      </Link>
+    );
+  };
+
+  const sidebarClass = cn(
+    "flex flex-col h-full overflow-y-auto bg-white border-r border-gray-200",
+    "w-64 fixed top-14 bottom-0 left-0 z-30 transition-transform duration-300",
+    isMobile && !isOpen && "-translate-x-full",
+    isMobile && isOpen && "translate-x-0"
+  );
+
+  return (
+    <>
+      {/* Overlay para dispositivos móveis */}
+      {isMobile && isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={closeSidebar}
+        />
+      )}
+      
+      <div className={sidebarClass}>
+        <div className="py-4 flex-1">
+          {/* Menus principais */}
+          <div className="px-3 mb-6">
+            <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Principal
+            </h2>
+            <div className="space-y-1">
+              {filteredMainMenu.map(renderMenuItem)}
+            </div>
+          </div>
+          
+          {/* Menu administrativo - apenas exibido se houver itens filtrados */}
+          {filteredAdminMenu.length > 0 && (
+            <div className="px-3 mb-6">
+              <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Administração
+              </h2>
+              <div className="space-y-1">
+                {filteredAdminMenu.map(renderMenuItem)}
+              </div>
+            </div>
+          )}
+          
+          {/* Menu de ajuda */}
+          <div className="px-3">
+            <h2 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Ajuda e Suporte
+            </h2>
+            <div className="space-y-1">
+              {helpMenuItems.map(renderMenuItem)}
+            </div>
+          </div>
+        </div>
+        
+        {/* Rodapé fixo no fundo do sidebar */}
+        <div className="p-3 border-t border-gray-200">
+          <div className="flex items-center px-4 py-2 text-sm text-gray-600">
+            <div className="flex-1">
+              Versão 1.0.0
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Sidebar;

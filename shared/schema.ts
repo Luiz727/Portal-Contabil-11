@@ -25,6 +25,16 @@ export const VIEW_MODES = {
   EXTERNO: 'externo'
 };
 
+export type ViewMode = 'escritorio' | 'empresa' | 'contador' | 'externo';
+
+// Tipos para perfis de visualização
+export interface PerfilVisualizacao {
+  id: string;
+  nome: string;
+  descricao: string;
+  permissoes: string[];
+}
+
 // Session storage table for Replit Auth
 export const sessions = pgTable(
   "sessions",
