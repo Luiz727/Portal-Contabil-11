@@ -134,7 +134,7 @@ export function registerViewModeRoutes(app: Express) {
       // do usuário a partir da sessão ou banco de dados
       
       const viewMode = req.query.viewMode as string || VIEW_MODES.ESCRITORIO;
-      const userPermissions = []; // Em um sistema real, você buscaria as permissões do usuário
+      const userPermissions: string[] = []; // Em um sistema real, você buscaria as permissões do usuário
       
       const menuItems = getMenuItems(viewMode, userPermissions);
       

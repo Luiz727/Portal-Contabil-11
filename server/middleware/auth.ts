@@ -4,14 +4,25 @@ import { isAuthenticated } from "../replitAuth";
 // Definição dos tipos de modos de visualização
 export enum ViewMode {
   ESCRITORIO = 'escritorio',
-  EMPRESA = 'empresa',
+  EMPRESA = 'empresa', 
   CONTADOR = 'contador',
   EXTERNO = 'externo'
 }
 
+// Extensão do tipo Request para incluir propriedades personalizadas
+declare global {
+  namespace Express {
+    interface Request {
+      viewMode?: string;
+      empresaId?: number;
+      user?: any; // Temporário para resolver erros de tipo
+    }
+  }
+}
+
 // Definição das funções de autorização baseadas em modos de visualização
 export function viewModeEscritorio(req: Request, res: Response, next: NextFunction) {
-  const viewMode = req.session?.viewMode as string;
+  const viewMode = req.viewMode || ViewMode.ESCRITORIO;
   
   if (viewMode !== ViewMode.ESCRITORIO) {
     return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Escritório." });
@@ -21,7 +32,7 @@ export function viewModeEscritorio(req: Request, res: Response, next: NextFuncti
 }
 
 export function viewModeEmpresa(req: Request, res: Response, next: NextFunction) {
-  const viewMode = req.session?.viewMode as string;
+  const viewMode = req.viewMode || ViewMode.ESCRITORIO;
   
   if (viewMode !== ViewMode.EMPRESA) {
     return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Empresa." });
@@ -31,7 +42,7 @@ export function viewModeEmpresa(req: Request, res: Response, next: NextFunction)
 }
 
 export function viewModeContador(req: Request, res: Response, next: NextFunction) {
-  const viewMode = req.session?.viewMode as string;
+  const viewMode = req.viewMode || ViewMode.ESCRITORIO;
   
   if (viewMode !== ViewMode.CONTADOR) {
     return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Contador." });
@@ -41,7 +52,7 @@ export function viewModeContador(req: Request, res: Response, next: NextFunction
 }
 
 export function viewModeExterno(req: Request, res: Response, next: NextFunction) {
-  const viewMode = req.session?.viewMode as string;
+  const viewMode = req.viewMode || ViewMode.ESCRITORIO;
   
   if (viewMode !== ViewMode.EXTERNO) {
     return res.status(403).json({ message: "Acesso negado. Este recurso requer o modo de visualização Externo." });
@@ -66,6 +77,62 @@ export function checkRole(role: string) {
     next();
   };
 }
+
+// Função para verificar se o usuário tem uma permissão específica
+export function requirePermission(permission: string) {
+  return (req: any, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Usuário não autenticado" });
+    }
+    
+    const userPermissions = req.user.permissions || [];
+    
+    if (!userPermissions.includes(permission)) {
+      return res.status(403).json({ message: `Acesso negado. Este recurso requer a permissão ${permission}.` });
+    }
+    
+    next();
+  };
+}
+
+// Função para verificar modo de visualização
+export function requireViewMode(mode: ViewMode) {
+  return (req: any, res: Response, next: NextFunction) => {
+    const viewMode = req.viewMode || ViewMode.ESCRITORIO;
+    
+    if (viewMode !== mode) {
+      return res.status(403).json({ message: `Acesso negado. Este recurso requer o modo de visualização ${mode}.` });
+    }
+    
+    next();
+  };
+}
+
+// Função para verificar o acesso a um cliente específico
+export function requireClientAccess(req: any, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ message: "Usuário não autenticado" });
+  }
+  
+  const clientId = parseInt(req.params.clientId || req.query.clientId || req.body.clientId);
+  
+  if (isNaN(clientId)) {
+    return res.status(400).json({ message: "ID de cliente inválido" });
+  }
+  
+  // Aqui seria verificado se o usuário tem acesso ao cliente especificado
+  // Para este exemplo, vamos apenas simular a verificação
+  const userClients = req.user.clients || [];
+  
+  if (!userClients.includes(clientId)) {
+    return res.status(403).json({ message: "Acesso negado. Você não tem permissão para acessar este cliente." });
+  }
+  
+  next();
+}
+
+// Exportando função para verificação de papel
+export const requireRole = checkRole;
 
 // Combinação de middlewares para verificação de autenticação e papel
 export const isAdmin = [isAuthenticated, checkRole('admin')];
@@ -101,8 +168,8 @@ export function checkCompanyAccess(req: any, res: Response, next: NextFunction) 
 
 // Middleware que permite acesso com base no modo de visualização
 export function allowViewModes(allowedModes: ViewMode[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const viewMode = req.session?.viewMode as string;
+  return (req: any, res: Response, next: NextFunction) => {
+    const viewMode = req.viewMode as string || ViewMode.ESCRITORIO;
     
     if (!viewMode || !allowedModes.includes(viewMode as ViewMode)) {
       return res.status(403).json({ 
