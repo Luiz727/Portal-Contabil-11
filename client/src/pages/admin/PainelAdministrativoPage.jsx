@@ -25,18 +25,9 @@ import { motion, AnimatePresence } from "framer-motion";
  * organizadas em abas.
  */
 const PainelAdministrativoPage = () => {
-  const [showNotification, setShowNotification] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
   
-  // Fechar a notificação automaticamente após 8 segundos
-  useEffect(() => {
-    if (showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 8000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showNotification]);
+  // Já não precisamos inicializar a notificação como verdadeira
   
   // Opções de configuração administrativa
   const menuOptions = [

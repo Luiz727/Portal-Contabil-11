@@ -46,7 +46,7 @@ import { EmpresasProvider } from "@/contexts/EmpresasContext";
 import { ProdutosProvider } from "@/contexts/ProdutosContext";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
