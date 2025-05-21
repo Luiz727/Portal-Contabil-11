@@ -17,6 +17,7 @@ import {
 
 import GerenciamentoPlanosPage from './GerenciamentoPlanosPage';
 import PermissoesPanel from '@/components/admin/PermissoesPanel';
+import PermissaoAdmin from '@/components/admin/PermissaoAdmin';
 import PerfilVisualizacaoConfig from '@/components/admin/PerfilVisualizacaoConfig';
 import { useViewMode, VIEW_MODES } from '@/contexts/ViewModeContext';
 
@@ -113,7 +114,7 @@ const ConfiguracoesAdminPage = () => {
         </TabsContent>
         
         <TabsContent value="permissoes" className="mt-0">
-          <PermissoesPanel />
+          <PermissaoAdmin />
         </TabsContent>
 
         <TabsContent value="visualizacoes" className="mt-0">
@@ -234,13 +235,102 @@ const ConfiguracoesAdminPage = () => {
                 Gerencie os usuários do sistema e suas permissões
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <HelpCircle className="h-16 w-16 text-muted-foreground opacity-20 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Módulo em Desenvolvimento</h3>
-              <p className="text-muted-foreground text-center max-w-md">
-                O gerenciamento avançado de usuários está em fase de implementação.
-                Aguarde as próximas atualizações.
-              </p>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Lista de usuários - será substituída com dados reais da API */}
+                  <Card className="bg-white hover:bg-gray-50 cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold">José Silva</h4>
+                          <p className="text-xs text-muted-foreground">jose.silva@exemplo.com</p>
+                          <div className="flex gap-1 mt-2">
+                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
+                              Admin
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                          Ativo
+                        </span>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          Editar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-white hover:bg-gray-50 cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold">Ana Oliveira</h4>
+                          <p className="text-xs text-muted-foreground">ana.oliveira@exemplo.com</p>
+                          <div className="flex gap-1 mt-2">
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                              Contador
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                          Ativo
+                        </span>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          Editar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-white hover:bg-gray-50 cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold">Carlos Pereira</h4>
+                          <p className="text-xs text-muted-foreground">carlos.pereira@exemplo.com</p>
+                          <div className="flex gap-1 mt-2">
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full">
+                              Cliente
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
+                          Inativo
+                        </span>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          Editar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button>
+                    <Users className="mr-2 h-4 w-4" />
+                    Convidar Usuário
+                  </Button>
+                </div>
+                
+                <div className="p-4 border rounded-md bg-gray-50 mt-8">
+                  <h3 className="text-lg font-semibold mb-2">Gestão de Permissões</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    As permissões de usuários agora são gerenciadas através do sistema de papéis (roles).
+                    Para atribuir permissões a um usuário, acesse a aba "Permissões e Acessos".
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => setActiveTab('permissoes')}>
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Ir para Gestão de Papéis e Permissões
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
