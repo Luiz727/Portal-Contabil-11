@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { ViewMode } from '../../shared/schema';
+
+// Definindo os modos de visualização diretamente aqui para evitar problemas de importação
+export type ViewMode = 'escritorio' | 'empresa' | 'contador' | 'externo';
 
 // Interface extendida do Express Request para incluir o usuário e o modo de visualização
 declare global {
