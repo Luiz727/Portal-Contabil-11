@@ -45,6 +45,7 @@ import SuperAdminPage from "./pages/admin/SuperAdminPage";
 // Contextos
 import { EmpresasProvider } from "@/contexts/EmpresasContext";
 import { ProdutosProvider } from "@/contexts/ProdutosContext";
+import { ViewModeProvider } from "@/contexts/ViewModeContext";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -262,12 +263,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <EmpresasProvider>
-          <ProdutosProvider>
-            <Toaster />
-            <Router />
-          </ProdutosProvider>
-        </EmpresasProvider>
+        <ViewModeProvider>
+          <EmpresasProvider>
+            <ProdutosProvider>
+              <Toaster />
+              <Router />
+            </ProdutosProvider>
+          </EmpresasProvider>
+        </ViewModeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

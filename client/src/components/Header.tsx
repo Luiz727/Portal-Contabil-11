@@ -6,6 +6,8 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import EmpresaSelector from "@/components/EmpresaSelector";
 import { useEmpresas } from "@/contexts/EmpresasContext";
+import ViewModeSelector from "@/components/ViewModeSelector";
+import { useViewMode, VIEW_MODES } from "@/contexts/ViewModeContext";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
