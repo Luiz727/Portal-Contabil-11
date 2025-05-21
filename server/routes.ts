@@ -8,8 +8,9 @@ import { registerHonorariosRoutes } from "./honorariosRoutes";
 import { registerXmlVaultRoutes } from "./routes/xmlVaultRoutes";
 import { registerTaxCalculatorRoutes } from "./routes/taxCalculatorRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
-import { registerViewModeRoutes } from "./routes/viewModeRoutes";
-import { registerEmpresasRoutes } from "./routes/empresasRoutes";
+// Temporariamente desativando as rotas de multitenancy para depuração
+// import { registerViewModeRoutes } from "./routes/viewModeRoutes";
+// import { registerEmpresasRoutes } from "./routes/empresasRoutes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -86,8 +87,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerTaxCalculatorRoutes(app);
   
   // Registrar rotas de gerenciamento de multitenancy
-  registerViewModeRoutes(app);
-  registerEmpresasRoutes(app);
+  // Temporariamente desativando para depuração
+  // registerViewModeRoutes(app);
+  // registerEmpresasRoutes(app);
   
   try {
     registerXmlVaultRoutes(app);

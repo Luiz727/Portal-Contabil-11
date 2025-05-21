@@ -1,15 +1,15 @@
 import { Request, Response, Express } from "express";
 import { storage } from "./storage";
-import { requireAuth, requireRole, requireViewMode, isAuthenticated, isEscritorioUser, ViewMode } from "./middleware/auth";
+import { requireAuth, requireRole, requireViewMode, isEscritorioUser, ViewMode } from "./middleware/auth";
 import { insertHonorarioSchema } from "../shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { honorarios, clients, nfses } from "../shared/schema";
 
 export function registerHonorariosRoutes(app: Express) {
-  // Usando os middlewares mais avançados de autenticação e permissionamento
-  const escritorioOnly = requireRole(["admin", "accountant"]);
-  const viewModeEscritorio = requireViewMode('escritorio' as ViewMode);
+  // Usando os middlewares mais simples temporariamente para depuração
+  // const escritorioOnly = requireRole(["admin", "accountant"]);
+  // const viewModeEscritorio = requireViewMode('escritorio' as ViewMode);
   
 
   // Buscar todos os honorários com dados do cliente
