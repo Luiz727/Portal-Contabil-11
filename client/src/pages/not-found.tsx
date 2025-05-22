@@ -1,21 +1,18 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import React from 'react';
 
-export default function NotFound() {
+const NotFound: React.FC = () => {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-amber-600 mb-4">404</h1>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">Página não encontrada</h2>
+        <p className="text-gray-600 mb-8">A página que você está procurando não existe ou foi removida.</p>
+        <a href="/" className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors">
+          Voltar ao início
+        </a>
+      </div>
     </div>
   );
-}
+};
+
+export default NotFound;

@@ -1,233 +1,64 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import ClientForm from "@/components/clients/ClientForm";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from 'react';
 
-export default function Clients() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
-  
-  // Fetch all clients
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ["/api/clients"],
-  });
-
-  // Fetch company groups for filtering
-  const { data: companyGroups } = useQuery({
-    queryKey: ["/api/company-groups"],
-    queryFn: async () => {
-      // This is just a placeholder since we don't have the endpoint yet
-      return [
-        { id: 1, name: "Grupo Aurora" },
-        { id: 2, name: "Holding XYZ" }
-      ];
-    }
-  });
-
-  // Filter clients by search query
-  const filteredClients = clients?.filter((client: any) => {
-    return (
-      searchQuery === "" || 
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.cnpj.includes(searchQuery) ||
-      (client.responsible && client.responsible.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  });
-
-  // Group clients by active status
-  const activeClients = filteredClients?.filter((client: any) => client.active === true);
-  const inactiveClients = filteredClients?.filter((client: any) => client.active === false);
-
+const Clients: React.FC = () => {
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-800">Clientes</h2>
-          <p className="mt-1 text-sm text-neutral-500">Gerencie os clientes do escritório</p>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Clientes</h1>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Lista de Clientes</h2>
+          <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors">
+            Novo Cliente
+          </button>
         </div>
-        <div className="mt-4 md:mt-0">
-          <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <span className="material-icons text-sm mr-1">add</span>
-                Novo Cliente
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Adicionar Novo Cliente</DialogTitle>
-              </DialogHeader>
-              <ClientForm 
-                onSuccess={() => setIsClientFormOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-3 px-4 text-left">Nome</th>
+                <th className="py-3 px-4 text-left">CNPJ/CPF</th>
+                <th className="py-3 px-4 text-left">Contato</th>
+                <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-left">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b">
+                <td className="py-3 px-4">Empresa ABC Ltda</td>
+                <td className="py-3 px-4">12.345.678/0001-90</td>
+                <td className="py-3 px-4">contato@empresaabc.com.br</td>
+                <td className="py-3 px-4"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Ativo</span></td>
+                <td className="py-3 px-4">
+                  <button className="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                  <button className="text-red-600 hover:text-red-800">Excluir</button>
+                </td>
+              </tr>
+              <tr className="border-b">
+                <td className="py-3 px-4">Comércio XYZ Ltda</td>
+                <td className="py-3 px-4">98.765.432/0001-10</td>
+                <td className="py-3 px-4">financeiro@xyz.com.br</td>
+                <td className="py-3 px-4"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Ativo</span></td>
+                <td className="py-3 px-4">
+                  <button className="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                  <button className="text-red-600 hover:text-red-800">Excluir</button>
+                </td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4">Indústria 123 S/A</td>
+                <td className="py-3 px-4">45.678.912/0001-34</td>
+                <td className="py-3 px-4">contabilidade@industria123.com</td>
+                <td className="py-3 px-4"><span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs">Pendente</span></td>
+                <td className="py-3 px-4">
+                  <button className="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                  <button className="text-red-600 hover:text-red-800">Excluir</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Input
-            placeholder="Buscar por nome, CNPJ ou responsável..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="md:w-80"
-          />
-        </div>
-      </div>
-
-      {/* Clients List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <Tabs defaultValue="active" className="w-full">
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="active">Ativos</TabsTrigger>
-              <TabsTrigger value="inactive">Inativos</TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="active" className="p-6">
-            {isLoading ? (
-              <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-              </div>
-            ) : activeClients?.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activeClients.map((client: any) => (
-                  <ClientCard 
-                    key={client.id} 
-                    client={client} 
-                    companyGroups={companyGroups}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <span className="material-icons text-neutral-400 text-4xl">business</span>
-                <p className="mt-2 text-neutral-500">Nenhum cliente ativo encontrado</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="inactive" className="p-6">
-            {isLoading ? (
-              <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-              </div>
-            ) : inactiveClients?.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {inactiveClients.map((client: any) => (
-                  <ClientCard 
-                    key={client.id} 
-                    client={client} 
-                    companyGroups={companyGroups}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <span className="material-icons text-neutral-400 text-4xl">business_off</span>
-                <p className="mt-2 text-neutral-500">Nenhum cliente inativo encontrado</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
-}
+};
 
-function ClientCard({ client, companyGroups }: { client: any, companyGroups: any[] }) {
-  // Find company group name
-  const companyGroup = companyGroups?.find(
-    (group) => group.id === client.groupId
-  );
-
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-neutral-800">{client.name}</h3>
-            
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center text-sm text-neutral-600">
-                <span className="material-icons text-sm mr-2">badge</span>
-                <span>CNPJ: {client.cnpj}</span>
-              </div>
-              
-              {client.email && (
-                <div className="flex items-center text-sm text-neutral-600">
-                  <span className="material-icons text-sm mr-2">email</span>
-                  <span>{client.email}</span>
-                </div>
-              )}
-              
-              {client.phone && (
-                <div className="flex items-center text-sm text-neutral-600">
-                  <span className="material-icons text-sm mr-2">phone</span>
-                  <span>{client.phone}</span>
-                </div>
-              )}
-              
-              {client.responsible && (
-                <div className="flex items-center text-sm text-neutral-600">
-                  <span className="material-icons text-sm mr-2">person</span>
-                  <span>Responsável: {client.responsible}</span>
-                </div>
-              )}
-              
-              {companyGroup && (
-                <div className="flex items-center text-sm text-neutral-600">
-                  <span className="material-icons text-sm mr-2">account_tree</span>
-                  <span>Grupo: {companyGroup.name}</span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon">
-                <span className="material-icons">edit</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Editar Cliente</DialogTitle>
-              </DialogHeader>
-              <ClientForm 
-                clientId={client.id} 
-                defaultValues={client}
-                isEditing
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <div className="mt-4 flex justify-between items-center">
-          <Badge variant={client.active ? "default" : "outline"}>
-            {client.active ? "Ativo" : "Inativo"}
-          </Badge>
-          
-          <div className="flex space-x-2">
-            <Button size="sm" variant="outline">
-              <span className="material-icons text-sm mr-1">folder</span>
-              Documentos
-            </Button>
-            <Button size="sm" variant="outline">
-              <span className="material-icons text-sm mr-1">assignment</span>
-              Tarefas
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+export default Clients;

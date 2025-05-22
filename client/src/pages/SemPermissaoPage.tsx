@@ -1,34 +1,21 @@
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import React from 'react';
+import { Link } from 'wouter';
 
-export default function SemPermissaoPage() {
+const SemPermissaoPage: React.FC = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-      <div className="text-center max-w-md">
-        <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ShieldAlert className="h-8 w-8 text-yellow-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Acesso Restrito</h1>
-        <p className="text-gray-600 mb-6">
-          Você não tem permissão para acessar esta página. Esta área é exclusiva para usuários com permissões específicas.
-        </p>
-        <div className="space-y-3">
-          <Link href="/">
-            <Button className="w-full flex items-center justify-center gap-2 bg-[#d9bb42] hover:bg-[#c2a73b] text-white">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para a página inicial
-            </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => window.location.href = '/api/login'}
-          >
-            Fazer login com outra conta
-          </Button>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-red-600 mb-4">403</h1>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">Acesso Negado</h2>
+        <p className="text-gray-600 mb-8">Você não tem permissão para acessar esta página ou recurso.</p>
+        <Link href="/">
+          <div className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors cursor-pointer">
+            Voltar ao início
+          </div>
+        </Link>
       </div>
     </div>
   );
-}
+};
+
+export default SemPermissaoPage;
