@@ -32,6 +32,7 @@ const Billing = lazy(() => import('./pages/Billing'));
 const Integrations = lazy(() => import('./pages/Integrations'));
 const WhatsApp = lazy(() => import('./pages/WhatsApp'));
 const Reconciliation = lazy(() => import('./pages/Reconciliation'));
+const SupabaseTest = lazy(() => import('./pages/SupabaseTest'));
 
 const Routes: React.FC = () => {
   return (
