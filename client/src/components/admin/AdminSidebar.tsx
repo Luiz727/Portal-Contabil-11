@@ -21,7 +21,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
   const [location] = useLocation();
-  
+
   const menuItems = [
     {
       title: 'Painel Administrativo',
@@ -93,14 +93,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
       ],
     },
   ];
-  
+
   return (
     <nav className={cn("flex flex-col space-y-1 h-full p-4 bg-white border-r", className)}>
       <h3 className="font-medium text-amber-700 flex items-center mb-2 px-3 py-2">
         <Shield className="h-4 w-4 mr-2" />
         Administração
       </h3>
-      
+
       <div className="space-y-4">
         {menuItems.map((group, groupIndex) => (
           <div key={groupIndex} className="space-y-1">
@@ -109,10 +109,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
                 {group.title}
               </h4>
             )}
-            
+
             {group.href && (
               <Link href={group.href}>
-                <a
+                <div
                   className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md",
                     group.active
@@ -127,10 +127,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
                     )} />
                   )}
                   {group.title}
-                </a>
+                </div>
               </Link>
             )}
-            
+
             {group.items && (
               <div className="space-y-1 pl-0">
                 {group.items.map((item, itemIndex) => (
@@ -158,7 +158,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
           </div>
         ))}
       </div>
-      
+
       <div className="mt-auto pt-4 border-t">
         <Link href="/">
           <a className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">

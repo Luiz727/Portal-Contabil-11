@@ -10,7 +10,7 @@ export function registerUserRolesRoutes(app: Express) {
   app.get("/api/users", requireAuth, requireRole(["admin", "accountant"]), async (req: Request, res: Response) => {
     try {
       const allUsers = await storage.getAllUsers();
-      
+
       // Para cada usuário, buscar seus papéis
       const usersWithRoles = await Promise.all(
         allUsers.map(async (user) => {
@@ -21,7 +21,7 @@ export function registerUserRolesRoutes(app: Express) {
           };
         })
       );
-      
+
       res.json(usersWithRoles);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
@@ -34,13 +34,13 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const id = req.params.id;
       const user = await storage.getUser(id);
-      
+
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       const roles = await storage.getUserRoles(id);
-      
+
       res.json({
         ...user,
         roles
@@ -56,24 +56,24 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const id = req.params.id;
       const { role } = req.body;
-      
+
       if (!role) {
         return res.status(400).json({ message: "Papel é obrigatório" });
       }
-      
+
       // Verificar se o usuário existe
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       // Atualizar o papel do usuário no campo role
       const [updatedUser] = await db
         .update(users)
         .set({ role, updatedAt: new Date() })
         .where(eq(users.id, id))
         .returning();
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Erro ao atualizar papel do usuário:", error);
@@ -86,18 +86,18 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const id = req.params.id;
       const { isActive } = req.body;
-      
+
       if (isActive === undefined) {
         return res.status(400).json({ message: "Status é obrigatório" });
       }
-      
+
       // Atualizar o status do usuário
       const updatedUser = await storage.updateUserStatus(id, isActive);
-      
+
       if (!updatedUser) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Erro ao atualizar status do usuário:", error);
@@ -109,13 +109,13 @@ export function registerUserRolesRoutes(app: Express) {
   app.get("/api/users/:id/roles", requireAuth, requireRole(["admin"]), async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
-      
+
       // Verificar se o usuário existe
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       const roles = await storage.getUserRoles(id);
       res.json(roles);
     } catch (error) {
@@ -129,19 +129,19 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const userId = req.params.userId;
       const roleId = parseInt(req.params.roleId);
-      
+
       // Verificar se o usuário existe
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       // Verificar se o papel existe
       const role = await storage.getRole(roleId);
       if (!role) {
         return res.status(404).json({ message: "Papel não encontrado" });
       }
-      
+
       const userRole = await storage.addRoleToUser(userId, roleId);
       res.status(201).json(userRole);
     } catch (error) {
@@ -155,9 +155,9 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const userId = req.params.userId;
       const roleId = parseInt(req.params.roleId);
-      
+
       const success = await storage.removeRoleFromUser(userId, roleId);
-      
+
       if (success) {
         res.json({ message: "Papel removido do usuário com sucesso" });
       } else {
@@ -173,28 +173,28 @@ export function registerUserRolesRoutes(app: Express) {
   app.get("/api/me", requireAuth, async (req: any, res: Response) => {
     try {
       const userId = req.user?.claims?.sub;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
-      
+
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      
+
       // Buscar papéis e configurações do usuário
       const roles = await storage.getUserRoles(userId);
-      
+
       // Buscar o modo de visualização atual do usuário
       const viewMode = req.session.viewMode || "escritorio"; // Valor padrão
       let viewModeConfig = null;
-      
+
       if (viewMode) {
         viewModeConfig = await storage.getUserViewMode(userId, viewMode);
       }
-      
+
       res.json({
         ...user,
         roles,
@@ -212,18 +212,18 @@ export function registerUserRolesRoutes(app: Express) {
     try {
       const userId = req.user?.claims?.sub;
       const { viewMode, clientId, activeProfile } = req.body;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
-      
+
       if (!viewMode) {
         return res.status(400).json({ message: "Modo de visualização é obrigatório" });
       }
-      
+
       // Salvar o modo de visualização na sessão
       req.session.viewMode = viewMode;
-      
+
       // Salvar as configurações do modo de visualização no banco de dados
       const viewModeConfig = await storage.saveUserViewMode({
         userId,
@@ -231,7 +231,7 @@ export function registerUserRolesRoutes(app: Express) {
         clientId,
         activeProfile
       });
-      
+
       res.json(viewModeConfig);
     } catch (error) {
       console.error("Erro ao atualizar modo de visualização:", error);
