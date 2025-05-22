@@ -1,6 +1,7 @@
 import React from 'react';
-import { Redirect, useLocation } from 'wouter';
+import { Redirect } from 'wouter';
 import { useAuth } from '../../contexts/AuthContext';
+import SemPermissao from '../../pages/SemPermissao';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,8 +12,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   roles = [] 
 }) => {
-  const { user, loading } = useAuth();
-  const [, setLocation] = useLocation();
+  const { session, profile, loading } = useAuth();
 
   // Se estiver carregando, mostra um indicador de carregamento
   if (loading) {
@@ -23,8 +23,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Se não estiver autenticado, redireciona para o login
-  if (!user) {
+  // Se não houver sessão, redireciona para o login
+  if (!session) {
     return <Redirect to="/login" />;
   }
 
@@ -33,12 +33,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
-  // @ts-expect-error - Verificação de permissão será implementada posteriormente
   // Verifica se o usuário tem uma das roles necessárias
-  const userHasRequiredRole = roles.includes(user.role);
+  const userHasRequiredRole = profile && roles.includes(profile.role);
 
+  // Se o usuário não tiver as permissões necessárias, mostra a página de acesso negado
   if (!userHasRequiredRole) {
-    return <Redirect to="/sem-permissao" />;
+    return <SemPermissao />;
   }
 
   return <>{children}</>;

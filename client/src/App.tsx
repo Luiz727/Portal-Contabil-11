@@ -6,8 +6,9 @@ import "./bootstrap"; // Importa o JavaScript do Bootstrap
 import AppRouter from './AppRouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from "./contexts/AuthContext";
+import { TenantProvider } from "./contexts/TenantContext";
 
-// Contextos
+// Contextos (importações temporárias até substituição completa)
 import { EmpresasProvider } from "./contexts/EmpresasContext";
 import { ProdutosProvider } from "./contexts/ProdutosContext";
 import { ViewModeProvider } from "./contexts/ViewModeContext";
@@ -18,14 +19,16 @@ function App() {
       <TooltipProvider>
         <ErrorBoundary>
           <AuthProvider>
-            <EmpresasProvider>
-              <ProdutosProvider>
-                <ViewModeProvider>
-                  <Toaster />
-                  <AppRouter />
-                </ViewModeProvider>
-              </ProdutosProvider>
-            </EmpresasProvider>
+            <TenantProvider>
+              <EmpresasProvider>
+                <ProdutosProvider>
+                  <ViewModeProvider>
+                    <Toaster />
+                    <AppRouter />
+                  </ViewModeProvider>
+                </ProdutosProvider>
+              </EmpresasProvider>
+            </TenantProvider>
           </AuthProvider>
         </ErrorBoundary>
       </TooltipProvider>
