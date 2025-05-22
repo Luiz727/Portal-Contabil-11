@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLocation } from 'wouter';
+import { Link } from 'wouter';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,92 +13,145 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    
+    if (!email || !password) {
+      setError('Por favor, preencha todos os campos');
+      return;
+    }
+    
     try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        setError(error.message);
-      } else {
-        setLocation('/dashboard');
+      setError(null);
+      setLoading(true);
+      
+      const { error: signInError } = await signIn(email, password);
+      
+      if (signInError) {
+        console.error('Erro de login:', signInError);
+        setError(signInError.message || 'Falha ao fazer login, verifique suas credenciais');
+        return;
       }
+      
+      // Redireciona para o dashboard após login bem-sucedido
+      setLocation('/dashboard');
     } catch (err) {
-      setError('Ocorreu um erro ao fazer login. Tente novamente.');
-      console.error('Erro de login:', err);
+      console.error('Erro inesperado durante login:', err);
+      setError('Ocorreu um erro inesperado. Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="w-full max-w-md m-auto bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
-          Login
-        </h2>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span className="block sm:inline">{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              Email
-            </label>
+    <div className="w-full max-w-md mx-auto p-6">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Login</h1>
+        <p className="text-gray-600">
+          Entre com suas credenciais para acessar o sistema
+        </p>
+      </div>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold"
+            placeholder="seu@email.com"
+            required
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Senha
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-gold"
+            placeholder="********"
+            required
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              id="remember-me"
+              type="checkbox"
+              className="h-4 w-4 text-brand-gold focus:ring-brand-gold border-gray-300 rounded"
             />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Senha
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+              Lembrar-me
             </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
           </div>
-          <div className="flex items-center justify-between">
-            <button
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
-          </div>
-          <div className="text-center mt-4">
-            <a
-              className="inline-block align-baseline font-bold text-sm text-amber-600 hover:text-amber-800"
-              href="/forgot-password"
-            >
-              Esqueceu sua senha?
-            </a>
-          </div>
-          <div className="text-center mt-2">
-            <a
-              className="inline-block align-baseline font-bold text-sm text-amber-600 hover:text-amber-800"
-              href="/register"
-            >
-              Não tem uma conta? Registre-se
-            </a>
-          </div>
-        </form>
+          
+          <Link href="/forgot-password" className="text-sm font-medium text-brand-gold hover:text-brand-gold/80">
+            Esqueceu a senha?
+          </Link>
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-2 px-4 bg-brand-gold hover:bg-brand-gold/90 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold transition-colors"
+        >
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </form>
+      
+      <div className="mt-4 text-center text-sm text-gray-600">
+        <span>Não tem uma conta? </span>
+        <Link href="/register" className="font-medium text-brand-gold hover:text-brand-gold/80">
+          Cadastre-se
+        </Link>
+      </div>
+      
+      {/* Login de emergência para desenvolvimento */}
+      <div className="mt-8 pt-4 border-t border-gray-200">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">Login de Desenvolvimento</h3>
+        <div className="space-y-2">
+          <button
+            onClick={() => {
+              setEmail('superadmin@example.com');
+              setPassword('senha123');
+            }}
+            className="w-full py-1 px-3 text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 rounded"
+          >
+            Superadmin
+          </button>
+          <button
+            onClick={() => {
+              setEmail('admin@example.com');
+              setPassword('senha123');
+            }}
+            className="w-full py-1 px-3 text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 rounded"
+          >
+            Admin
+          </button>
+          <button
+            onClick={() => {
+              setEmail('user@example.com');
+              setPassword('senha123');
+            }}
+            className="w-full py-1 px-3 text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 rounded"
+          >
+            Usuário Regular
+          </button>
+        </div>
       </div>
     </div>
   );

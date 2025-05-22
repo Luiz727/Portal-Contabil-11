@@ -33,8 +33,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
+  // Se o perfil não foi carregado, é melhor redirecionar para login em vez de um loading infinito
+  if (!profile) {
+    console.warn('Perfil do usuário não disponível, redirecionando para login');
+    return <Redirect to="/login" />;
+  }
+
   // Verifica se o usuário tem uma das roles necessárias
-  const userHasRequiredRole = profile && roles.includes(profile.role);
+  const userRole = profile.role || 'user'; // Valor padrão caso não exista
+  const userHasRequiredRole = roles.includes(userRole);
 
   // Se o usuário não tiver as permissões necessárias, mostra a página de acesso negado
   if (!userHasRequiredRole) {

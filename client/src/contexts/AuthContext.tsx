@@ -44,13 +44,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Erro ao buscar perfil do usuário:', error);
+        
+        // Se a tabela não existir ou houver outro erro, retornar um perfil padrão
+        // para evitar o loading infinito
+        if (error.code === '42P01') { // "relation does not exist"
+          console.warn('Tabela profiles não existe. Criando perfil padrão temporário.');
+          return {
+            id: userId,
+            role: 'user',
+            created_at: new Date().toISOString()
+          };
+        }
+        
         return null;
       }
 
       return data;
     } catch (error) {
       console.error('Erro ao buscar perfil:', error);
-      return null;
+      // Retorna um perfil padrão em caso de erro para evitar loops
+      return {
+        id: userId,
+        role: 'user',
+        created_at: new Date().toISOString()
+      };
     }
   };
 
