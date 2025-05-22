@@ -1,44 +1,48 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-// Define o tipo para os modos de visualização
-export type ViewMode = 'standard' | 'compact' | 'expanded' | 'expert';
+// Tipos de modos de visualização suportados
+export type ViewMode = 'simple' | 'advanced' | 'expert';
 
 interface ViewModeContextType {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
+  isAdvancedMode: () => boolean;
+  isExpertMode: () => boolean;
+  isSimpleMode: () => boolean;
 }
 
 const ViewModeContext = createContext<ViewModeContextType | undefined>(undefined);
 
-export const ViewModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Inicializa com o modo salvo no localStorage ou o padrão 'standard'
-  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
-    const savedMode = localStorage.getItem('nixcon-view-mode');
-    return (savedMode as ViewMode) || 'standard';
-  });
+interface ViewModeProviderProps {
+  children: ReactNode;
+}
 
-  // Atualiza o localStorage quando o modo é alterado
-  useEffect(() => {
-    localStorage.setItem('nixcon-view-mode', viewMode);
-  }, [viewMode]);
+export const ViewModeProvider: React.FC<ViewModeProviderProps> = ({ children }) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('simple');
 
-  // Função para atualizar o modo de visualização
-  const setViewMode = (mode: ViewMode) => {
-    setViewModeState(mode);
-  };
+  const isAdvancedMode = () => viewMode === 'advanced';
+  const isExpertMode = () => viewMode === 'expert';
+  const isSimpleMode = () => viewMode === 'simple';
 
-  const value = {
-    viewMode,
-    setViewMode,
-  };
-
-  return <ViewModeContext.Provider value={value}>{children}</ViewModeContext.Provider>;
+  return (
+    <ViewModeContext.Provider
+      value={{
+        viewMode,
+        setViewMode,
+        isAdvancedMode,
+        isExpertMode,
+        isSimpleMode
+      }}
+    >
+      {children}
+    </ViewModeContext.Provider>
+  );
 };
 
 export const useViewMode = (): ViewModeContextType => {
   const context = useContext(ViewModeContext);
   if (context === undefined) {
-    throw new Error('useViewMode deve ser usado dentro de um ViewModeProvider');
+    throw new Error('useViewMode must be used within a ViewModeProvider');
   }
   return context;
 };

@@ -1,192 +1,262 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from './AuthContext';
-import type { Database } from '../types/database';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import axios from 'axios';
 
-type EmpresaType = Database['public']['Tables']['empresas']['Row'];
+// Tipo para empresa
+export interface Empresa {
+  id: number;
+  nome: string;
+  cnpj: string;
+  email?: string;
+  telefone?: string;
+  regime_tributario?: string;
+  status: 'ativo' | 'inativo';
+  endereco?: {
+    logradouro?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+    cep?: string;
+  };
+}
 
 interface EmpresasContextType {
-  empresas: EmpresaType[];
-  empresaAtual: EmpresaType | null;
-  isLoading: boolean;
+  empresas: Empresa[];
+  selectedEmpresa: Empresa | null;
+  loading: boolean;
   error: string | null;
-  setEmpresaAtual: (empresa: EmpresaType) => void;
-  atualizarEmpresas: () => Promise<void>;
-  adicionarEmpresa: (empresa: Omit<EmpresaType, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-  editarEmpresa: (id: number, dados: Partial<EmpresaType>) => Promise<void>;
-  excluirEmpresa: (id: number) => Promise<void>;
+  fetchEmpresas: () => Promise<void>;
+  selectEmpresa: (empresa: Empresa) => void;
+  addEmpresa: (empresa: Omit<Empresa, 'id'>) => Promise<Empresa>;
+  updateEmpresa: (id: number, empresa: Partial<Empresa>) => Promise<Empresa>;
+  deleteEmpresa: (id: number) => Promise<void>;
 }
 
 const EmpresasContext = createContext<EmpresasContextType | undefined>(undefined);
 
-export const EmpresasProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [empresas, setEmpresas] = useState<EmpresaType[]>([]);
-  const [empresaAtual, setEmpresaAtualState] = useState<EmpresaType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface EmpresasProviderProps {
+  children: ReactNode;
+}
+
+export const EmpresasProvider: React.FC<EmpresasProviderProps> = ({ children }) => {
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { user, isAuthenticated } = useAuth();
 
-  const carregarEmpresas = async () => {
-    if (!isAuthenticated || !user) {
-      setEmpresas([]);
-      setEmpresaAtualState(null);
-      setIsLoading(false);
-      return;
-    }
-
+  const fetchEmpresas = async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from('empresas')
-        .select('*')
-        .eq('active', true)
-        .order('nome');
-
-      if (error) {
-        throw error;
-      }
-
-      setEmpresas(data || []);
-
-      if (data && data.length > 0 && !empresaAtual) {
-        const savedEmpresaId = localStorage.getItem('empresaAtualId');
-        
-        if (savedEmpresaId) {
-          const savedEmpresa = data.find(empresa => empresa.id.toString() === savedEmpresaId);
-          if (savedEmpresa) {
-            setEmpresaAtualState(savedEmpresa);
-          } else {
-            setEmpresaAtualState(data[0]);
-            localStorage.setItem('empresaAtualId', data[0].id.toString());
+      // Simulação de chamada API - substituir pela implementação real
+      // const response = await axios.get('/api/empresas');
+      // setEmpresas(response.data);
+      
+      // Dados de exemplo para desenvolvimento
+      const mockEmpresas: Empresa[] = [
+        {
+          id: 1,
+          nome: 'Empresa Modelo LTDA',
+          cnpj: '12.345.678/0001-99',
+          email: 'contato@empresamodelo.com.br',
+          telefone: '(11) 3456-7890',
+          regime_tributario: 'Simples Nacional',
+          status: 'ativo',
+          endereco: {
+            logradouro: 'Av. Paulista',
+            numero: '1000',
+            complemento: 'Sala 123',
+            bairro: 'Bela Vista',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            cep: '01310-100'
           }
-        } else {
-          setEmpresaAtualState(data[0]);
-          localStorage.setItem('empresaAtualId', data[0].id.toString());
+        },
+        {
+          id: 2,
+          nome: 'Empresa Exemplo S.A.',
+          cnpj: '98.765.432/0001-10',
+          email: 'contato@empresaexemplo.com.br',
+          telefone: '(11) 2345-6789',
+          regime_tributario: 'Lucro Presumido',
+          status: 'ativo',
+          endereco: {
+            logradouro: 'Rua Augusta',
+            numero: '500',
+            bairro: 'Consolação',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            cep: '01304-000'
+          }
         }
-      } else if (data && data.length === 0) {
-        setEmpresaAtualState(null);
-        localStorage.removeItem('empresaAtualId');
+      ];
+      
+      setEmpresas(mockEmpresas);
+      
+      // Seleciona a primeira empresa por padrão se ainda não houver uma selecionada
+      if (!selectedEmpresa && mockEmpresas.length > 0) {
+        setSelectedEmpresa(mockEmpresas[0]);
       }
     } catch (err) {
-      const mensagem = err instanceof Error ? err.message : 'Erro ao buscar empresas';
-      setError(mensagem);
+      setError('Erro ao carregar empresas.');
+      console.error('Erro ao carregar empresas:', err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Carregar empresas quando o usuário autenticar
+  const selectEmpresa = (empresa: Empresa): void => {
+    setSelectedEmpresa(empresa);
+    // Salvar a preferência no localStorage ou em um cookie
+    localStorage.setItem('selectedEmpresaId', empresa.id.toString());
+  };
+
+  const addEmpresa = async (empresa: Omit<Empresa, 'id'>): Promise<Empresa> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simulação de chamada API - substituir pela implementação real
+      // const response = await axios.post('/api/empresas', empresa);
+      // const newEmpresa = response.data;
+      
+      // Simulação da resposta para desenvolvimento
+      const newEmpresa: Empresa = {
+        ...empresa as Empresa,
+        id: empresas.length > 0 ? Math.max(...empresas.map(e => e.id)) + 1 : 1,
+        status: empresa.status || 'ativo'
+      };
+      
+      setEmpresas(prevEmpresas => [...prevEmpresas, newEmpresa]);
+      return newEmpresa;
+    } catch (err) {
+      setError('Erro ao adicionar empresa.');
+      console.error('Erro ao adicionar empresa:', err);
+      throw new Error('Falha ao adicionar empresa');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateEmpresa = async (id: number, empresaData: Partial<Empresa>): Promise<Empresa> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simulação de chamada API - substituir pela implementação real
+      // const response = await axios.put(`/api/empresas/${id}`, empresaData);
+      // const updatedEmpresa = response.data;
+      
+      // Simulação da atualização para desenvolvimento
+      const index = empresas.findIndex(e => e.id === id);
+      if (index === -1) {
+        throw new Error('Empresa não encontrada');
+      }
+      
+      const updatedEmpresa: Empresa = {
+        ...empresas[index],
+        ...empresaData
+      };
+      
+      const updatedEmpresas = [...empresas];
+      updatedEmpresas[index] = updatedEmpresa;
+      
+      setEmpresas(updatedEmpresas);
+      
+      // Atualiza a empresa selecionada se for a mesma que está sendo editada
+      if (selectedEmpresa && selectedEmpresa.id === id) {
+        setSelectedEmpresa(updatedEmpresa);
+      }
+      
+      return updatedEmpresa;
+    } catch (err) {
+      setError('Erro ao atualizar empresa.');
+      console.error('Erro ao atualizar empresa:', err);
+      throw new Error('Falha ao atualizar empresa');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteEmpresa = async (id: number): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simulação de chamada API - substituir pela implementação real
+      // await axios.delete(`/api/empresas/${id}`);
+      
+      // Simulação da exclusão para desenvolvimento
+      setEmpresas(prevEmpresas => prevEmpresas.filter(empresa => empresa.id !== id));
+      
+      // Se a empresa excluída for a selecionada, seleciona outra ou limpa a seleção
+      if (selectedEmpresa && selectedEmpresa.id === id) {
+        const remainingEmpresas = empresas.filter(empresa => empresa.id !== id);
+        if (remainingEmpresas.length > 0) {
+          setSelectedEmpresa(remainingEmpresas[0]);
+        } else {
+          setSelectedEmpresa(null);
+        }
+      }
+    } catch (err) {
+      setError('Erro ao excluir empresa.');
+      console.error('Erro ao excluir empresa:', err);
+      throw new Error('Falha ao excluir empresa');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carregar empresas ao montar o componente
   useEffect(() => {
-    carregarEmpresas();
-  }, [isAuthenticated, user]);
-
-  // Atualizar a empresa atual
-  const setEmpresaAtual = (empresa: EmpresaType) => {
-    setEmpresaAtualState(empresa);
-    localStorage.setItem('empresaAtualId', empresa.id.toString());
-  };
-
-  // Recarregar lista de empresas
-  const atualizarEmpresas = async () => {
-    await carregarEmpresas();
-  };
-
-  // Adicionar uma nova empresa
-  const adicionarEmpresa = async (empresa: Omit<EmpresaType, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from('empresas')
-        .insert([{ ...empresa, active: true }])
-        .select();
-
-      if (error) {
-        throw error;
-      }
-
-      await carregarEmpresas();
-    } catch (err) {
-      const mensagem = err instanceof Error ? err.message : 'Erro ao adicionar empresa';
-      setError(mensagem);
-      throw err;
-    } finally {
-      setIsLoading(false);
+    fetchEmpresas();
+    
+    // Tenta restaurar a empresa selecionada do localStorage
+    const savedEmpresaId = localStorage.getItem('selectedEmpresaId');
+    if (savedEmpresaId) {
+      const empresaId = parseInt(savedEmpresaId, 10);
+      // Aguarda o carregamento das empresas antes de tentar restaurar a seleção
+      const intervalId = setInterval(() => {
+        if (empresas.length > 0) {
+          const empresa = empresas.find(e => e.id === empresaId);
+          if (empresa) {
+            setSelectedEmpresa(empresa);
+          }
+          clearInterval(intervalId);
+        }
+      }, 100);
+      
+      // Limpa o intervalo após 5 segundos se as empresas não forem carregadas
+      setTimeout(() => clearInterval(intervalId), 5000);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Editar uma empresa existente
-  const editarEmpresa = async (id: number, dados: Partial<EmpresaType>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const { error } = await supabase
-        .from('empresas')
-        .update(dados)
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
-      await carregarEmpresas();
-    } catch (err) {
-      const mensagem = err instanceof Error ? err.message : 'Erro ao editar empresa';
-      setError(mensagem);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Excluir uma empresa (soft delete)
-  const excluirEmpresa = async (id: number) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const { error } = await supabase
-        .from('empresas')
-        .update({ active: false })
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
-      await carregarEmpresas();
-    } catch (err) {
-      const mensagem = err instanceof Error ? err.message : 'Erro ao excluir empresa';
-      setError(mensagem);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const value = {
-    empresas,
-    empresaAtual,
-    isLoading,
-    error,
-    setEmpresaAtual,
-    atualizarEmpresas,
-    adicionarEmpresa,
-    editarEmpresa,
-    excluirEmpresa,
-  };
-
-  return <EmpresasContext.Provider value={value}>{children}</EmpresasContext.Provider>;
+  return (
+    <EmpresasContext.Provider
+      value={{
+        empresas,
+        selectedEmpresa,
+        loading,
+        error,
+        fetchEmpresas,
+        selectEmpresa,
+        addEmpresa,
+        updateEmpresa,
+        deleteEmpresa
+      }}
+    >
+      {children}
+    </EmpresasContext.Provider>
+  );
 };
 
 export const useEmpresas = (): EmpresasContextType => {
   const context = useContext(EmpresasContext);
   if (context === undefined) {
-    throw new Error('useEmpresas deve ser usado dentro de um EmpresasProvider');
+    throw new Error('useEmpresas must be used within an EmpresasProvider');
   }
   return context;
 };
