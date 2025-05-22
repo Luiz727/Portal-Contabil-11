@@ -12,7 +12,9 @@ const AuthContext = createContext({
 });
 
 // Hook para acessar o contexto
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = function() {
+  return useContext(AuthContext);
+};
 
 // Provedor do contexto
 export const AuthProvider = ({ children }) => {
