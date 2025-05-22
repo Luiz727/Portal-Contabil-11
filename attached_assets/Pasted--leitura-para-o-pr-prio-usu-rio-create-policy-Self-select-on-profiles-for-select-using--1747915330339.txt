@@ -1,0 +1,76 @@
+-- leitura para o próprio usuário
+create policy "Self select"
+  on profiles for select
+  using ( auth.uid() = id );
+-- superadmin full
+create policy "Superadmin full"
+  on profiles for all
+  using ( exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'superadmin') );
+``` |
+| **Trigger após signup** | Se ainda não existir:  
+```sql
+create function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email, role)
+  values (new.id, new.email, 'client');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+``` |
+
+> **Teste rápido**: faça `supabase.auth.signInWithPassword({ email, password })` no console; o retorno deve vir com `user.id` e `session`. Se isso passar, o front-end deixa de mostrar “Usuário não encontrado”.
+
+---
+
+## Prioridade 2 — Estrutura de rotas / componentes faltantes
+
+Para compilar sem warnings nem _404 Component Not Found_, precisaremos ao menos desses esquele­tos (podem ser placeholders agora):
+
+| Página / componente | Rota sugerida | Notas |
+|---------------------|--------------|-------|
+| **Dashboard** (visão geral) | `/dashboard` | Cards de KPIs, links rápidos. |
+| **UserManagement** | `/admin/users` | Já existe back-end? verifique. |
+| **Company/Tenant Settings** | `/admin/company` | Dados da empresa usuária; ACL só para admin. |
+| **Billing / Planos** | `/billing` | SaaS típico: ver plano, trocar cartão. |
+| **Auth** páginas básicas | `/login`, `/register`, `/forgot-password` | As duas últimas podem ser opcionais se só houver convite. |
+| **NotFound** | `*` | 404 amigável. |
+| **ErrorBoundary** | — | Captura runtime errors em produção. |
+| **Layout** | `MainLayout`, `AuthLayout` | Evita duplicar `<Sidebar>` etc. |
+
+Também é comum criar átomos compartilhados:
+
+* `Button`, `Input`, `Modal`, `Loader`, `ToastProvider`
+
+---
+
+## Prioridade 3 — Ajuste de importações e rotas
+
+1. Gire um script “busca-fantasma” para identificar imports que apontam para arquivos que não existem mais (`grep -R "from './.*'" src | sort -u`).  
+2. Atualize `src/routes.tsx` (ou `App.tsx` se usa React Router) e garanta que toda página exporte um `lazy(() => import('../pages/...'))`.  
+3. Adicione `//@ts-expect-error` **apenas** onde algum tipo gerado do Supabase ainda não exista; depois geramos esses tipos com `supabase gen types typescript --project-id ... > src/types/database.ts`.
+
+---
+
+## Prompt sugerido para o Agente (cria esqueleto + corrige Auth)
+
+```txt
+1. Revise a configuração Supabase:
+ - Crie supabaseClient.ts lendo VITE_SUPABASE_URL e VITE_SUPABASE_ANON.
+ - Adicione AuthProvider com React context e mantenha sessão no localStorage.
+ - Gere types TS via `supabase gen types typescript` e coloque em `src/types/database.ts`.
+ - Implemente ProtectedRoute que recebe `roles?: string[]`.
+
+2. Crie esqueleto (placeholder) dos componentes/páginas abaixo, usando `React.lazy`:
+ - Dashboard, UserManagement, CompanySettings, Billing, Login, Register, ForgotPassword, NotFound, ErrorBoundary, MainLayout, AuthLayout.
+ - Cada um retorna `<div>Nome da página</div>` por enquanto.
+
+3. Atualize `routes.tsx` com as rotas acima e ProtectedRoute apropriado (`['admin','superadmin']` onde necessário).
+
+4. Garanta que `npm run dev` não mostre mais erros/avisos de “module not found”.
+
+Mostre diff resumido das alterações no final.
