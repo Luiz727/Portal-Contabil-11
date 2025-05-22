@@ -1,66 +1,79 @@
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import IntegranotasConfig from '@/components/integrations/IntegranotasConfig';
-import WhatsAppConfig from '@/components/integrations/WhatsAppConfig';
-import GoogleIntegration from '@/components/integrations/GoogleIntegration';
-import MicrosoftIntegration from '@/components/integrations/MicrosoftIntegration';
+import React from 'react';
 
-export default function Integrations() {
-  const { user, isAuthenticated } = useAuth();
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("whatsapp");
-
-  if (!isAuthenticated) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Acesso Restrito</CardTitle>
-          <CardDescription>
-            Você precisa estar autenticado para acessar as configurações de integrações.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
+const Integrations: React.FC = () => {
   return (
-    <div className="container mx-auto py-6">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Integrações</h1>
-          <p className="text-muted-foreground">
-            Configure integrações com serviços externos para ampliar as funcionalidades do sistema.
-          </p>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Integrações</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Google</h2>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Conectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com o Google Workspace para sincronização de calendário, contatos e documentos.</p>
+          <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors w-full">
+            Desconectar
+          </button>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-4 md:w-[600px]">
-            <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
-            <TabsTrigger value="integranotas">Integranotas</TabsTrigger>
-            <TabsTrigger value="google">Google</TabsTrigger>
-            <TabsTrigger value="microsoft">Microsoft 365</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="whatsapp" className="space-y-4">
-            <WhatsAppConfig />
-          </TabsContent>
-          
-          <TabsContent value="integranotas" className="space-y-4">
-            <IntegranotasConfig />
-          </TabsContent>
-          
-          <TabsContent value="google" className="space-y-4">
-            <GoogleIntegration />
-          </TabsContent>
-          
-          <TabsContent value="microsoft" className="space-y-4">
-            <MicrosoftIntegration />
-          </TabsContent>
-        </Tabs>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Microsoft 365</h2>
+            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">Desconectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com o Microsoft 365 para sincronização de email, calendário e documentos.</p>
+          <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full">
+            Conectar
+          </button>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">WhatsApp Business</h2>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Conectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com WhatsApp Business API para comunicação com clientes.</p>
+          <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors w-full">
+            Desconectar
+          </button>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Banco do Brasil</h2>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Conectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com a API do Banco do Brasil para reconciliação bancária.</p>
+          <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full">
+            Configurar
+          </button>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">SEFAZ</h2>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Conectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com a SEFAZ para emissão e consulta de documentos fiscais.</p>
+          <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full">
+            Configurar
+          </button>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Integranotas</h2>
+            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">Desconectado</span>
+          </div>
+          <p className="text-gray-600 mb-4">Integração com o sistema Integranotas para emissão de NFS-e municipal.</p>
+          <button className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors w-full">
+            Conectar
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Integrations;
