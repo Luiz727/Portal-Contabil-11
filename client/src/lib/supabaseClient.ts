@@ -8,7 +8,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL or Anon Key is missing in environment variables');
 }
 
+console.log('Inicializando Supabase com:', 
+  supabaseUrl ? 'URL Válida' : 'URL Ausente',
+  supabaseAnonKey ? 'Key Válida' : 'Key Ausente'
+);
+
 export const supabase = createClient<Database>(
   supabaseUrl || '',
-  supabaseAnonKey || ''
+  supabaseAnonKey || '',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );

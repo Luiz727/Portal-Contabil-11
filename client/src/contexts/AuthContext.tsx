@@ -76,11 +76,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // Verificar se já existe uma sessão ativa
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Sessão inicial:', session ? 'Ativa' : 'Inativa');
         setSession(session);
         
         if (session?.user) {
+          console.log('Usuário da sessão:', session.user.email);
           setUser(session.user);
+          
+          console.log('Buscando perfil para o usuário:', session.user.id);
           const userProfile = await fetchProfile(session.user.id);
+          console.log('Perfil encontrado:', userProfile ? 'Sim' : 'Não');
           setProfile(userProfile);
         }
       } catch (error) {
@@ -94,12 +99,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Configurar o listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('AUTH', event, session ? 'Sessão ativa' : 'Sem sessão');
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('AuthStateChange: Buscando perfil para', session.user.email);
           const userProfile = await fetchProfile(session.user.id);
+          console.log('AuthStateChange: Perfil carregado:', userProfile ? 'Sim' : 'Não');
+          
+          if (userProfile) {
+            console.log('Role do usuário:', userProfile.role || 'não definida');
+          }
+          
           setProfile(userProfile);
         } else {
           setProfile(null);

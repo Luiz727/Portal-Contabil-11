@@ -23,19 +23,33 @@ const Login: React.FC = () => {
       setError(null);
       setLoading(true);
       
-      const { error: signInError } = await signIn(email, password);
+      console.log('Tentando login com:', email);
+      const { error: signInError, data } = await signIn(email, password);
       
       if (signInError) {
         console.error('Erro de login:', signInError);
-        setError(signInError.message || 'Falha ao fazer login, verifique suas credenciais');
+        
+        // Mensagens de erro mais detalhadas
+        if (signInError.message?.includes('Invalid login credentials')) {
+          setError('Credenciais inválidas. Verifique seu email e senha.');
+        } else if (signInError.message?.includes('Email not confirmed')) {
+          setError('Seu email não foi confirmado. Verifique sua caixa de entrada.');
+        } else {
+          setError(signInError.message || 'Falha ao fazer login, verifique suas credenciais');
+        }
         return;
       }
       
+      console.log('Login bem-sucedido, sessão:', data);
+      
       // Redireciona para o dashboard após login bem-sucedido
-      setLocation('/dashboard');
-    } catch (err) {
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 500); // Pequeno delay para garantir que o estado foi atualizado
+      
+    } catch (err: any) {
       console.error('Erro inesperado durante login:', err);
-      setError('Ocorreu um erro inesperado. Por favor, tente novamente.');
+      setError(`Ocorreu um erro inesperado: ${err?.message || 'Erro desconhecido'}`);
     } finally {
       setLoading(false);
     }
