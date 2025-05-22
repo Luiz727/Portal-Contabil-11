@@ -4,6 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import NotFound from './pages/NotFound';
 import SemPermissao from './pages/SemPermissao';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Páginas de autenticação
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -50,16 +51,16 @@ const AppRouter: React.FC = () => {
         
         {/* Rotas protegidas - principal */}
         <Route path="/dashboard">
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
         </Route>
         
         {/* Rota padrão - redireciona para o dashboard */}
         <Route path="/">
-          <MainLayout>
-            <Dashboard />
-          </MainLayout>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
         </Route>
         
         {/* Rota 404 - Não encontrado */}

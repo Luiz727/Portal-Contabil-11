@@ -7,11 +7,9 @@ import AppRouter from './AppRouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from "./contexts/AuthContext";
 import { TenantProvider } from "./contexts/TenantContext";
-
-// Contextos (importações temporárias até substituição completa)
+import { ViewModeProvider } from "./contexts/ViewModeContext";
 import { EmpresasProvider } from "./contexts/EmpresasContext";
 import { ProdutosProvider } from "./contexts/ProdutosContext";
-import { ViewModeProvider } from "./contexts/ViewModeContext";
 
 function App() {
   return (
