@@ -82,6 +82,23 @@ export function registerUserRolesRoutes(app: Express) {
   });
 
   // Atualizar o status (ativo/inativo) de um usuário
+  app.post("/api/auth/logout", async (req: Request, res: Response) => {
+    try {
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('Erro ao destruir sessão:', err);
+          }
+        });
+      }
+      res.clearCookie('connect.sid');
+      res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      res.status(500).json({ message: "Erro ao realizar logout" });
+    }
+  });
+
   app.put("/api/users/:id/status", requireAuth, requireRole(["admin"]), async (req: Request, res: Response) => {
     try {
       const id = req.params.id;

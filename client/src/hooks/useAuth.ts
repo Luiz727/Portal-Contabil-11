@@ -83,12 +83,19 @@ export function useAuth() {
   }, [viewModeContext]);
 
   // Função para realizar logout
-  const logout = () => {
-    localStorage.removeItem('nixcon_user');
-    setUser(null);
-    queryClient.clear();
-    // Usar window.location para recarregar a página totalmente
-    window.location.href = '/login';
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
+      localStorage.removeItem('nixcon_user');
+      setUser(null);
+      queryClient.clear();
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
   };
 
   // Verifica se o usuário é superadmin
