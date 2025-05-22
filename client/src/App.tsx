@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./bootstrap"; // Importa o JavaScript do Bootstrap
-import Routes from './Routes';
+import AppRouter from './AppRouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -22,7 +22,7 @@ function App() {
               <ProdutosProvider>
                 <ViewModeProvider>
                   <Toaster />
-                  <Routes />
+                  <AppRouter />
                 </ViewModeProvider>
               </ProdutosProvider>
             </EmpresasProvider>
