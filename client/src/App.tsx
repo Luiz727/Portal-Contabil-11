@@ -203,33 +203,33 @@ function Router() {
 
         {isAuthenticated && (
           <Route path="/admin/painel">
-            <MainLayout>
+            <AdminLayout>
               <PainelAdministrativoPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
           <Route path="/admin/empresas-usuarias">
-            <MainLayout>
+            <AdminLayout>
               <EmpresasUsuariasPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
           <Route path="/admin/produtos-universais">
-            <MainLayout>
+            <AdminLayout>
               <ProdutosUniversaisPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
           <Route path="/admin/importar-produtos">
-            <MainLayout>
+            <AdminLayout>
               <ImportacaoProdutosPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
         
@@ -253,31 +253,33 @@ function Router() {
 
         {isAuthenticated && (
           <Route path="/admin/planos">
-            <MainLayout>
+            <AdminLayout>
               <PlanosAssinaturasPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
-          <Route path="/admin/usuarios">
-            <MainLayout>
+          <Route path="/admin/permissoes">
+            <AdminLayout>
               <UsuariosPermissoesPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
           <Route path="/admin/configuracoes-empresa">
-            <MainLayout>
+            <AdminLayout>
               <ConfiguracoesEmpresaPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
         {isAuthenticated && (
           <Route path="/admin/superadmin">
-            <SuperAdminPage />
+            <AdminLayout>
+              <SuperAdminPage />
+            </AdminLayout>
           </Route>
         )}
 
