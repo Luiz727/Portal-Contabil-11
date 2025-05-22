@@ -131,6 +131,13 @@ const Routes: React.FC = () => {
             </MainLayout>
           </ProtectedRoute>
         </Route>
+
+        {/* Teste Supabase */}
+        <Route path="/supabase-test">
+          <MainLayout>
+            <SupabaseTest />
+          </MainLayout>
+        </Route>
         
         {/* Rotas administrativas */}
         <Route path="/admin/users">
