@@ -22,6 +22,7 @@ import Integrations from "@/pages/Integrations";
 import WhatsApp from "@/pages/WhatsApp";
 import ImpostometroPage from "./pages/ImpostometroPage";
 import MainLayout from "@/layouts/MainLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 import { useAuth, AuthProvider } from "./contexts/AuthContext";
 
 // Novo módulo fiscal integrado
@@ -194,9 +195,9 @@ function Router() {
         {/* Páginas Administrativas */}
         {isAuthenticated && (
           <Route path="/admin/configuracoes">
-            <MainLayout>
+            <AdminLayout>
               <ConfiguracoesAdminPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
@@ -235,18 +236,18 @@ function Router() {
         {/* Nova rota para a página central de administração */}
         {isAuthenticated && (
           <Route path="/admin">
-            <MainLayout>
+            <AdminLayout>
               <AdminPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
         
         {/* Nova rota para a página de usuários */}
         {isAuthenticated && (
           <Route path="/admin/usuarios">
-            <MainLayout>
+            <AdminLayout>
               <UsuariosPage />
-            </MainLayout>
+            </AdminLayout>
           </Route>
         )}
 
