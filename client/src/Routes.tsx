@@ -157,7 +157,7 @@ const Routes: React.FC = () => {
         </Route>
         
         {/* Rota 404 - Não encontrado */}
-        <Route>
+        <Route path="*">
           <NotFound />
         </Route>
       </Switch>
