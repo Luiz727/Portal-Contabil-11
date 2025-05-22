@@ -85,14 +85,14 @@ export function registerUserRolesRoutes(app: Express) {
   app.put("/api/users/:id/status", requireAuth, requireRole(["admin"]), async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
-      const { isActive } = req.body;
+      const { active } = req.body;
 
-      if (isActive === undefined) {
+      if (active === undefined) {
         return res.status(400).json({ message: "Status é obrigatório" });
       }
 
       // Atualizar o status do usuário
-      const updatedUser = await storage.updateUserStatus(id, isActive);
+      const updatedUser = await storage.updateUserStatus(id, active);
 
       if (!updatedUser) {
         return res.status(404).json({ message: "Usuário não encontrado" });

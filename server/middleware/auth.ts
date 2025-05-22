@@ -62,7 +62,9 @@ export function viewModeExterno(req: Request, res: Response, next: NextFunction)
 }
 
 // Middleware que verifica se o usuário está autenticado e tem o papel requerido
-export function checkRole(role: string) {
+export function checkRole(roles: string | string[]) {
+  const allowedRoles = Array.isArray(roles) ? roles : [roles];
+  
   return (req: any, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: "Usuário não autenticado" });
@@ -70,8 +72,10 @@ export function checkRole(role: string) {
 
     const userRole = req.user.role;
 
-    if (userRole !== role) {
-      return res.status(403).json({ message: `Acesso negado. Este recurso requer o papel de ${role}.` });
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ 
+        message: `Acesso negado. Este recurso requer um dos seguintes papéis: ${allowedRoles.join(', ')}.`
+      });
     }
 
     next();

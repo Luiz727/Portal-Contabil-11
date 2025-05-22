@@ -385,11 +385,11 @@ export function registerAdminRoutes(app: Express) {
   // Rota específica para configurar superadmin
   app.post("/api/admin/superadmin", async (req: Request, res: Response) => {
     try {
-      const { email, secretKey } = req.body;
+      const { email } = req.body;
       
-      // Verificar a chave secreta (uma medida básica de segurança)
-      if (secretKey !== "nixcon2025") {
-        return res.status(401).json({ message: "Chave secreta inválida" });
+      // Verificar se é o email autorizado
+      if (email !== "luizreis.dev@gmail.com") {
+        return res.status(401).json({ message: "Email não autorizado para superadmin" });
       }
       
       if (!email) {
