@@ -135,7 +135,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
               <div className="space-y-1 pl-0">
                 {group.items.map((item, itemIndex) => (
                   <Link key={itemIndex} href={item.href}>
-                    <a
+                    <div
                       className={cn(
                         "flex items-center pl-7 pr-3 py-2 text-sm font-medium rounded-md",
                         item.active
@@ -150,7 +150,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
                         )} />
                       )}
                       {item.title}
-                    </a>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -161,10 +161,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className }) => {
 
       <div className="mt-auto pt-4 border-t">
         <Link href="/">
-          <a className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">
+          <div className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">
             <ChevronRight className="mr-3 h-4 w-4 text-gray-500" />
             Voltar ao Sistema
-          </a>
+          </div>
         </Link>
       </div>
     </nav>
