@@ -25,6 +25,7 @@ const CompanySettings = lazy(() => import('./pages/admin/CompanySettings'));
 
 // Páginas de módulos
 const FiscalPage = lazy(() => import('./pages/FiscalPage'));
+const FiscalPageResponsivo = lazy(() => import('./pages/FiscalPageResponsivo'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Billing = lazy(() => import('./pages/Billing'));
