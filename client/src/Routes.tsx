@@ -26,6 +26,7 @@ const CompanySettings = lazy(() => import('./pages/admin/CompanySettings'));
 // Páginas de módulos
 const FiscalPage = lazy(() => import('./pages/FiscalPage'));
 const FiscalPageResponsivo = lazy(() => import('./pages/FiscalPageResponsivo'));
+const TaxCalculator = lazy(() => import('./pages/TaxCalculator'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Billing = lazy(() => import('./pages/Billing'));
@@ -128,6 +129,15 @@ const Routes: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <Reconciliation />
+            </MainLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* Calculadora de Impostos */}
+        <Route path="/tax-calculator">
+          <ProtectedRoute>
+            <MainLayout>
+              <TaxCalculator />
             </MainLayout>
           </ProtectedRoute>
         </Route>

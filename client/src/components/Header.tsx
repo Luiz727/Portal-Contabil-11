@@ -15,10 +15,8 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo e título - visível apenas em desktop */}
         <div className="hidden md:flex items-center">
-          <Link href="/dashboard">
-            <a className="text-xl font-bold text-brand-gold flex items-center">
-              NIXCON Portal
-            </a>
+          <Link href="/dashboard" className="text-xl font-bold text-brand-gold flex items-center">
+            NIXCON Portal
           </Link>
         </div>
 

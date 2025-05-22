@@ -81,18 +81,17 @@ const Sidebar: React.FC = () => {
               
               return (
                 <li key={item.path}>
-                  <Link href={item.path}>
-                    <a
-                      className={`
-                        flex items-center px-4 py-3 rounded-md cursor-pointer transition-colors
-                        ${isActive 
-                          ? 'bg-brand-gold text-white' 
-                          : 'text-white hover:bg-brand-gold/70'}
-                      `}
-                    >
-                      <IconComponent size={18} className="mr-3" />
-                      <span>{item.title}</span>
-                    </a>
+                  <Link 
+                    href={item.path}
+                    className={`
+                      flex items-center px-4 py-3 rounded-md cursor-pointer transition-colors
+                      ${isActive 
+                        ? 'bg-brand-gold text-white' 
+                        : 'text-white hover:bg-brand-gold/70'}
+                    `}
+                  >
+                    <IconComponent size={18} className="mr-3" />
+                    <span>{item.title}</span>
                   </Link>
                 </li>
               );
