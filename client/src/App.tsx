@@ -42,6 +42,8 @@ import EmpresasUsuariasPage from "./pages/admin/EmpresasUsuariasPage";
 import PainelAdministrativoPage from "./pages/admin/PainelAdministrativoPage";
 import UsuariosPermissoesPage from "./pages/admin/UsuariosPermissoesPage";
 import SuperAdminPage from "./pages/admin/SuperAdminPage";
+import AdminPage from "./pages/admin/AdminPage";
+import UsuariosPage from "./pages/admin/UsuariosPage";
 
 // Contextos
 import { EmpresasProvider } from "./contexts/EmpresasContext";
@@ -226,6 +228,24 @@ function Router() {
           <Route path="/admin/importar-produtos">
             <MainLayout>
               <ImportacaoProdutosPage />
+            </MainLayout>
+          </Route>
+        )}
+        
+        {/* Nova rota para a página central de administração */}
+        {isAuthenticated && (
+          <Route path="/admin">
+            <MainLayout>
+              <AdminPage />
+            </MainLayout>
+          </Route>
+        )}
+        
+        {/* Nova rota para a página de usuários */}
+        {isAuthenticated && (
+          <Route path="/admin/usuarios">
+            <MainLayout>
+              <UsuariosPage />
             </MainLayout>
           </Route>
         )}

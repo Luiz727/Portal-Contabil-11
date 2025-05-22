@@ -227,10 +227,19 @@ const UsuariosPage: React.FC = () => {
   // Mutation para excluir usuário
   const deleteUsuarioMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest(`/api/users/${id}`, {
-        method: 'DELETE'
-      });
-      return response.data;
+      try {
+        const response = await fetch(`/api/users/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!response.ok) throw new Error('Falha ao excluir usuário');
+        return await response.json();
+      } catch (error) {
+        console.error('Erro ao excluir usuário:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });
