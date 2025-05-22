@@ -12,7 +12,9 @@ const EmpresasContext = createContext({
 });
 
 // Hook para acessar o contexto
-export const useEmpresas = () => useContext(EmpresasContext);
+export function useEmpresas() {
+  return useContext(EmpresasContext);
+};
 
 // Provedor do contexto
 export const EmpresasProvider = ({ children }) => {

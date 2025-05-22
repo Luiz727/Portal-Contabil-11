@@ -422,6 +422,8 @@ export const ProdutosProvider = ({ children }) => {
   );
 };
 
-export const useProdutos = () => useContext(ProdutosContext);
+export function useProdutos() {
+  return useContext(ProdutosContext);
+};
 
 export default ProdutosContext;

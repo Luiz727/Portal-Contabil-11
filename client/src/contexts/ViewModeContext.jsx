@@ -28,7 +28,9 @@ const ViewModeContext = createContext({
 });
 
 // Hook para acessar o contexto
-export const useViewMode = () => useContext(ViewModeContext);
+export function useViewMode() {
+  return useContext(ViewModeContext);
+};
 
 // Provedor do contexto
 export const ViewModeProvider = ({ children }) => {
